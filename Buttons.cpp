@@ -31,7 +31,7 @@ void Buttons::readInputs() {
   // read shift register values
   if(shift.update()) {
     for(int i = 0; i < shift.getDataWidth(); i++) {
-      Serial.print(shift.state(i));
+      //Serial.print(shift.state(i));
       int currentButtonState = shift.state(i);
       if (currentButtonState != lastButtonState[i]) {
         _joystick->setButton(i, currentButtonState);
@@ -39,4 +39,12 @@ void Buttons::readInputs() {
       }
     }
   }
+}
+
+void Buttons::sendButtonState() {
+  for (int i : lastButtonState) {
+    Serial.print(i);
+  }
+  Serial.println("");
+  
 }

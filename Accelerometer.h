@@ -10,6 +10,7 @@ class Accelerometer {
     Accelerometer();
     void init(Joystick_* joystick);
     void accelerometerRead();
+    void sendAccelerometerState();
     
   private:
     Joystick_* _joystick;

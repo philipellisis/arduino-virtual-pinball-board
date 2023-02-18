@@ -5,21 +5,21 @@
 
 
 Plunger::Plunger() {
-  Serial.println("plunger: About to initialize pins");
+  //Serial.println("plunger: About to initialize pins");
   int plungerMax = 634;
   int plungerMin = 10;
   plungerMid = 100;
   plungerScaleFactor = float(plungerMid) / float(plungerMax);
 
   pinMode(23, INPUT_PULLUP); //plunger
-  Serial.println("plunger: pins initialized");
+  //Serial.println("plunger: pins initialized");
 }
 
 void Plunger::init(Joystick_* joystick) {
-  Serial.println("plunger: initializing joystick");
+  //Serial.println("plunger: initializing joystick");
   _joystick = joystick;
   _joystick->setZAxisRange(plungerMin, plungerMax);
-  Serial.println("plunger: initialized joystick");
+  //Serial.println("plunger: initialized joystick");
 }
 
 int Plunger::getMid() {
@@ -33,12 +33,15 @@ int Plunger::getMin() {
 }
 void Plunger::plungerRead() {
   int sensorValue = analogRead(22);
-  int adjustedValue;
   if (sensorValue <= plungerMid) {
     adjustedValue = sensorValue;
   } else {
     adjustedValue = (sensorValue-plungerMid) * plungerScaleFactor + plungerMid;
   }
-  Serial.println("plunger: value " + String(adjustedValue));
+  //Serial.println("plunger: value " + String(adjustedValue));
   _joystick->setZAxis(adjustedValue);
+}
+
+void Plunger::sendPlungerState() {
+  Serial.println(adjustedValue);
 }

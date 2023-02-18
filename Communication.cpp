@@ -1,8 +1,9 @@
 #include "Communication.h"
-#include "Plunger.h"
 #include <Arduino.h>
-#include <Joystick.h>
 #include "Outputs.h"
+#include "Plunger.h"
+#include "Buttons.h"
+#include "Accelerometer.h"
 
 
 Outputs outputs = Outputs();
@@ -12,11 +13,13 @@ Communication::Communication() {
   Serial.println("Communication: pins initialized");
 }
 
-void Communication::init(Joystick_* joystick) {
-  Serial.println("Communication: initializing Communication");
-  _joystick = joystick;
+void Communication::init(Plunger* plunger, Accelerometer* accel, Buttons* buttons) {
+  //Serial.println("Communication: initializing Communication");
+  _plunger = plunger;
+  _accelerometer = accel;
+  _buttons = buttons;
   outputs.init();
-  Serial.println("Communication: initialized Communication");
+  //Serial.println("Communication: initialized Communication");
 }
 
 void Communication::communicate() {
@@ -36,7 +39,13 @@ void Communication::communicate() {
       if (dataLocation == 8) {
         Serial.println("8 slots filled, sending outputs");
         if (incomingData[2] == adminNumber) {
-          //call admin functions
+          // set admin functions
+          if (incomingData[3] == 0) {
+            admin = incomingData[4];
+          }
+          
+          //call admin function
+          
         } else {
           //normal operation
           updateOutputs();
@@ -44,6 +53,24 @@ void Communication::communicate() {
         dataLocation = 0;
       } else {
         dataLocation++;
+      }
+    }
+    if (admin > 0) {
+      // buttons
+      if (admin == 1) {
+        _buttons->sendButtonState();
+      }
+      // getoutputs
+      if (admin == 2) {
+        outputs.sendOutputState();
+      }
+      // plunger
+      if (admin == 3) {
+        _plunger->sendPlungerState();
+      }
+      // accel
+      if (admin == 4) {
+        _accelerometer->sendAccelerometerState();
       }
     }
   }

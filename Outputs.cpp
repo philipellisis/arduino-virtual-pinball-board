@@ -24,9 +24,19 @@ void Outputs::updateOutput(int outputId, int outputValue) {
   Serial.println("output " + String(outputId) + " set to " + String(outputValue) );
   if (outputValue == 255) {
     pwm.setPWM(outputId, 4096, 0);
+    outputValues[outputId] = 255;
   } else if (outputValue == 0) {
     pwm.setPWM(outputId, 0, 4096);
+    outputValues[outputId] = 0;
   } else {
+    outputValues[outputId] = outputValue;
     pwm.setPWM(outputId, 1, outputValue * 16);
   }
+}
+
+void Outputs::sendOutputState() {
+  for (int i : outputValues) {
+    Serial.print(i);
+  }
+  Serial.println("");
 }

@@ -1,14 +1,17 @@
 #ifndef COMMUNICATION_H
 #define COMMUNICATION_H
 #include <Arduino.h>
-#include <Joystick.h>
+#include "Plunger.h"
+#include "Buttons.h"
+#include "Accelerometer.h"
 
 
 class Communication {
   
   public:
     Communication();
-    void init(Joystick_* joystick);
+    void init(Plunger* plunger, Accelerometer* accel, Buttons* buttons);
+    //void init();
     void communicate();
     
   private:
@@ -18,10 +21,13 @@ class Communication {
     int maxNumber = 125; //255 normally
     byte firstNumberByte = 32;
     float scaleFactor = 255/float(maxNumber-firstNumber);
-    Joystick_* _joystick;
+    Accelerometer* _accelerometer;
+    Plunger* _plunger;
+    Buttons* _buttons;
     byte incomingData[10];
     int dataLocation = 0;
     void updateOutputs();
+    int admin = 0;
 };
 
 #endif

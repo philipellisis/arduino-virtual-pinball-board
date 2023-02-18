@@ -13,6 +13,7 @@ class Plunger {
     int getMid();
     int getMax();
     int getMin();
+    void sendPlungerState();
     
   private:
     Joystick_* _joystick;
@@ -20,6 +21,7 @@ class Plunger {
     int plungerMid;
     int plungerMax;
     int plungerMin;
+    int adjustedValue;
 };
 
 #endif

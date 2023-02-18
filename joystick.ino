@@ -31,18 +31,21 @@ void setup() {
   buttons.init(&Joystick);
   plunger.init(&Joystick);
   accel.init(&Joystick);
-  comm.init(&Joystick);
+  comm.init(&plunger, &accel, &buttons);
+  //comm.init();
   
 }
 
 
 
 void loop() {
-
-  //buttons.readInputs();
-  //plunger.plungerRead();
-  //accel.accelerometerRead();
+  long int t1 = millis();
+  buttons.readInputs();
+  plunger.plungerRead();
+  accel.accelerometerRead();
   comm.communicate();
+  long int t2 = millis();
+  Serial.print("Time taken by the task: "); Serial.print(t2-t1); Serial.println(" milliseconds");
 
   //Serial.println("arduino is running");
   delay(100);

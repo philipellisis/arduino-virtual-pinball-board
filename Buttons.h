@@ -9,6 +9,7 @@ class Buttons {
     Buttons();
     void readInputs();
     void init(Joystick_* joystick);
+    void sendButtonState();
     
     
   private:
