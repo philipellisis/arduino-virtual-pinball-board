@@ -3,14 +3,15 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <Wire.h>
 
+
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Outputs::Outputs() {
-  Serial.println("Communication: About to initialize serial");
+  if (DEBUG) {Serial.println("Communication: About to initialize serial");}
    for (int index = 0; index < numberOutputs; index++) {
     pinMode(outputList[index], OUTPUT);
    }
   
-  Serial.println("Communication: pins initialized");
+  if (DEBUG) {Serial.println("Communication: pins initialized");}
 }
 
 void Outputs::init() {
@@ -21,7 +22,7 @@ void Outputs::init() {
 }
 
 void Outputs::updateOutput(int outputId, int outputValue) {
-  Serial.println("output " + String(outputId) + " set to " + String(outputValue) );
+  if (DEBUG) {Serial.print("output "); Serial.print(outputId); Serial.print(" set to "); Serial.println(outputValue);}
   if (outputValue == 255) {
     pwm.setPWM(outputId, 4096, 0);
     outputValues[outputId] = 255;

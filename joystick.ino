@@ -19,12 +19,13 @@ Buttons buttons = Buttons();
 
 Accelerometer accel = Accelerometer();
 Communication comm = Communication();
+bool DEBUG = true;
 
 void setup() {
 
   Serial.begin(9600);
   delay(1000);
-  Serial.println("Starting up arduino");
+  if (DEBUG) {Serial.println("Starting up arduino");}
   delay(1000);
   // Initialize Joystick Library
   Joystick.begin();
@@ -45,7 +46,7 @@ void loop() {
   accel.accelerometerRead();
   comm.communicate();
   long int t2 = millis();
-  Serial.print("Time taken by the task: "); Serial.print(t2-t1); Serial.println(" milliseconds");
+  Serial.print("Time taken by the task: "); Serial.print((t2-t1)); Serial.println(" milliseconds");
 
   //Serial.println("arduino is running");
   delay(100);

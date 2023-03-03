@@ -13,6 +13,9 @@ class Accelerometer {
     void sendAccelerometerState();
     
   private:
+    bool DEBUG = true;
+    float xValueOffset = 0;
+    float yValueOffset = 0;
     Joystick_* _joystick;
     float xValue;
     float yValue;

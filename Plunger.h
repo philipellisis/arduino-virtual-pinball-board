@@ -16,6 +16,7 @@ class Plunger {
     void sendPlungerState();
     
   private:
+    bool DEBUG = true;
     Joystick_* _joystick;
     float plungerScaleFactor;
     int plungerMid;

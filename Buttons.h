@@ -14,6 +14,7 @@ class Buttons {
     
   private:
     // 17 button inputs total
+    bool DEBUG = true;
     int numberInputs = 24;
     int lastButtonState[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     int buttonMap[5] = {18,19,20,21,22};
