@@ -16,8 +16,8 @@ class Buttons {
     // 17 button inputs total
     bool DEBUG = true;
     int numberInputs = 24;
-    int lastButtonState[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    int buttonMap[5] = {18,19,20,21,22};
+    bool lastButtonState[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    byte buttonMap[5] = {18,19,20,21,22};
     Joystick_* _joystick;
 };
 

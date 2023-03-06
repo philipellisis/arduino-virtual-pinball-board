@@ -16,9 +16,10 @@ class Outputs {
     
   private:
     bool DEBUG = true;
-    int numberOutputs = 7;
-    int outputList[7] = {5,6,7,8,9,10,12};
-    int outputValues[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    byte numberOutputs = 7;
+    byte outputList[7] = {5,6,7,8,9,10,12};
+    byte outputValues[48] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    void updateOutputActual(int outputId, int outputValueStart, int outputValueFinish);
 };
 
 #endif

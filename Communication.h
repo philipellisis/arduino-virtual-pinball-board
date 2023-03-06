@@ -16,11 +16,11 @@ class Communication {
     
   private:
     bool DEBUG = true;
-    int firstNumber = 32; //0 normally
-    int bankOffset = 100; //200 normally
-    int adminNumber = 126; //255 normally
-    int connectionNumber = 127;
-    int maxNumber = 125; //255 normally
+    byte firstNumber = 32; //0 normally
+    byte bankOffset = 100; //200 normally
+    byte adminNumber = 126; //255 normally
+    byte connectionNumber = 127;
+    byte maxNumber = 125; //255 normally
     byte firstNumberByte = 32;
     float scaleFactor = 255/float(maxNumber-firstNumber);
     Accelerometer* _accelerometer;

@@ -5,6 +5,7 @@
 #include "Accelerometer.h"
 #include "Communication.h"
 #include <Joystick.h>
+#include "Config.h"
 
 #include <Wire.h>
 
@@ -19,6 +20,7 @@ Buttons buttons = Buttons();
 
 Accelerometer accel = Accelerometer();
 Communication comm = Communication();
+Config config = Config();
 bool DEBUG = true;
 
 void setup() {
@@ -28,12 +30,12 @@ void setup() {
   if (DEBUG) {Serial.println("Starting up arduino");}
   delay(1000);
   // Initialize Joystick Library
+  config.init();
   Joystick.begin();
   buttons.init(&Joystick);
   plunger.init(&Joystick);
   accel.init(&Joystick);
   comm.init(&plunger, &accel, &buttons);
-  //comm.init();
   
 }
 
