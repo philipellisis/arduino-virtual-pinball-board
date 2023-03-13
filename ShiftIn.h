@@ -26,14 +26,13 @@ SOFTWARE.
 #define ShiftIn_h
 
 #include "Arduino.h"
-
+//4, 1, 0, 1
 template<byte chipCount, typename ShiftType>
 class _ShiftIn {
 private:
   byte ploadPin;
   byte clockEnablePin;
   byte dataPin;
-  byte clockPin;
 
   const uint16_t dataWidth;
   uint8_t pulseWidth;
@@ -44,11 +43,11 @@ public:
   _ShiftIn() : dataWidth(chipCount * 8), pulseWidth(5), lastState(0), currentState(0) {}
   
   // setup all pins
-  void begin(int pload, int clockEN, int data, int clock) {
+  void begin(byte pload, byte clockEN, byte data) {
     pinMode(ploadPin = pload, OUTPUT);
     pinMode(clockEnablePin = clockEN, OUTPUT);
     pinMode(dataPin = data, INPUT);
-    pinMode(clockPin = clock, OUTPUT);
+    pinMode(clockEnablePin = clockEN, OUTPUT);
   }
   
   inline uint8_t getPulseWidth() { return pulseWidth; }
@@ -86,9 +85,9 @@ public:
       ShiftType value = digitalRead(dataPin);
       //Serial.println(value);
       result |= (value << ((dataWidth-1) - i));
-      digitalWrite(clockPin, HIGH);
+      digitalWrite(clockEnablePin, HIGH);
       delayMicroseconds(pulseWidth);
-      digitalWrite(clockPin, LOW);
+      digitalWrite(clockEnablePin, LOW);
     }
     currentState = result;
     return result;

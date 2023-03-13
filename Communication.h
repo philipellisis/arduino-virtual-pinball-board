@@ -4,13 +4,15 @@
 #include "Plunger.h"
 #include "Buttons.h"
 #include "Accelerometer.h"
+#include "Config.h"
+#include "Outputs.h"
 
 
 class Communication {
   
   public:
     Communication();
-    void init(Plunger* plunger, Accelerometer* accel, Buttons* buttons);
+    void init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs);
     //void init();
     void communicate();
     
@@ -26,6 +28,8 @@ class Communication {
     Accelerometer* _accelerometer;
     Plunger* _plunger;
     Buttons* _buttons;
+    Config* _config;
+    Outputs* _outputs;
     byte incomingData[10];
     int dataLocation = 0;
     void updateOutputs();

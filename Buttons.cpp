@@ -13,17 +13,18 @@ ShiftIn<3> shift;
 
 Buttons::Buttons() {
   // Initialize Button Pins
-  if (DEBUG) {Serial.println("buttons: About to initialize pins");}
-  shift.begin(4, 1, 0, 1);
-  if (DEBUG) {Serial.println("buttons: pins initialized");}
+  if (DEBUG) {Serial.println(F("buttons: About to initialize pins"));}
+  shift.begin(4, 1, 0);
+  if (DEBUG) {Serial.println(F("buttons: pins initialized"));}
   
 }
 
-void Buttons::init(Joystick_* joystick) {
-  if (DEBUG) {Serial.println("buttons: initializing joystick");}
+void Buttons::init(Joystick_* joystick, Config* config, Outputs* outputs) {
+  if (DEBUG) {Serial.println(F("buttons: initializing joystick"));}
   _joystick = joystick;
-
-  if (DEBUG) {Serial.println("buttons: initialized joystick");}
+  _config = config;
+  _outputs = outputs;
+  if (DEBUG) {Serial.println(F("buttons: initialized joystick"));}
 }
 
 void Buttons::readInputs() {
@@ -36,6 +37,13 @@ void Buttons::readInputs() {
       if (currentButtonState != lastButtonState[i]) {
         _joystick->setButton(i, currentButtonState);
         lastButtonState[i] = currentButtonState;
+        for (int j = 0; j < 4; j++) {
+          if (currentButtonState == 1 && _config->solenoidButtonMap[j] == i) {
+            _outputs->updateOutput(_config->solenoidOutputMap[j], 255);
+          } else if (currentButtonState == 0 && _config->solenoidButtonMap[j] == i) {
+            _outputs->updateOutput(_config->solenoidOutputMap[j], 0);
+          }
+        }
       }
     }
     if (DEBUG) {Serial.println("");}

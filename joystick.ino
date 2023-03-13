@@ -1,12 +1,10 @@
-//#include <Adafruit_PWMServoDriver.h>
-//#include <EEPROM.h>
 #include "Plunger.h"
 #include "Buttons.h"
 #include "Accelerometer.h"
 #include "Communication.h"
+#include "Outputs.h"
 #include <Joystick.h>
 #include "Config.h"
-
 #include <Wire.h>
 
 Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID,JOYSTICK_TYPE_GAMEPAD,
@@ -20,6 +18,7 @@ Buttons buttons = Buttons();
 
 Accelerometer accel = Accelerometer();
 Communication comm = Communication();
+Outputs outputs = Outputs();
 Config config = Config();
 bool DEBUG = true;
 
@@ -27,15 +26,16 @@ void setup() {
 
   Serial.begin(9600);
   delay(1000);
-  if (DEBUG) {Serial.println("Starting up arduino");}
+  if (DEBUG) {Serial.println(F("Starting up arduino"));}
   delay(1000);
   // Initialize Joystick Library
   config.init();
+  outputs.init(&config);
   Joystick.begin();
-  buttons.init(&Joystick);
-  plunger.init(&Joystick);
+  buttons.init(&Joystick, &config, &outputs);
+  plunger.init(&Joystick, &config);
   accel.init(&Joystick);
-  comm.init(&plunger, &accel, &buttons);
+  comm.init(&plunger, &accel, &buttons, &config, &outputs);
   
 }
 
@@ -48,7 +48,7 @@ void loop() {
   accel.accelerometerRead();
   comm.communicate();
   long int t2 = millis();
-  Serial.print("Time taken by the task: "); Serial.print((t2-t1)); Serial.println(" milliseconds");
+  Serial.print(F("Time taken by the task: ")); Serial.print((t2-t1)); Serial.println(F(" milliseconds"));
 
   //Serial.println("arduino is running");
   delay(100);

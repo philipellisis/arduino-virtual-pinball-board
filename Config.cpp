@@ -4,17 +4,14 @@
 
 
 Config::Config() {
-  if (DEBUG) {Serial.println("Config: About to initialize");}
 }
 
 void Config::init() {
-  if (DEBUG) {Serial.println("Config: initializing joystick");}
+  if (DEBUG) {Serial.println(F("Config: initializing joystick"));}
 
   // get first 16 bank maximum values
   for (int i = 0; i < 16; i++) {
-    EEPROM.get(i, maxOutputState0[i]);
-    EEPROM.get(i+16, maxOutputState1[i]);
-    EEPROM.get(i+32, maxOutputState2[i]);
+    EEPROM.get(i, maxOutputState[i]);
   }
   
 }
@@ -22,8 +19,6 @@ void Config::init() {
 void Config::saveConfig() {
   // save first 16 bank maximum values
   for (int i = 0; i < 16; i++) {
-    EEPROM.write(i, maxOutputState0[i]);
-    EEPROM.write(i+16, maxOutputState1[i]);
-    EEPROM.write(i+32, maxOutputState2[i]);
+    EEPROM.write(i, maxOutputState[i]);
   }
 }

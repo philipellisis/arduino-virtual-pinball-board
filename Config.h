@@ -8,14 +8,13 @@ class Config {
     Config();
     void saveConfig();
     void init();
-    byte maxOutputState0[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte maxOutputState1[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte maxOutputState2[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-
-    byte maxOutputTime0[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte maxOutputTime1[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte maxOutputTime2[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    
+    byte maxOutputState[48] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    byte maxOutputTime[48] = {255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255};
+    int plungerMax = 634;
+    byte plungerMin = 10;
+    byte plungerMid = 100;
+    byte solenoidButtonMap[4] = {0,0,0,0};
+    byte solenoidOutputMap[4] = {0,0,0,0};
   private:
     bool DEBUG = true;
     

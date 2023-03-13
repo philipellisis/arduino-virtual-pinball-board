@@ -6,18 +6,14 @@
 
 Adafruit_MPU6050 mpu;
 Accelerometer::Accelerometer() {
-  if (DEBUG) {Serial.println("accel: About to initialize pins");}
-
-  if (DEBUG) {Serial.println("plunger: pins initialized");}
 }
 
 void Accelerometer::init(Joystick_* joystick) {
-  if (DEBUG) {Serial.println("plunger: initializing accel");}
   _joystick = joystick;
   _joystick->setXAxisRange(-15, 15);
   _joystick->setYAxisRange(-15, 15);
   while (!mpu.begin()) {
-    if (DEBUG) {Serial.println("Failed to find MPU6050 chip");}
+    if (DEBUG) {Serial.println(F("Failed to find MPU6050 chip"));}
     delay(1000);
   }
 
@@ -29,8 +25,7 @@ void Accelerometer::init(Joystick_* joystick) {
   mpu.setInterruptPinPolarity(true);
   mpu.setMotionInterrupt(true);
   
-  if (DEBUG) {Serial.println("MPU6050 Found!");}
-  if (DEBUG) {Serial.println("accel: initialized joystick");}
+  if (DEBUG) {Serial.println(F("MPU6050 Found!"));}
 }
 
 void Accelerometer::accelerometerRead() {
@@ -52,10 +47,10 @@ void Accelerometer::accelerometerRead() {
   }
   _joystick->setXAxis(xValue);
   _joystick->setYAxis(yValue);
-  if (DEBUG) {Serial.print("AccelX:");}
+  if (DEBUG) {Serial.print(F("AccelX:"));}
   if (DEBUG) {Serial.print(xValue);}
-  if (DEBUG) {Serial.print(",");}
-  if (DEBUG) {Serial.print("AccelY:");}
+  if (DEBUG) {Serial.print(F(","));}
+  if (DEBUG) {Serial.print(F("AccelY:"));}
   if (DEBUG) {Serial.println(yValue);}
 }
 
