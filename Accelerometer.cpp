@@ -11,8 +11,8 @@ Accelerometer::Accelerometer() {
 
 void Accelerometer::init(Joystick_* joystick) {
   _joystick = joystick;
-  _joystick->setXAxisRange(-15, 15);
-  _joystick->setYAxisRange(-15, 15);
+  _joystick->setXAxisRange(-1500, 1500);
+  _joystick->setYAxisRange(-1500, 1500);
   while (!mpu.begin()) {
     if (DEBUG) {Serial.println(F("Failed to find MPU6050 chip"));}
     delay(1000);
@@ -39,8 +39,8 @@ void Accelerometer::accelerometerRead() {
   sensors_event_t a;
   mpu_accel->getEvent(&a);
 
-  xValue = a.acceleration.x - xValueOffset;
-  yValue = a.acceleration.y - yValueOffset;
+  xValue = floor((a.acceleration.x - xValueOffset)*100);
+  yValue = floor((a.acceleration.y - yValueOffset)*100);
   //}
   if (xValueOffset == 0){
     xValueOffset = a.acceleration.x;

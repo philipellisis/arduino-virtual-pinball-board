@@ -22,6 +22,7 @@ class Outputs {
     byte numberOutputs = 15;
     byte outputList[15] = {5,6,10,9,8,7,12,18,19,20,21,22,14,15,16};
     byte outputValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    byte timeTurnedOn[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     void updateOutputActual(byte outputId, int outputValueStart, int outputValueFinish);
     byte resetOutputNumber = 0;
 };

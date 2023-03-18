@@ -32,10 +32,16 @@ void Buttons::readInputs() {
   // read shift register values
   if(shift.update()) {
     for(int i = 0; i < shift.getDataWidth(); i++) {
-      int currentButtonState = !shift.state(i);
+      bool currentButtonState = !shift.state(i);
       if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i]) {
+        if (i == 23) {
+          if (DEBUG) {Serial.print("setting night mode to ");Serial.println(currentButtonState);}
+          _config->nightMode = currentButtonState;
+        } 
         _joystick->setButton(i, currentButtonState);
+        
+        
         lastButtonState[i] = currentButtonState;
         for (int j = 0; j < 4; j++) {
           if (currentButtonState == 1 && _config->solenoidButtonMap[j] == i) {

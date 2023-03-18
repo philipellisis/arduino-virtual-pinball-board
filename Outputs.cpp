@@ -31,33 +31,33 @@ void Outputs::init(Config* config) {
 }
 
 void Outputs::updateOutput(byte outputId, byte outputValue) {
+  if (_config->maxOutputState[outputId] > 0 && outputValue > _config->maxOutputState[outputId]) {
+    outputValue = _config->maxOutputState[outputId];
+  }
+  if (_config->nightMode == true && bitRead(_config->toySpecialOption[outputId],0) == 1) {
+    outputValue = 0;
+  }
   if (DEBUG) {Serial.print(F("output ")); Serial.print(outputId); Serial.print(F(" set to ")); Serial.println(outputValue);}
+  outputValues[outputId] = outputValue;
+  if (outputValue == 0) {
+    timeTurnedOn[outputId] = 0;
+  }
   if (outputId < 16) {
     if (outputId < 5) {
-      if (outputValue > 0) {
-        outputValues[outputId] = 1;
-      } else {
-        outputValues[outputId] = 0;
-      }
       analogWrite(outputList[outputId], outputValue);
     } else {
       if (outputValue > 127) {
         digitalWrite(outputList[outputId], HIGH);
-        outputValues[outputId] = 1;
       } else {
         digitalWrite(outputList[outputId], LOW);
-        outputValues[outputId] = 0;
       }
     }
   } else {
     if (outputValue == 255) {
       updateOutputActual(outputId - 15, 4096, 0);
-      outputValues[outputId] = 1;
     } else if (outputValue == 0) {
       updateOutputActual(outputId - 15, 0, 4096);
-      outputValues[outputId] = 0;
     } else {
-      outputValues[outputId] = 1;
       updateOutputActual(outputId - 15, 1, outputValue * 16);
     }
   }
@@ -66,18 +66,22 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
 }
 
 void Outputs::checkResetOutputs() {
-  if (resetOutputNumber < 62) {
-    resetOutputNumber++;
-  } else {
-    resetOutputNumber = 0;
-  }
-  if (outputValues[resetOutputNumber] > 0 && _config->maxOutputTime[resetOutputNumber] > 0) {
-    if (DEBUG) {Serial.print(F("Output is turned on, checking if it has been on for too long "));Serial.println(resetOutputNumber);}
-    if (outputValues[resetOutputNumber] == _config->maxOutputTime[resetOutputNumber]) {
-      if (DEBUG) {Serial.println(F("Output has reached max time, turning off"));}
-      updateOutput(resetOutputNumber, 0);
+  for(int i = 0; i < 5; i++) {
+    if (resetOutputNumber < 62) {
+      resetOutputNumber++;
+    } else {
+      resetOutputNumber = 0;
     }
-    outputValues[resetOutputNumber]++;
+    if (outputValues[resetOutputNumber] > _config->turnOffState[resetOutputNumber] && _config->maxOutputTime[resetOutputNumber] > 0) {
+      if (DEBUG) {Serial.print(F("Output is turned on, checking if it has been on for too long "));Serial.println(resetOutputNumber);}
+      if (timeTurnedOn[resetOutputNumber] == _config->maxOutputTime[resetOutputNumber]) {
+        if (DEBUG) {Serial.println(F("Output has reached max time, turning off"));}
+        updateOutput(resetOutputNumber, _config->turnOffState[resetOutputNumber]);
+      } else {
+        timeTurnedOn[resetOutputNumber]++;
+      }
+      
+    }
   }
 }
 
