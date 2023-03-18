@@ -32,7 +32,7 @@ void Buttons::readInputs() {
   // read shift register values
   if(shift.update()) {
     for(int i = 0; i < shift.getDataWidth(); i++) {
-      int currentButtonState = shift.state(i);
+      int currentButtonState = !shift.state(i);
       if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i]) {
         _joystick->setButton(i, currentButtonState);

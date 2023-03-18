@@ -20,7 +20,7 @@ Accelerometer accel = Accelerometer();
 Communication comm = Communication();
 Outputs outputs = Outputs();
 Config config = Config();
-bool DEBUG = true;
+bool DEBUG = false;
 
 void setup() {
 
@@ -48,7 +48,7 @@ void loop() {
   accel.accelerometerRead();
   comm.communicate();
   long int t2 = millis();
-  Serial.print(F("Time taken by the task: ")); Serial.print((t2-t1)); Serial.println(F(" milliseconds"));
+  if (DEBUG) {Serial.print(F("Time taken by the task: ")); Serial.print((t2-t1)); Serial.println(F(" milliseconds"));}
 
   //Serial.println("arduino is running");
   delay(100);

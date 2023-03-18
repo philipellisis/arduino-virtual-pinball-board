@@ -5,6 +5,7 @@
 
 
 Adafruit_MPU6050 mpu;
+Adafruit_Sensor *mpu_accel;
 Accelerometer::Accelerometer() {
 }
 
@@ -16,7 +17,7 @@ void Accelerometer::init(Joystick_* joystick) {
     if (DEBUG) {Serial.println(F("Failed to find MPU6050 chip"));}
     delay(1000);
   }
-
+  
   //setupt motion detection
   mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
   mpu.setMotionDetectionThreshold(1);
@@ -24,7 +25,9 @@ void Accelerometer::init(Joystick_* joystick) {
   mpu.setInterruptPinLatch(true);  // Keep it latched.  Will turn off when reinitialized.
   mpu.setInterruptPinPolarity(true);
   mpu.setMotionInterrupt(true);
-  
+
+  //assign accelerometer
+  mpu_accel = mpu.getAccelerometerSensor();
   if (DEBUG) {Serial.println(F("MPU6050 Found!"));}
 }
 
@@ -33,8 +36,8 @@ void Accelerometer::accelerometerRead() {
   //yValue = 0;
   //if(mpu.getMotionInterruptStatus()) {
   /* Get new sensor events with the readings */
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
+  sensors_event_t a;
+  mpu_accel->getEvent(&a);
 
   xValue = a.acceleration.x - xValueOffset;
   yValue = a.acceleration.y - yValueOffset;

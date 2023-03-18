@@ -12,17 +12,18 @@ class Outputs {
   public:
     Outputs();
     void init(Config* config);
-    void updateOutput(int outputId, int outputValue);
+    void updateOutput(byte outputId, byte outputValue);
     void sendOutputState();
     void checkResetOutputs();
     
   private:
     Config* _config;
     bool DEBUG = true;
-    byte numberOutputs = 7;
-    byte outputList[7] = {5,6,7,8,9,10,12};
-    byte outputValues[48] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    void updateOutputActual(int outputId, int outputValueStart, int outputValueFinish);
+    byte numberOutputs = 15;
+    byte outputList[15] = {5,6,10,9,8,7,12,18,19,20,21,22,14,15,16};
+    byte outputValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    void updateOutputActual(byte outputId, int outputValueStart, int outputValueFinish);
+    byte resetOutputNumber = 0;
 };
 
 #endif

@@ -30,33 +30,58 @@ void Outputs::init(Config* config) {
 
 }
 
-void Outputs::updateOutput(int outputId, int outputValue) {
+void Outputs::updateOutput(byte outputId, byte outputValue) {
   if (DEBUG) {Serial.print(F("output ")); Serial.print(outputId); Serial.print(F(" set to ")); Serial.println(outputValue);}
-  if (outputValue == 255) {
-    updateOutputActual(outputId, 4096, 0);
-    outputValues[outputId] = 1;
-  } else if (outputValue == 0) {
-    updateOutputActual(outputId, 0, 4096);
-    outputValues[outputId] = 0;
+  if (outputId < 16) {
+    if (outputId < 5) {
+      if (outputValue > 0) {
+        outputValues[outputId] = 1;
+      } else {
+        outputValues[outputId] = 0;
+      }
+      analogWrite(outputList[outputId], outputValue);
+    } else {
+      if (outputValue > 127) {
+        digitalWrite(outputList[outputId], HIGH);
+        outputValues[outputId] = 1;
+      } else {
+        digitalWrite(outputList[outputId], LOW);
+        outputValues[outputId] = 0;
+      }
+    }
   } else {
-    outputValues[outputId] = 1;
-    updateOutputActual(outputId, 1, outputValue * 16);
+    if (outputValue == 255) {
+      updateOutputActual(outputId - 15, 4096, 0);
+      outputValues[outputId] = 1;
+    } else if (outputValue == 0) {
+      updateOutputActual(outputId - 15, 0, 4096);
+      outputValues[outputId] = 0;
+    } else {
+      outputValues[outputId] = 1;
+      updateOutputActual(outputId - 15, 1, outputValue * 16);
+    }
   }
+  
+
 }
 
 void Outputs::checkResetOutputs() {
-  for (int i = 0; i < 48; i++) {
-    if (outputValues[i] > 0 && _config->maxOutputTime[i] != 0) {
-      outputValues[i]++;
-      if (outputValues[i] == _config->maxOutputTime[i]) {
-        if (DEBUG) {Serial.println(F("Output has reached max time, turning off"));}
-        updateOutput(i, 0);
-      }
+  if (resetOutputNumber < 62) {
+    resetOutputNumber++;
+  } else {
+    resetOutputNumber = 0;
+  }
+  if (outputValues[resetOutputNumber] > 0 && _config->maxOutputTime[resetOutputNumber] > 0) {
+    if (DEBUG) {Serial.print(F("Output is turned on, checking if it has been on for too long "));Serial.println(resetOutputNumber);}
+    if (outputValues[resetOutputNumber] == _config->maxOutputTime[resetOutputNumber]) {
+      if (DEBUG) {Serial.println(F("Output has reached max time, turning off"));}
+      updateOutput(resetOutputNumber, 0);
     }
+    outputValues[resetOutputNumber]++;
   }
 }
 
-void Outputs::updateOutputActual(int outputId, int outputValueStart, int outputValueFinish) {
+void Outputs::updateOutputActual(byte outputId, int outputValueStart, int outputValueFinish) {
   if (outputId < 16) {
     pwm.setPWM(outputId, outputValueStart, outputValueFinish);
   }
