@@ -44,6 +44,8 @@ void Config::init() {
     for (int i = 0; i < 4; i++) {
       EEPROM.get(i + 416, solenoidOutputMap[i]);
     }
+
+    EEPROM.get(426, orientation);
   }
   
   
@@ -80,6 +82,8 @@ void Config::saveConfig() {
     for (int i = 0; i < 4; i++) {
       EEPROM.write(i + 416, solenoidOutputMap[i]);
     }
+    
+    EEPROM.write(426, orientation);
 
     EEPROM.write(1000, 100);
 }
@@ -151,7 +155,32 @@ void Config::updateConfigFromSerial() {
         return;
       }
     }
+
+    orientation = blockRead();
+    if (done == true) {
+      Serial.println(F("FAILED,error reading orientation"));
+      return;
+    }
+    
     Serial.println(F("SUCCESS"));
+}
+
+void Config::setPlunger() {
+    plungerMax = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.println(F("FAILED,error reading plungerMax"));
+      return;
+    }
+    plungerMin = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.println(F("FAILED,error reading plungerMin"));
+      return;
+    }
+    plungerMid = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.println(F("FAILED,error reading plungerMid"));
+      return;
+    }
 }
 
 void Config::sendConfig() {
@@ -185,6 +214,9 @@ void Config::sendConfig() {
     for (int i = 0; i < 4; i++) {
       Serial.print(solenoidOutputMap[i]);
     }
+
+    Serial.print(orientation);
+    
     Serial.println(F("END OF DATA"));
 }
 

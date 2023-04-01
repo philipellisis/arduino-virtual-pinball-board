@@ -57,8 +57,8 @@ void Buttons::readInputs() {
 }
 
 void Buttons::sendButtonState() {
-  for (int i : lastButtonState) {
-    Serial.print(i);
+  for (int i = 0; i < 24; i++) {
+    Serial.print(lastButtonState[i]);
   }
   Serial.println("");
   

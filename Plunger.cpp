@@ -31,5 +31,5 @@ void Plunger::plungerRead() {
 }
 
 void Plunger::sendPlungerState() {
-  Serial.println(adjustedValue);
+  Serial.println(analogRead(22));
 }

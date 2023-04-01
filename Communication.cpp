@@ -65,21 +65,29 @@ void Communication::communicate() {
 void Communication::sendAdmin() {
   if (admin > 0) {
     if (DEBUG) {Serial.println(F("going into admin mode"));}
-    // buttons
     if (admin == BUTTONS) {
       _buttons->sendButtonState();
     }
-    // getoutputs
     if (admin == OUTPUTS) {
       _outputs->sendOutputState();
     }
-    // plunger
     if (admin == PLUNGER) {
       _plunger->sendPlungerState();
     }
-    // accel
     if (admin == ACCEL) {
       _accelerometer->sendAccelerometerState();
+    }
+    if (admin == SEND_CONFIG) {
+      _config->sendConfig();
+      admin = 0;
+    }
+    if (admin == GET_CONFIG) {
+      _config->updateConfigFromSerial();
+      admin = 0;
+    }
+    if (admin == SET_PLUNGER) {
+      _config->setPlunger();
+      admin = 0;
     }
   }
 }

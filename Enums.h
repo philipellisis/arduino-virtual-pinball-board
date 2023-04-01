@@ -5,6 +5,9 @@ enum admin_type {
     OUTPUTS = 2,
     PLUNGER = 3,
     ACCEL = 4,
+    SEND_CONFIG = 5,
+    GET_CONFIG = 6,
+    SET_PLUNGER = 7
 };
 
 enum eeprom {

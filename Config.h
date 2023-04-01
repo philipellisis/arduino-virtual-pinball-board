@@ -16,12 +16,16 @@ class Config {
     int plungerMax = 634;
     int plungerMin = 10;
     int plungerMid = 100;
-    bool done = false;
     byte solenoidButtonMap[4] = {1,2,3,4};
     byte solenoidOutputMap[4] = {0,0,1,1};
+    byte orientation = 0;
+    
+
+    bool done = false;
     bool nightMode = false;
     void updateConfigFromSerial();
     void sendConfig();
+    void setPlunger();
     
   private:
     bool DEBUG = true;
