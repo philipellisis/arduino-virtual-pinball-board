@@ -14,13 +14,21 @@ class Config {
     byte maxOutputState[63] = {0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     byte maxOutputTime[63] = {2,2,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     int plungerMax = 634;
-    byte plungerMin = 10;
-    byte plungerMid = 100;
+    int plungerMin = 10;
+    int plungerMid = 100;
+    bool done = false;
     byte solenoidButtonMap[4] = {1,2,3,4};
     byte solenoidOutputMap[4] = {0,0,1,1};
     bool nightMode = false;
+    void updateConfigFromSerial();
+    void sendConfig();
+    
   private:
     bool DEBUG = true;
+    byte Config::blockRead();
+    void writeIntIntoEEPROM(int address, int number);
+    int readIntFromEEPROM(int address);
+    
     
 };
 

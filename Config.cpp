@@ -9,16 +9,205 @@ Config::Config() {
 void Config::init() {
   if (DEBUG) {Serial.println(F("Config: initializing joystick"));}
 
-  // get first 16 bank maximum values
-  for (int i = 0; i < 16; i++) {
-    EEPROM.get(i, maxOutputState[i]);
+  byte eepromCheck;
+  EEPROM.get(1000, eepromCheck);
+
+  if (eepromCheck == 100) {
+    if (DEBUG) {Serial.println(F("eeprom check indicates values are all saved, reading from eeprom"));}
+    // get first 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      EEPROM.get(i, toySpecialOption[i]);
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      EEPROM.get(i + 100, turnOffState[i]);
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      EEPROM.get(i + 200, maxOutputState[i]);
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      EEPROM.get(i + 300, maxOutputTime[i]);
+    }
+
+    plungerMax = readIntFromEEPROM(401);
+    plungerMin = readIntFromEEPROM(403);
+    plungerMid = readIntFromEEPROM(405);
+    
+    for (int i = 0; i < 4; i++) {
+      EEPROM.get(i + 406, solenoidButtonMap[i]);
+    }
+    for (int i = 0; i < 4; i++) {
+      EEPROM.get(i + 416, solenoidOutputMap[i]);
+    }
   }
+  
   
 }
 
 void Config::saveConfig() {
-  // save first 16 bank maximum values
-  for (int i = 0; i < 16; i++) {
-    EEPROM.write(i, maxOutputState[i]);
-  }
+    // get first 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      EEPROM.write(i, toySpecialOption[i]);
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      EEPROM.write(i + 100, turnOffState[i]);
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      EEPROM.write(i + 200, maxOutputState[i]);
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      EEPROM.write(i + 300, maxOutputTime[i]);
+    }
+  
+    writeIntIntoEEPROM(401, plungerMax);
+    writeIntIntoEEPROM(403, plungerMin);
+    writeIntIntoEEPROM(405, plungerMid);
+    
+    for (int i = 0; i < 4; i++) {
+      EEPROM.write(i + 406, solenoidButtonMap[i]);
+    }
+    for (int i = 0; i < 4; i++) {
+      EEPROM.write(i + 416, solenoidOutputMap[i]);
+    }
+
+    EEPROM.write(1000, 100);
+}
+
+void Config::updateConfigFromSerial() {
+
+    // get first 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      toySpecialOption[i] = blockRead();
+      if (done == true) {
+        Serial.println(F("FAILED,error reading toySpecialOption"));
+        return;
+      }
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      turnOffState[i] = blockRead();
+      if (done == true) {
+        Serial.println(F("FAILED,error reading turnOffState"));
+        return;
+      }
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      maxOutputState[i] = blockRead();
+      if (done == true) {
+        Serial.println(F("FAILED,error reading maxOutputState"));
+        return;
+      }
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      maxOutputTime[i] = blockRead();
+      if (done == true) {
+        Serial.println(F("FAILED,error reading maxOutputTime"));
+        return;
+      }
+    }
+
+    plungerMax = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.println(F("FAILED,error reading plungerMax"));
+      return;
+    }
+    plungerMin = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.println(F("FAILED,error reading plungerMin"));
+      return;
+    }
+    plungerMid = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.println(F("FAILED,error reading plungerMid"));
+      return;
+    }
+    for (int i = 0; i < 4; i++) {
+      solenoidButtonMap[i] = blockRead();
+      if (done == true) {
+        Serial.println(F("FAILED,error reading solenoidButtonMap"));
+        return;
+      }
+    }
+    for (int i = 0; i < 4; i++) {
+      solenoidOutputMap[i] = blockRead();
+      if (done == true) {
+        Serial.println(F("FAILED,error reading solenoidOutputMap"));
+        return;
+      }
+    }
+    Serial.println(F("SUCCESS"));
+}
+
+void Config::sendConfig() {
+    // get first 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      Serial.print(toySpecialOption[i]);
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      Serial.print(turnOffState[i]);
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      Serial.print(maxOutputState[i]);
+    }
+  
+    // get next 62 bank maximum values
+    for (int i = 0; i < 62; i++) {
+      Serial.print(maxOutputTime[i]);
+    }
+  
+    Serial.print(plungerMax);
+    Serial.print(plungerMin);
+    Serial.print(plungerMid);
+    
+    for (int i = 0; i < 4; i++) {
+      Serial.print(solenoidButtonMap[i]);
+    }
+    for (int i = 0; i < 4; i++) {
+      Serial.print(solenoidOutputMap[i]);
+    }
+    Serial.println(F("END OF DATA"));
+}
+
+byte Config::blockRead() {
+    long int t1 = millis();
+    long int t2 = millis();
+    while ((t2 - t1) < 5000) {
+      if (Serial.available() > 0) {
+        return Serial.read();
+      }
+      t2 = millis();
+    }
+    done = true;
+    return 0;
+}
+
+void Config::writeIntIntoEEPROM(int address, int number)
+{ 
+  EEPROM.write(address, number >> 8);
+  EEPROM.write(address + 1, number & 0xFF);
+}
+
+int Config::readIntFromEEPROM(int address)
+{
+  return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
 }
