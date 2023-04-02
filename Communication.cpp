@@ -33,21 +33,21 @@ void Communication::communicate() {
     // sample data coming in for test: " d       "
     // sample data coming in for test all on : " d}}}}}}}"
     // sample data coming in for test all off: " d       "
-    if ((dataLocation == 0 && incomingData[dataLocation] != firstNumber) || (dataLocation == 1 && (incomingData[dataLocation] < bankOffset))) {
+    if ((dataLocation == 0 && incomingData[0] != firstNumber) || (dataLocation == 1 && (incomingData[1] < bankOffset))) {
       dataLocation = 0;
       if (DEBUG) {Serial.println(F("bad data found, resetting positions"));}
     } else {
-      // wait until we have filled 8 slots of data, then do what needs to be done
+      // wait until we have filled 9 slots of data, then do what needs to be done
       if (dataLocation == 8) {
-        if (DEBUG) {Serial.println(F("8 slots filled, sending outputs"));}
+        if (DEBUG) {Serial.println(F("9 slots filled, sending outputs"));}
         if (incomingData[1] == adminNumber) {
           if (DEBUG) {Serial.println(F("Turning admin on"));}
-          // set admin functions
-          if (incomingData[3] == 0) {
-            admin = incomingData[4];
-          }
+          // set admin functions{
+          admin = incomingData[2];
         } else if (incomingData[1] == connectionNumber) {
-          if (DEBUG) {Serial.println(F("CSD Board Connected"));}
+          Serial.println(F("CSD Board Connected"));
+        } else if (incomingData[1] == outputSingleNumber) {
+          _outputs->updateOutput(incomingData[2], incomingData[3]);
         } else {
           //normal operation
           if (DEBUG) {Serial.println(F("sending output"));}
@@ -87,6 +87,13 @@ void Communication::sendAdmin() {
     }
     if (admin == SET_PLUNGER) {
       _config->setPlunger();
+      admin = 0;
+    }
+    if (admin == OFF) {
+      admin = 0;
+    }
+    if (admin == CONNECT) {
+      Serial.println(F("CSD Board Connected"));
       admin = 0;
     }
   }

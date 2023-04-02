@@ -100,6 +100,7 @@ void Outputs::updateOutputActual(byte outputId, int outputValueStart, int output
 void Outputs::sendOutputState() {
   for (int i = 0; i < 62; i++) {
     Serial.print(outputValues[i]);
+    Serial.print(F(","));
   }
   Serial.println("");
 }

@@ -7,7 +7,10 @@ enum admin_type {
     ACCEL = 4,
     SEND_CONFIG = 5,
     GET_CONFIG = 6,
-    SET_PLUNGER = 7
+    SET_PLUNGER = 7,
+    OFF = 255,
+    CONNECT = 8,
+    
 };
 
 enum eeprom {

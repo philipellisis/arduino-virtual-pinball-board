@@ -46,6 +46,7 @@ void Config::init() {
     }
 
     EEPROM.get(426, orientation);
+    EEPROM.get(427, accelerometer);
   }
   
   
@@ -84,6 +85,7 @@ void Config::saveConfig() {
     }
     
     EEPROM.write(426, orientation);
+    EEPROM.write(427, accelerometer);
 
     EEPROM.write(1000, 100);
 }
@@ -161,6 +163,12 @@ void Config::updateConfigFromSerial() {
       Serial.println(F("FAILED,error reading orientation"));
       return;
     }
+
+    accelerometer = blockRead();
+    if (done == true) {
+      Serial.println(F("FAILED,error reading accelerometer"));
+      return;
+    }
     
     Serial.println(F("SUCCESS"));
 }
@@ -187,35 +195,47 @@ void Config::sendConfig() {
     // get first 62 bank maximum values
     for (int i = 0; i < 62; i++) {
       Serial.print(toySpecialOption[i]);
+      Serial.print(F(","));
     }
   
     // get next 62 bank maximum values
     for (int i = 0; i < 62; i++) {
       Serial.print(turnOffState[i]);
+      Serial.print(F(","));
     }
   
     // get next 62 bank maximum values
     for (int i = 0; i < 62; i++) {
       Serial.print(maxOutputState[i]);
+      Serial.print(F(","));
     }
   
     // get next 62 bank maximum values
     for (int i = 0; i < 62; i++) {
       Serial.print(maxOutputTime[i]);
+      Serial.print(F(","));
     }
   
     Serial.print(plungerMax);
+    Serial.print(F(","));
     Serial.print(plungerMin);
+    Serial.print(F(","));
     Serial.print(plungerMid);
+    Serial.print(F(","));
     
     for (int i = 0; i < 4; i++) {
       Serial.print(solenoidButtonMap[i]);
+      Serial.print(F(","));
     }
     for (int i = 0; i < 4; i++) {
       Serial.print(solenoidOutputMap[i]);
+      Serial.print(F(","));
     }
 
     Serial.print(orientation);
+    Serial.print(F(","));
+    Serial.print(accelerometer);
+    Serial.print(F(","));
     
     Serial.println(F("END OF DATA"));
 }

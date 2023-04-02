@@ -9,13 +9,20 @@ Adafruit_Sensor *mpu_accel;
 Accelerometer::Accelerometer() {
 }
 
-void Accelerometer::init(Joystick_* joystick) {
+void Accelerometer::init(Joystick_* joystick, Config* config) {
   _joystick = joystick;
+  _config = config;
   _joystick->setXAxisRange(-1500, 1500);
   _joystick->setYAxisRange(-1500, 1500);
+  byte count = 0;
   while (!mpu.begin()) {
     if (DEBUG) {Serial.println(F("Failed to find MPU6050 chip"));}
     delay(1000);
+    count++;
+    if (count > 5) {
+      config->accelerometer = 2;
+      break;
+    }
   }
   
   //setupt motion detection

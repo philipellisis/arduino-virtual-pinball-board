@@ -19,6 +19,7 @@ class Config {
     byte solenoidButtonMap[4] = {1,2,3,4};
     byte solenoidOutputMap[4] = {0,0,1,1};
     byte orientation = 0;
+    byte accelerometer = 0;
     
 
     bool done = false;
@@ -28,7 +29,7 @@ class Config {
     void setPlunger();
     
   private:
-    bool DEBUG = true;
+    bool DEBUG = false;
     byte Config::blockRead();
     void writeIntIntoEEPROM(int address, int number);
     int readIntFromEEPROM(int address);

@@ -17,13 +17,13 @@ class Communication {
     void communicate();
     
   private:
-    bool DEBUG = true;
-    byte firstNumber = 32; //0 normally
-    byte bankOffset = 100; //200 normally
-    byte adminNumber = 126; //255 normally
-    byte connectionNumber = 127;
-    byte maxNumber = 125; //255 normally
-    byte firstNumberByte = 32;
+    bool DEBUG = false;
+    byte firstNumber = 0; //0 normally
+    byte bankOffset = 200; //200 normally
+    byte adminNumber = 250; //250 normally
+    byte connectionNumber = 251;//251 normally
+    byte outputSingleNumber = 252;//252 normally
+    byte maxNumber = 255; //255 normally
     float scaleFactor = 255/float(maxNumber-firstNumber);
     Accelerometer* _accelerometer;
     Plunger* _plunger;

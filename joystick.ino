@@ -34,7 +34,10 @@ void setup() {
   Joystick.begin();
   buttons.init(&Joystick, &config, &outputs);
   plunger.init(&Joystick, &config);
-  accel.init(&Joystick);
+  if (config.accelerometer > 0) {
+    accel.init(&Joystick, &config);
+  }
+  
   comm.init(&plunger, &accel, &buttons, &config, &outputs);
   
 }
@@ -45,7 +48,9 @@ void loop() {
   long int t1 = millis();
   buttons.readInputs();
   plunger.plungerRead();
-  accel.accelerometerRead();
+  if (config.accelerometer > 0) {
+    accel.accelerometerRead();
+  }
   comm.communicate();
   long int t2 = millis();
   if (DEBUG) {Serial.print(F("Time taken by the task: ")); Serial.print((t2-t1)); Serial.println(F(" milliseconds"));}
