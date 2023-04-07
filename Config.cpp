@@ -7,20 +7,20 @@ Config::Config() {
 }
 
 void Config::init() {
-  if (DEBUG) {Serial.println(F("Config: initializing joystick"));}
+  if (DEBUG) {Serial.print(F("DEBUG,Config: initializing\r\n"));}
 
   byte eepromCheck;
   EEPROM.get(1000, eepromCheck);
 
   if (eepromCheck == 100) {
-    if (DEBUG) {Serial.println(F("eeprom check indicates values are all saved, reading from eeprom"));}
+    if (DEBUG) {Serial.print(F("DEBUG,eeprom check indicates values are all saved, reading from eeprom\r\n"));}
     // get first 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       EEPROM.get(i, toySpecialOption[i]);
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       EEPROM.get(i + 100, turnOffState[i]);
     }
   
@@ -30,7 +30,7 @@ void Config::init() {
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       EEPROM.get(i + 300, maxOutputTime[i]);
     }
 
@@ -54,22 +54,22 @@ void Config::init() {
 
 void Config::saveConfig() {
     // get first 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       EEPROM.write(i, toySpecialOption[i]);
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       EEPROM.write(i + 100, turnOffState[i]);
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       EEPROM.write(i + 200, maxOutputState[i]);
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       EEPROM.write(i + 300, maxOutputTime[i]);
     }
   
@@ -93,125 +93,126 @@ void Config::saveConfig() {
 void Config::updateConfigFromSerial() {
 
     // get first 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       toySpecialOption[i] = blockRead();
       if (done == true) {
-        Serial.println(F("FAILED,error reading toySpecialOption"));
+        Serial.print(F("CONFIG FAILED,error reading toySpecialOption\r\n"));
         return;
       }
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       turnOffState[i] = blockRead();
       if (done == true) {
-        Serial.println(F("FAILED,error reading turnOffState"));
+        Serial.print(F("CONFIG FAILED,error reading turnOffState\r\n"));
         return;
       }
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       maxOutputState[i] = blockRead();
       if (done == true) {
-        Serial.println(F("FAILED,error reading maxOutputState"));
+        Serial.print(F("CONFIG FAILED,error reading maxOutputState\r\n"));
         return;
       }
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       maxOutputTime[i] = blockRead();
       if (done == true) {
-        Serial.println(F("FAILED,error reading maxOutputTime"));
+        Serial.print(F("CONFIG FAILED,error reading maxOutputTime\r\n"));
         return;
       }
     }
 
     plungerMax = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.println(F("FAILED,error reading plungerMax"));
+      Serial.print(F("CONFIG FAILED,error reading plungerMax\r\n"));
       return;
     }
     plungerMin = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.println(F("FAILED,error reading plungerMin"));
+      Serial.print(F("CONFIG FAILED,error reading plungerMin\r\n"));
       return;
     }
     plungerMid = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.println(F("FAILED,error reading plungerMid"));
+      Serial.print(F("CONFIG FAILED,error reading plungerMid\r\n"));
       return;
     }
     for (int i = 0; i < 4; i++) {
       solenoidButtonMap[i] = blockRead();
       if (done == true) {
-        Serial.println(F("FAILED,error reading solenoidButtonMap"));
+        Serial.print(F("CONFIG FAILED,error reading solenoidButtonMap\r\n"));
         return;
       }
     }
     for (int i = 0; i < 4; i++) {
       solenoidOutputMap[i] = blockRead();
       if (done == true) {
-        Serial.println(F("FAILED,error reading solenoidOutputMap"));
+        Serial.print(F("CONFIG FAILED,error reading solenoidOutputMap\r\n"));
         return;
       }
     }
 
     orientation = blockRead();
     if (done == true) {
-      Serial.println(F("FAILED,error reading orientation"));
+      Serial.print(F("CONFIG FAILED,error reading orientation\r\n"));
       return;
     }
 
     accelerometer = blockRead();
     if (done == true) {
-      Serial.println(F("FAILED,error reading accelerometer"));
+      Serial.print(F("CONFIG FAILED,error reading accelerometer\r\n"));
       return;
     }
     
-    Serial.println(F("SUCCESS"));
+    Serial.print(F("CONFIG SUCCESS\r\n"));
 }
 
 void Config::setPlunger() {
     plungerMax = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.println(F("FAILED,error reading plungerMax"));
+      Serial.print(F("CONFIG FAILED,error reading plungerMax\r\n"));
       return;
     }
     plungerMin = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.println(F("FAILED,error reading plungerMin"));
+      Serial.print(F("CONFIG FAILED,error reading plungerMin\r\n"));
       return;
     }
     plungerMid = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.println(F("FAILED,error reading plungerMid"));
+      Serial.print(F("CONFIG FAILED,error reading plungerMid\r\n"));
       return;
     }
 }
 
 void Config::sendConfig() {
     // get first 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    Serial.print(F("CONFIG,"));
+    for (int i = 0; i < 63; i++) {
       Serial.print(toySpecialOption[i]);
       Serial.print(F(","));
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       Serial.print(turnOffState[i]);
       Serial.print(F(","));
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       Serial.print(maxOutputState[i]);
       Serial.print(F(","));
     }
   
     // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
+    for (int i = 0; i < 63; i++) {
       Serial.print(maxOutputTime[i]);
       Serial.print(F(","));
     }
@@ -237,7 +238,7 @@ void Config::sendConfig() {
     Serial.print(accelerometer);
     Serial.print(F(","));
     
-    Serial.println(F("END OF DATA"));
+    Serial.print(F("END OF DATA\r\n"));
 }
 
 byte Config::blockRead() {

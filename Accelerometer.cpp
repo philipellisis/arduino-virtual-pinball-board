@@ -16,7 +16,7 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
   _joystick->setYAxisRange(-1500, 1500);
   byte count = 0;
   while (!mpu.begin()) {
-    if (DEBUG) {Serial.println(F("Failed to find MPU6050 chip"));}
+    if (DEBUG) {Serial.print(F("DEBUG,Failed to find MPU6050 chip\r\n"));}
     delay(1000);
     count++;
     if (count > 5) {
@@ -35,7 +35,7 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
 
   //assign accelerometer
   mpu_accel = mpu.getAccelerometerSensor();
-  if (DEBUG) {Serial.println(F("MPU6050 Found!"));}
+  if (DEBUG) {Serial.print(F("DEBUG,MPU6050 Found!\r\n"));}
 }
 
 void Accelerometer::accelerometerRead() {
@@ -57,16 +57,19 @@ void Accelerometer::accelerometerRead() {
   }
   _joystick->setXAxis(xValue);
   _joystick->setYAxis(yValue);
-  if (DEBUG) {Serial.print(F("AccelX:"));}
+  if (DEBUG) {Serial.print(F("DEBUG,AccelX:"));}
   if (DEBUG) {Serial.print(xValue);}
   if (DEBUG) {Serial.print(F(","));}
   if (DEBUG) {Serial.print(F("AccelY:"));}
-  if (DEBUG) {Serial.println(yValue);}
+  if (DEBUG) {Serial.print(yValue);}
+  if (DEBUG) {Serial.print(F("\r\n"));}
 }
 
 void Accelerometer::sendAccelerometerState() {
+  if (DEBUG) {Serial.print(F("ACCEL,"));}
   Serial.print(xValue);
-  Serial.print(",");
-  Serial.println(yValue);
+  Serial.print(F(","));
+  Serial.print(yValue);
+  Serial.print(F("\r\n"));
   
 }

@@ -12,7 +12,7 @@ Outputs::Outputs() {
     pinMode(outputList[index], OUTPUT);
    }
   
-  if (DEBUG) {Serial.println(F("Communication: pins initialized"));}
+  if (DEBUG) {Serial.print(F("DEBUG,Communication: pins initialized\r\n"));}
 }
 
 void Outputs::init(Config* config) {
@@ -37,7 +37,7 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
   if (_config->nightMode == true && bitRead(_config->toySpecialOption[outputId],0) == 1) {
     outputValue = 0;
   }
-  if (DEBUG) {Serial.print(F("output ")); Serial.print(outputId); Serial.print(F(" set to ")); Serial.println(outputValue);}
+  if (DEBUG) {Serial.print(F("DEBUG,output ")); Serial.print(outputId); Serial.print(F(" set to ")); Serial.print(outputValue); Serial.print("\r\n");}
   outputValues[outputId] = outputValue;
   if (outputValue == 0) {
     timeTurnedOn[outputId] = 0;
@@ -73,9 +73,9 @@ void Outputs::checkResetOutputs() {
       resetOutputNumber = 0;
     }
     if (outputValues[resetOutputNumber] > _config->turnOffState[resetOutputNumber] && _config->maxOutputTime[resetOutputNumber] > 0) {
-      if (DEBUG) {Serial.print(F("Output is turned on, checking if it has been on for too long "));Serial.println(resetOutputNumber);}
+      if (DEBUG) {Serial.print(F("DEBUG,Output is turned on, checking if it has been on for too long "));Serial.print(resetOutputNumber); Serial.print(F("\r\n"));}
       if (timeTurnedOn[resetOutputNumber] == _config->maxOutputTime[resetOutputNumber]) {
-        if (DEBUG) {Serial.println(F("Output has reached max time, turning off"));}
+        if (DEBUG) {Serial.print(F("DEBUG,Output has reached max time, turning off\r\n"));}
         updateOutput(resetOutputNumber, _config->turnOffState[resetOutputNumber]);
       } else {
         timeTurnedOn[resetOutputNumber]++;
@@ -98,9 +98,11 @@ void Outputs::updateOutputActual(byte outputId, int outputValueStart, int output
 }
 
 void Outputs::sendOutputState() {
+  Serial.print(F("OUTPUTS,"));
   for (int i = 0; i < 62; i++) {
     Serial.print(outputValues[i]);
     Serial.print(F(","));
   }
-  Serial.println("");
+  Serial.print(outputValues[62]);
+  Serial.print(F("\r\n"));
 }
