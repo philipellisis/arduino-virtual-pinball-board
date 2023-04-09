@@ -56,5 +56,5 @@ void loop() {
   if (DEBUG) {Serial.print(F("DEBUG,Time taken by the task: ")); Serial.print((t2-t1)); Serial.print(F(" milliseconds\r\n"));}
 
   //Serial.println("arduino is running");
-  delay(100);
+  //delay(100);
 }

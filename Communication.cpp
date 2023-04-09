@@ -87,7 +87,7 @@ void Communication::sendAdmin() {
     }
     if (admin == SET_PLUNGER) {
       _config->setPlunger();
-      admin = 0;
+      admin = 3;
     }
     if (admin == OFF) {
       admin = 0;
@@ -96,7 +96,7 @@ void Communication::sendAdmin() {
       Serial.print(F("DEBUG,CSD Board Connected\r\n"));
       admin = 0;
     }
-    delay(100);
+    delay(50);
   }
 }
 

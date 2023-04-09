@@ -20,7 +20,7 @@ void Plunger::init(Joystick_* joystick, Config* config) {
 }
 
 void Plunger::plungerRead() {
-  int sensorValue = analogRead(22);
+  int sensorValue = analogRead(23);
   if (sensorValue <= _config->plungerMid) {
     adjustedValue = sensorValue;
   } else {
@@ -32,6 +32,6 @@ void Plunger::plungerRead() {
 
 void Plunger::sendPlungerState() {
   Serial.print(F("PLUNGER,"));
-  Serial.print(analogRead(22));
+  Serial.print(analogRead(23));
   Serial.print("\r\n");
 }

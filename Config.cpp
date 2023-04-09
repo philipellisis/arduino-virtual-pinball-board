@@ -91,7 +91,7 @@ void Config::saveConfig() {
 }
 
 void Config::updateConfigFromSerial() {
-
+    done = false;
     // get first 62 bank maximum values
     for (int i = 0; i < 63; i++) {
       toySpecialOption[i] = blockRead();
@@ -174,17 +174,21 @@ void Config::updateConfigFromSerial() {
 }
 
 void Config::setPlunger() {
+    done = false;
     plungerMax = (blockRead() << 8) + blockRead();
+    Serial.print(F("DEBUG,plunger max set to")); Serial.print(plungerMax); Serial.print(F("\r\n"));
     if (done == true) {
       Serial.print(F("CONFIG FAILED,error reading plungerMax\r\n"));
       return;
     }
     plungerMin = (blockRead() << 8) + blockRead();
+    Serial.print(F("DEBUG,plunger min set to")); Serial.print(plungerMin); Serial.print(F("\r\n"));
     if (done == true) {
       Serial.print(F("CONFIG FAILED,error reading plungerMin\r\n"));
       return;
     }
     plungerMid = (blockRead() << 8) + blockRead();
+    Serial.print(F("DEBUG,plunger mid set to")); Serial.print(plungerMid); Serial.print(F("\r\n"));
     if (done == true) {
       Serial.print(F("CONFIG FAILED,error reading plungerMid\r\n"));
       return;
@@ -249,6 +253,7 @@ byte Config::blockRead() {
         return Serial.read();
       }
       t2 = millis();
+      delay(50);
     }
     done = true;
     return 0;
