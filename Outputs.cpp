@@ -42,7 +42,7 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
   if (outputValue == 0) {
     timeTurnedOn[outputId] = 0;
   }
-  if (outputId < 16) {
+  if (outputId < 15) {
     if (outputId < 5) {
       analogWrite(outputList[outputId], outputValue);
     } else {

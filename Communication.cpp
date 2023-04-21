@@ -89,6 +89,10 @@ void Communication::sendAdmin() {
       _config->setPlunger();
       admin = 3;
     }
+    if (admin == SAVE_CONFIG) {
+      _config->saveConfig();
+      admin = 0;
+    }
     if (admin == OFF) {
       admin = 0;
     }

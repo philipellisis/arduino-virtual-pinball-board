@@ -39,10 +39,10 @@ void Config::init() {
     plungerMid = readIntFromEEPROM(405);
     
     for (int i = 0; i < 4; i++) {
-      EEPROM.get(i + 406, solenoidButtonMap[i]);
+      EEPROM.get(i + 407, solenoidButtonMap[i]);
     }
     for (int i = 0; i < 4; i++) {
-      EEPROM.get(i + 416, solenoidOutputMap[i]);
+      EEPROM.get(i + 417, solenoidOutputMap[i]);
     }
 
     EEPROM.get(426, orientation);
@@ -78,16 +78,17 @@ void Config::saveConfig() {
     writeIntIntoEEPROM(405, plungerMid);
     
     for (int i = 0; i < 4; i++) {
-      EEPROM.write(i + 406, solenoidButtonMap[i]);
+      EEPROM.write(i + 407, solenoidButtonMap[i]);
     }
     for (int i = 0; i < 4; i++) {
-      EEPROM.write(i + 416, solenoidOutputMap[i]);
+      EEPROM.write(i + 417, solenoidOutputMap[i]);
     }
     
     EEPROM.write(426, orientation);
     EEPROM.write(427, accelerometer);
 
     EEPROM.write(1000, 100);
+    Serial.print(F("RESPONSE,Config saved into EEPROM\r\n"));
 }
 
 void Config::updateConfigFromSerial() {
@@ -96,7 +97,7 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       toySpecialOption[i] = blockRead();
       if (done == true) {
-        Serial.print(F("CONFIG FAILED,error reading toySpecialOption\r\n"));
+        Serial.print(F("RESPONSE,error reading toySpecialOption\r\n"));
         return;
       }
     }
@@ -105,7 +106,7 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       turnOffState[i] = blockRead();
       if (done == true) {
-        Serial.print(F("CONFIG FAILED,error reading turnOffState\r\n"));
+        Serial.print(F("RESPONSE,error reading turnOffState\r\n"));
         return;
       }
     }
@@ -114,7 +115,7 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       maxOutputState[i] = blockRead();
       if (done == true) {
-        Serial.print(F("CONFIG FAILED,error reading maxOutputState\r\n"));
+        Serial.print(F("RESPONSE,error reading maxOutputState\r\n"));
         return;
       }
     }
@@ -123,54 +124,55 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       maxOutputTime[i] = blockRead();
       if (done == true) {
-        Serial.print(F("CONFIG FAILED,error reading maxOutputTime\r\n"));
+        Serial.print(F("RESPONSE,error reading maxOutputTime\r\n"));
         return;
       }
     }
 
     plungerMax = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("CONFIG FAILED,error reading plungerMax\r\n"));
+      Serial.print(F("RESPONSE,error reading plungerMax\r\n"));
       return;
     }
     plungerMin = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("CONFIG FAILED,error reading plungerMin\r\n"));
+      Serial.print(F("RESPONSE,error reading plungerMin\r\n"));
       return;
     }
     plungerMid = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("CONFIG FAILED,error reading plungerMid\r\n"));
+      Serial.print(F("RESPONSE,error reading plungerMid\r\n"));
       return;
     }
     for (int i = 0; i < 4; i++) {
       solenoidButtonMap[i] = blockRead();
       if (done == true) {
-        Serial.print(F("CONFIG FAILED,error reading solenoidButtonMap\r\n"));
+        Serial.print(F("RESPONSE,error reading solenoidButtonMap\r\n"));
         return;
       }
     }
     for (int i = 0; i < 4; i++) {
       solenoidOutputMap[i] = blockRead();
       if (done == true) {
-        Serial.print(F("CONFIG FAILED,error reading solenoidOutputMap\r\n"));
+        Serial.print(F("RESPONSE,error reading solenoidOutputMap\r\n"));
         return;
       }
     }
 
     orientation = blockRead();
     if (done == true) {
-      Serial.print(F("CONFIG FAILED,error reading orientation\r\n"));
+      Serial.print(F("RESPONSE,error reading orientation\r\n"));
       return;
     }
 
     accelerometer = blockRead();
+    Serial.print(F("DEBUG,Config: setting accelerometer"));Serial.print(accelerometer); Serial.print(F("\r\n"));
     if (done == true) {
-      Serial.print(F("CONFIG FAILED,error reading accelerometer\r\n"));
+      Serial.print(F("RESPONSE,error reading accelerometer\r\n"));
       return;
     }
     
-    Serial.print(F("CONFIG SUCCESS\r\n"));
+    Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
 }
 
 void Config::setPlunger() {
@@ -178,19 +180,19 @@ void Config::setPlunger() {
     plungerMax = (blockRead() << 8) + blockRead();
     Serial.print(F("DEBUG,plunger max set to")); Serial.print(plungerMax); Serial.print(F("\r\n"));
     if (done == true) {
-      Serial.print(F("CONFIG FAILED,error reading plungerMax\r\n"));
+      Serial.print(F("RESPONSE,error reading plungerMax\r\n"));
       return;
     }
     plungerMin = (blockRead() << 8) + blockRead();
     Serial.print(F("DEBUG,plunger min set to")); Serial.print(plungerMin); Serial.print(F("\r\n"));
     if (done == true) {
-      Serial.print(F("CONFIG FAILED,error reading plungerMin\r\n"));
+      Serial.print(F("RESPONSE,error reading plungerMin\r\n"));
       return;
     }
     plungerMid = (blockRead() << 8) + blockRead();
     Serial.print(F("DEBUG,plunger mid set to")); Serial.print(plungerMid); Serial.print(F("\r\n"));
     if (done == true) {
-      Serial.print(F("CONFIG FAILED,error reading plungerMid\r\n"));
+      Serial.print(F("RESPONSE,error reading plungerMid\r\n"));
       return;
     }
 }

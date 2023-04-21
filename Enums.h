@@ -10,7 +10,7 @@ enum admin_type {
     SET_PLUNGER = 7,
     OFF = 255,
     CONNECT = 8,
-    
+    SAVE_CONFIG = 9,
 };
 
 enum eeprom {
