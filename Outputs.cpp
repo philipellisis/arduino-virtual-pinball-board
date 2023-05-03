@@ -90,10 +90,10 @@ void Outputs::updateOutputActual(byte outputId, int outputValueStart, int output
     pwm.setPWM(outputId, outputValueStart, outputValueFinish);
   }
   else if (outputId >= 16 && outputId < 32) {
-    pwm1.setPWM(outputId, outputValueStart, outputValueFinish);
+    pwm1.setPWM(outputId - 16, outputValueStart, outputValueFinish);
   }
   else if (outputId >= 32 && outputId < 48) {
-    pwm2.setPWM(outputId, outputValueStart, outputValueFinish);
+    pwm2.setPWM(outputId - 32, outputValueStart, outputValueFinish);
   }
 }
 
