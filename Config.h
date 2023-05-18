@@ -19,6 +19,7 @@ class Config {
     byte solenoidButtonMap[4] = {1,2,3,4};
     byte solenoidOutputMap[4] = {0,0,1,1};
     byte orientation = 0;
+    byte accelerometerEprom = 0;
     byte accelerometer = 0;
     
 

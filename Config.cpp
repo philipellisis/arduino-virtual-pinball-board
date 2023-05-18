@@ -47,6 +47,7 @@ void Config::init() {
 
     EEPROM.get(426, orientation);
     EEPROM.get(427, accelerometer);
+    accelerometerEprom = accelerometer;
   }
   
   

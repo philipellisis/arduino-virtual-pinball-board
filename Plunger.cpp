@@ -6,7 +6,7 @@
 
 
 Plunger::Plunger() {
-  plungerScaleFactor = float(_config->plungerMid) / float(_config->plungerMax);
+  
 
   pinMode(23, INPUT_PULLUP); //plunger
   if (DEBUG) {Serial.print(F("DEBUG,plunger: pins initialized\r\n"));}
@@ -14,6 +14,7 @@ Plunger::Plunger() {
 
 void Plunger::init(Joystick_* joystick, Config* config) {
   _config = config;
+  plungerScaleFactor = (float)_config->plungerMid / (float)_config->plungerMax;
   _joystick = joystick;
   _joystick->setZAxisRange(_config->plungerMin, _config->plungerMax);
   if (DEBUG) {Serial.print(F("DEBUG,plunger: initialized joystick\r\n"));}
@@ -26,7 +27,7 @@ void Plunger::plungerRead() {
   } else {
     adjustedValue = (sensorValue-_config->plungerMid) * plungerScaleFactor + _config->plungerMid;
   }
-  if (DEBUG) {Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
+  if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
   _joystick->setZAxis(adjustedValue);
 }
 

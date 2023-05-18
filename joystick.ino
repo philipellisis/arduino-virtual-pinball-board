@@ -48,7 +48,7 @@ void loop() {
   long int t1 = millis();
   buttons.readInputs();
   plunger.plungerRead();
-  if (config.accelerometer > 0) {
+  if (config.accelerometerEprom > 0) {
     accel.accelerometerRead();
   }
   comm.communicate();
