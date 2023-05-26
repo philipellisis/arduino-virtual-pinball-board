@@ -31,6 +31,21 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
 
   //assign accelerometer
   mpu_accel = mpu.getAccelerometerSensor();
+
+  sensors_event_t a;
+  while (count < 10) {
+    mpu_accel->getEvent(&a);
+    xValue = floor((a.acceleration.x - xValueOffset)*100);
+    yValue = floor((a.acceleration.y - yValueOffset)*100);
+    xValueOffset += a.acceleration.x;
+    yValueOffset += a.acceleration.y;
+    count++;
+  }
+  xValueOffset = xValueOffset/10;
+  yValueOffset = yValueOffset/10;
+
+
+  
   if (DEBUG) {Serial.print(F("DEBUG,MPU6050 Found!\r\n"));}
 }
 
@@ -44,13 +59,7 @@ void Accelerometer::accelerometerRead() {
 
   xValue = floor((a.acceleration.x - xValueOffset)*100);
   yValue = floor((a.acceleration.y - yValueOffset)*100);
-  //}
-  if (xValueOffset == 0){
-    xValueOffset = a.acceleration.x;
-  }
-  if (yValueOffset == 0){
-    yValueOffset = a.acceleration.y;
-  }
+
   _joystick->setXAxis(xValue);
   _joystick->setYAxis(yValue);
   if (DEBUG) {Serial.print(F("DEBUG,AccelX:"));}
