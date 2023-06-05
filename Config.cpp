@@ -48,6 +48,12 @@ void Config::init() {
     EEPROM.get(426, orientation);
     EEPROM.get(427, accelerometer);
     accelerometerEprom = accelerometer;
+
+    accelerometerMultiplier = readIntFromEEPROM(450);
+    accelerometerDeadZone = readIntFromEEPROM(452);
+  } else {
+    //save default config in case it's never been done before
+    saveConfig();
   }
   
   
@@ -87,6 +93,9 @@ void Config::saveConfig() {
     
     EEPROM.write(426, orientation);
     EEPROM.write(427, accelerometer);
+
+    writeIntIntoEEPROM(450, accelerometerMultiplier);
+    writeIntIntoEEPROM(452, accelerometerDeadZone);
 
     EEPROM.write(1000, 100);
     Serial.print(F("RESPONSE,Config saved into EEPROM\r\n"));
@@ -172,6 +181,17 @@ void Config::updateConfigFromSerial() {
       Serial.print(F("RESPONSE,error reading accelerometer\r\n"));
       return;
     }
+
+    accelerometerMultiplier = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.print(F("RESPONSE,error reading accelerometerMultiplier\r\n"));
+      return;
+    }
+    accelerometerDeadZone = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.print(F("RESPONSE,error reading accelerometerDeadZone\r\n"));
+      return;
+    }
     
     Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
 }
@@ -196,6 +216,33 @@ void Config::setPlunger() {
       Serial.print(F("RESPONSE,error reading plungerMid\r\n"));
       return;
     }
+    writeIntIntoEEPROM(401, plungerMax);
+    writeIntIntoEEPROM(403, plungerMin);
+    writeIntIntoEEPROM(405, plungerMid);
+    Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
+}
+
+void Config::setAccelerometer() {
+    done = false;
+    accelerometerMultiplier = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.print(F("RESPONSE,error reading accelerometerMultiplier\r\n"));
+      return;
+    }
+    accelerometerDeadZone = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      Serial.print(F("RESPONSE,error reading accelerometerDeadZone\r\n"));
+      return;
+    }
+    orientation = blockRead();
+    if (done == true) {
+      Serial.print(F("RESPONSE,error reading orientation\r\n"));
+      return;
+    }
+    writeIntIntoEEPROM(450, accelerometerMultiplier);
+    writeIntIntoEEPROM(452, accelerometerDeadZone);
+    EEPROM.write(426, orientation);
+    Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
 }
 
 void Config::sendConfig() {
@@ -243,6 +290,10 @@ void Config::sendConfig() {
     Serial.print(orientation);
     Serial.print(F(","));
     Serial.print(accelerometer);
+    Serial.print(F(","));
+    Serial.print(accelerometerMultiplier);
+    Serial.print(F(","));
+    Serial.print(accelerometerDeadZone);
     Serial.print(F(","));
     
     Serial.print(F("END OF DATA\r\n"));

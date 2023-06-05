@@ -11,6 +11,7 @@ enum admin_type {
     OFF = 255,
     CONNECT = 8,
     SAVE_CONFIG = 9,
+    SET_ACCEL = 10,
 };
 
 enum eeprom {

@@ -10,17 +10,19 @@ class Config {
     void init();
     //first byte is for noisy toy, other 7 bits can be used for other things
     byte toySpecialOption[63] = {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte turnOffState[63] = {0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte maxOutputState[63] = {0,128,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte maxOutputTime[63] = {2,2,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    byte turnOffState[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    byte maxOutputState[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    byte maxOutputTime[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     int plungerMax = 634;
     int plungerMin = 10;
     int plungerMid = 100;
-    byte solenoidButtonMap[4] = {1,2,3,4};
-    byte solenoidOutputMap[4] = {0,0,1,1};
+    byte solenoidButtonMap[4] = {0,0,0,0};
+    byte solenoidOutputMap[4] = {0,0,0,0};
     byte orientation = 0;
     byte accelerometerEprom = 0;
-    byte accelerometer = 0;
+    byte accelerometer = 1;
+    int accelerometerMultiplier = 100;
+    int accelerometerDeadZone = 10;
     
 
     bool done = false;
@@ -28,6 +30,7 @@ class Config {
     void updateConfigFromSerial();
     void sendConfig();
     void setPlunger();
+    void setAccelerometer();
     
   private:
     bool DEBUG = false;

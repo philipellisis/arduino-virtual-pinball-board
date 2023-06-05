@@ -35,8 +35,6 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
   sensors_event_t a;
   while (count < 10) {
     mpu_accel->getEvent(&a);
-    xValue = floor((a.acceleration.x - xValueOffset)*100);
-    yValue = floor((a.acceleration.y - yValueOffset)*100);
     xValueOffset += a.acceleration.x;
     yValueOffset += a.acceleration.y;
     count++;
@@ -57,9 +55,14 @@ void Accelerometer::accelerometerRead() {
   sensors_event_t a;
   mpu_accel->getEvent(&a);
 
-  xValue = floor((a.acceleration.x - xValueOffset)*100);
-  yValue = floor((a.acceleration.y - yValueOffset)*100);
-
+  xValue = floor((a.acceleration.x - xValueOffset)*_config->accelerometerMultiplier);
+  yValue = floor((a.acceleration.y - yValueOffset)*_config->accelerometerMultiplier);
+  if (abs(xValue) < _config->accelerometerDeadZone) {
+    xValue = 0;
+  }
+  if (abs(yValue) < _config->accelerometerDeadZone) {
+    yValue = 0;
+  }
   _joystick->setXAxis(xValue);
   _joystick->setYAxis(yValue);
   if (DEBUG) {Serial.print(F("DEBUG,AccelX:"));}
@@ -71,7 +74,13 @@ void Accelerometer::accelerometerRead() {
 }
 
 void Accelerometer::sendAccelerometerState() {
+  sensors_event_t a;
+  mpu_accel->getEvent(&a);
   Serial.print(F("ACCEL,"));
+  Serial.print((a.acceleration.x - xValueOffset));
+  Serial.print(F(","));
+  Serial.print((a.acceleration.y - yValueOffset));
+  Serial.print(F(","));
   Serial.print(xValue);
   Serial.print(F(","));
   Serial.print(yValue);
