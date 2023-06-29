@@ -7,13 +7,13 @@ Config::Config() {
 }
 
 void Config::init() {
-  if (DEBUG) {Serial.print(F("DEBUG,Config: initializing\r\n"));}
+  //if (DEBUG) {Serial.print(F("DEBUG,Config: initializing\r\n"));}
 
   byte eepromCheck;
   EEPROM.get(1000, eepromCheck);
 
   if (eepromCheck == 100) {
-    if (DEBUG) {Serial.print(F("DEBUG,eeprom check indicates values are all saved, reading from eeprom\r\n"));}
+    //if (DEBUG) {Serial.print(F("DEBUG,eeprom check indicates values are all saved, reading from eeprom\r\n"));}
     // get first 62 bank maximum values
     for (int i = 0; i < 63; i++) {
       EEPROM.get(i, toySpecialOption[i]);
@@ -107,7 +107,7 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       toySpecialOption[i] = blockRead();
       if (done == true) {
-        Serial.print(F("RESPONSE,error reading toySpecialOption\r\n"));
+        writeConfigMessage("toySpecialOption");
         return;
       }
     }
@@ -116,7 +116,7 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       turnOffState[i] = blockRead();
       if (done == true) {
-        Serial.print(F("RESPONSE,error reading turnOffState\r\n"));
+        writeConfigMessage("turnOffState");
         return;
       }
     }
@@ -125,7 +125,7 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       maxOutputState[i] = blockRead();
       if (done == true) {
-        Serial.print(F("RESPONSE,error reading maxOutputState\r\n"));
+        writeConfigMessage("maxOutputState");
         return;
       }
     }
@@ -134,62 +134,62 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       maxOutputTime[i] = blockRead();
       if (done == true) {
-        Serial.print(F("RESPONSE,error reading maxOutputTime\r\n"));
+        writeConfigMessage("maxOutputTime");
         return;
       }
     }
 
     plungerMax = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading plungerMax\r\n"));
+      writeConfigMessage("plungerMax");
       return;
     }
     plungerMin = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading plungerMin\r\n"));
+      writeConfigMessage("plungerMin");
       return;
     }
     plungerMid = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading plungerMid\r\n"));
+      writeConfigMessage("plungerMid");
       return;
     }
     for (int i = 0; i < 4; i++) {
       solenoidButtonMap[i] = blockRead();
       if (done == true) {
-        Serial.print(F("RESPONSE,error reading solenoidButtonMap\r\n"));
+        writeConfigMessage("solenoidButtonMap");
         return;
       }
     }
     for (int i = 0; i < 4; i++) {
       solenoidOutputMap[i] = blockRead();
       if (done == true) {
-        Serial.print(F("RESPONSE,error reading solenoidOutputMap\r\n"));
+        writeConfigMessage("solenoidOutputMap");
         return;
       }
     }
 
     orientation = blockRead();
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading orientation\r\n"));
+      writeConfigMessage("orientation");
       return;
     }
 
     accelerometer = blockRead();
     Serial.print(F("DEBUG,Config: setting accelerometer"));Serial.print(accelerometer); Serial.print(F("\r\n"));
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading accelerometer\r\n"));
+      writeConfigMessage("accelerometer");
       return;
     }
 
     accelerometerMultiplier = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading accelerometerMultiplier\r\n"));
+      writeConfigMessage("accelerometerMultiplier");
       return;
     }
     accelerometerDeadZone = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading accelerometerDeadZone\r\n"));
+      writeConfigMessage("accelerometerDeadZone");
       return;
     }
     
@@ -201,19 +201,19 @@ void Config::setPlunger() {
     plungerMax = (blockRead() << 8) + blockRead();
     Serial.print(F("DEBUG,plunger max set to")); Serial.print(plungerMax); Serial.print(F("\r\n"));
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading plungerMax\r\n"));
+      writeConfigMessage("plungerMax");
       return;
     }
     plungerMin = (blockRead() << 8) + blockRead();
     Serial.print(F("DEBUG,plunger min set to")); Serial.print(plungerMin); Serial.print(F("\r\n"));
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading plungerMin\r\n"));
+      writeConfigMessage("plungerMin");
       return;
     }
     plungerMid = (blockRead() << 8) + blockRead();
     Serial.print(F("DEBUG,plunger mid set to")); Serial.print(plungerMid); Serial.print(F("\r\n"));
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading plungerMid\r\n"));
+      writeConfigMessage("plungerMid");
       return;
     }
     writeIntIntoEEPROM(401, plungerMax);
@@ -226,23 +226,29 @@ void Config::setAccelerometer() {
     done = false;
     accelerometerMultiplier = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading accelerometerMultiplier\r\n"));
+      writeConfigMessage("accelerometerMultiplier");
       return;
     }
     accelerometerDeadZone = (blockRead() << 8) + blockRead();
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading accelerometerDeadZone\r\n"));
+      writeConfigMessage("accelerometerDeadZone");
       return;
     }
     orientation = blockRead();
     if (done == true) {
-      Serial.print(F("RESPONSE,error reading orientation\r\n"));
+      writeConfigMessage("orientation");
       return;
     }
     writeIntIntoEEPROM(450, accelerometerMultiplier);
     writeIntIntoEEPROM(452, accelerometerDeadZone);
     EEPROM.write(426, orientation);
     Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
+}
+
+void Config::writeConfigMessage(char *s) {
+  Serial.print(F("RESPONSE,error reading "));
+  Serial.print(s);
+  Serial.print(F("\r\n"));
 }
 
 void Config::sendConfig() {

@@ -37,6 +37,7 @@ class Config {
     byte Config::blockRead();
     void writeIntIntoEEPROM(int address, int number);
     int readIntFromEEPROM(int address);
+    void writeConfigMessage(char *s);
     
     
 };
