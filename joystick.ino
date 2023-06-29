@@ -26,7 +26,7 @@ void setup() {
 
   Serial.begin(9600);
   delay(1000);
-  if (DEBUG) {Serial.print(F("DEBUG,Starting up arduino\r\n"));}
+  //if (DEBUG) {Serial.print(F("DEBUG,Starting up arduino\r\n"));}
   delay(1000);
   // Initialize Joystick Library
   config.init();
@@ -45,15 +45,15 @@ void setup() {
 
 
 void loop() {
-  long int t1 = millis();
+  //long int t1 = millis();
   buttons.readInputs();
   plunger.plungerRead();
   if (config.accelerometerEprom > 0) {
     accel.accelerometerRead();
   }
   comm.communicate();
-  long int t2 = millis();
-  if (DEBUG) {Serial.print(F("DEBUG,Time taken by the task: ")); Serial.print((t2-t1)); Serial.print(F(" milliseconds\r\n"));}
+  //long int t2 = millis();
+  //if (DEBUG) {Serial.print(F("DEBUG,Time taken by the task: ")); Serial.print((t2-t1)); Serial.print(F(" milliseconds\r\n"));}
 
   //Serial.println("arduino is running");
   //delay(100);

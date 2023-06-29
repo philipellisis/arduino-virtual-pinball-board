@@ -28,6 +28,10 @@ void Outputs::init(Config* config) {
   pwm2.setPWMFreq(1600);  // This is the maximum PWM frequency
   Wire.setClock(400000);
 
+  for (int i = 0; i < 62; i++) {
+    updateOutput(i, 0);
+  }
+
 }
 
 void Outputs::updateOutput(byte outputId, byte outputValue) {
@@ -53,6 +57,10 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
       }
     }
   } else {
+    // if the output is the button board output, then invert the value
+    if (outputId < 31) {
+      outputValue = 255 - outputValue;
+    }
     if (outputValue == 255) {
       updateOutputActual(outputId - 15, 4096, 0);
     } else if (outputValue == 0) {
