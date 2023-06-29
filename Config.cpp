@@ -107,7 +107,7 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       toySpecialOption[i] = blockRead();
       if (done == true) {
-        writeConfigMessage("toySpecialOption");
+        writeConfigMessage(1);
         return;
       }
     }
@@ -116,7 +116,7 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       turnOffState[i] = blockRead();
       if (done == true) {
-        writeConfigMessage("turnOffState");
+        writeConfigMessage(2);
         return;
       }
     }
@@ -125,7 +125,7 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       maxOutputState[i] = blockRead();
       if (done == true) {
-        writeConfigMessage("maxOutputState");
+        writeConfigMessage(3);
         return;
       }
     }
@@ -134,62 +134,62 @@ void Config::updateConfigFromSerial() {
     for (int i = 0; i < 63; i++) {
       maxOutputTime[i] = blockRead();
       if (done == true) {
-        writeConfigMessage("maxOutputTime");
+        writeConfigMessage(4);
         return;
       }
     }
 
     plungerMax = (blockRead() << 8) + blockRead();
     if (done == true) {
-      writeConfigMessage("plungerMax");
+      writeConfigMessage(5);
       return;
     }
     plungerMin = (blockRead() << 8) + blockRead();
     if (done == true) {
-      writeConfigMessage("plungerMin");
+      writeConfigMessage(6);
       return;
     }
     plungerMid = (blockRead() << 8) + blockRead();
     if (done == true) {
-      writeConfigMessage("plungerMid");
+      writeConfigMessage(7);
       return;
     }
     for (int i = 0; i < 4; i++) {
       solenoidButtonMap[i] = blockRead();
       if (done == true) {
-        writeConfigMessage("solenoidButtonMap");
+        writeConfigMessage(8);
         return;
       }
     }
     for (int i = 0; i < 4; i++) {
       solenoidOutputMap[i] = blockRead();
       if (done == true) {
-        writeConfigMessage("solenoidOutputMap");
+        writeConfigMessage(9);
         return;
       }
     }
 
     orientation = blockRead();
     if (done == true) {
-      writeConfigMessage("orientation");
+      writeConfigMessage(10);
       return;
     }
 
     accelerometer = blockRead();
     Serial.print(F("DEBUG,Config: setting accelerometer"));Serial.print(accelerometer); Serial.print(F("\r\n"));
     if (done == true) {
-      writeConfigMessage("accelerometer");
+      writeConfigMessage(11);
       return;
     }
 
     accelerometerMultiplier = (blockRead() << 8) + blockRead();
     if (done == true) {
-      writeConfigMessage("accelerometerMultiplier");
+      writeConfigMessage(12);
       return;
     }
     accelerometerDeadZone = (blockRead() << 8) + blockRead();
     if (done == true) {
-      writeConfigMessage("accelerometerDeadZone");
+      writeConfigMessage(13);
       return;
     }
     
@@ -201,19 +201,19 @@ void Config::setPlunger() {
     plungerMax = (blockRead() << 8) + blockRead();
     Serial.print(F("DEBUG,plunger max set to")); Serial.print(plungerMax); Serial.print(F("\r\n"));
     if (done == true) {
-      writeConfigMessage("plungerMax");
+      writeConfigMessage(14);
       return;
     }
     plungerMin = (blockRead() << 8) + blockRead();
     Serial.print(F("DEBUG,plunger min set to")); Serial.print(plungerMin); Serial.print(F("\r\n"));
     if (done == true) {
-      writeConfigMessage("plungerMin");
+      writeConfigMessage(15);
       return;
     }
     plungerMid = (blockRead() << 8) + blockRead();
     Serial.print(F("DEBUG,plunger mid set to")); Serial.print(plungerMid); Serial.print(F("\r\n"));
     if (done == true) {
-      writeConfigMessage("plungerMid");
+      writeConfigMessage(16);
       return;
     }
     writeIntIntoEEPROM(401, plungerMax);
@@ -226,17 +226,17 @@ void Config::setAccelerometer() {
     done = false;
     accelerometerMultiplier = (blockRead() << 8) + blockRead();
     if (done == true) {
-      writeConfigMessage("accelerometerMultiplier");
+      writeConfigMessage(17);
       return;
     }
     accelerometerDeadZone = (blockRead() << 8) + blockRead();
     if (done == true) {
-      writeConfigMessage("accelerometerDeadZone");
+      writeConfigMessage(18);
       return;
     }
     orientation = blockRead();
     if (done == true) {
-      writeConfigMessage("orientation");
+      writeConfigMessage(19);
       return;
     }
     writeIntIntoEEPROM(450, accelerometerMultiplier);
@@ -245,9 +245,9 @@ void Config::setAccelerometer() {
     Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
 }
 
-void Config::writeConfigMessage(char *s) {
+void Config::writeConfigMessage(int errorCode) {
   Serial.print(F("RESPONSE,error reading "));
-  Serial.print(s);
+  Serial.print(errorCode);
   Serial.print(F("\r\n"));
 }
 
