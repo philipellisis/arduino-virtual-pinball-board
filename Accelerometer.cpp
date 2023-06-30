@@ -63,6 +63,17 @@ void Accelerometer::accelerometerRead() {
   if (abs(yValue) < _config->accelerometerDeadZone) {
     yValue = 0;
   }
+  int temp = xValue;
+  if (_config->orientation == 1) {
+    xValue = -yValue;
+    yValue = -temp;
+  } else if (_config->orientation == 2) {
+    xValue = -xValue;
+    yValue = -yValue;
+  } else if (_config->orientation == 3) {
+    xValue = yValue;
+    yValue = -temp;
+  }
   _joystick->setXAxis(xValue);
   _joystick->setYAxis(yValue);
   //if (DEBUG) {Serial.print(F("DEBUG,AccelX:"));}
