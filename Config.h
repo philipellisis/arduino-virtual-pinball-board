@@ -23,6 +23,7 @@ class Config {
     byte accelerometer = 1;
     int accelerometerMultiplier = 100;
     int accelerometerDeadZone = 10;
+    byte plungerButtonPush = 0;
     
 
     bool done = false;

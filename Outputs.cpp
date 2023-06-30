@@ -43,8 +43,8 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
   }
   //if (DEBUG) {Serial.print(F("DEBUG,output ")); Serial.print(outputId); Serial.print(F(" set to ")); Serial.print(outputValue); Serial.print("\r\n");}
   outputValues[outputId] = outputValue;
-  if (outputValue == 0) {
-    timeTurnedOn[outputId] = 0;
+  if (outputValue != 0) {
+    timeTurnedOn[outputId] = millis();
   }
   if (outputId < 15) {
     if (outputId < 5) {
@@ -74,6 +74,7 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
 }
 
 void Outputs::checkResetOutputs() {
+  long int t1 = millis();
   for(int i = 0; i < 5; i++) {
     if (resetOutputNumber < 62) {
       resetOutputNumber++;
@@ -82,13 +83,10 @@ void Outputs::checkResetOutputs() {
     }
     if (outputValues[resetOutputNumber] > _config->turnOffState[resetOutputNumber] && _config->maxOutputTime[resetOutputNumber] > 0) {
       //if (DEBUG) {Serial.print(F("DEBUG,Output is turned on, checking if it has been on for too long "));Serial.print(resetOutputNumber); Serial.print(F("\r\n"));}
-      if (timeTurnedOn[resetOutputNumber] == _config->maxOutputTime[resetOutputNumber]) {
+      if (t1 - timeTurnedOn[resetOutputNumber] >= _config->maxOutputTime[resetOutputNumber] * 100) {
         //if (DEBUG) {Serial.print(F("DEBUG,Output has reached max time, turning off\r\n"));}
         updateOutput(resetOutputNumber, _config->turnOffState[resetOutputNumber]);
-      } else {
-        timeTurnedOn[resetOutputNumber]++;
       }
-      
     }
   }
 }

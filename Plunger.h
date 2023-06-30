@@ -18,6 +18,7 @@ class Plunger {
     float plungerScaleFactor;
     int adjustedValue;
     Config* _config;
+    byte buttonState;
 };
 
 #endif

@@ -22,6 +22,21 @@ void Plunger::init(Joystick_* joystick, Config* config) {
 
 void Plunger::plungerRead() {
   int sensorValue = analogRead(23);
+  if( _config->plungerButtonPush == 1 && buttonState == 0 && sensorValue >= _config->plungerMax - 5) {
+    _joystick->setButton(23, 1);
+    buttonState = 1;
+  } else if (_config->plungerButtonPush == 1 && buttonState == 1 && sensorValue < _config->plungerMax - 5 ) {
+    _joystick->setButton(23, 0);
+    buttonState = 0;
+  }
+  if( _config->plungerButtonPush == 2 && buttonState == 0 && sensorValue <= _config->plungerMin + 5) {
+    _joystick->setButton(23, 1);
+    buttonState = 1;
+  } else if (_config->plungerButtonPush == 2 && buttonState == 1 && sensorValue > _config->plungerMin + 5 ) {
+    _joystick->setButton(23, 0);
+    buttonState = 0;
+  }
+  
   if (sensorValue <= _config->plungerMid) {
     adjustedValue = sensorValue;
   } else {

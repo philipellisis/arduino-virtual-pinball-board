@@ -36,7 +36,7 @@ void Buttons::readInputs() {
       bool currentButtonState = !shift.state(i);
       //if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i]) {
-        if (i == 23) {
+        if (i == 21) {
           //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(currentButtonState); Serial.print(F("\r\n"));}
           _config->nightMode = currentButtonState;
         } 
