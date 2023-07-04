@@ -52,7 +52,9 @@ void Config::init() {
     accelerometerMultiplier = readIntFromEEPROM(450);
     accelerometerDeadZone = readIntFromEEPROM(452);
 
-    plungerButtonPush = readIntFromEEPROM(454);
+    EEPROM.get(454, plungerButtonPush);
+
+    accelerometerTilt = readIntFromEEPROM(455);
   } else {
     //save default config in case it's never been done before
     saveConfig();
@@ -100,6 +102,7 @@ void Config::saveConfig() {
     writeIntIntoEEPROM(452, accelerometerDeadZone);
 
     EEPROM.write(454, plungerButtonPush);
+    writeIntIntoEEPROM(455, accelerometerTilt);
 
     EEPROM.write(1000, 100);
     Serial.print(F("RESPONSE,Config saved into EEPROM\r\n"));
@@ -202,6 +205,12 @@ void Config::updateConfigFromSerial() {
       writeConfigMessage(14);
       return;
     }
+
+    accelerometerTilt = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      writeConfigMessage(17);
+      return;
+    }
     
     Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
 }
@@ -230,7 +239,7 @@ void Config::setPlunger() {
     writeIntIntoEEPROM(401, plungerMax);
     writeIntIntoEEPROM(403, plungerMin);
     writeIntIntoEEPROM(405, plungerMid);
-    writeIntIntoEEPROM(454, plungerButtonPush);
+    EEPROM.write(454, plungerButtonPush);
     
 
     Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
@@ -253,9 +262,15 @@ void Config::setAccelerometer() {
       writeConfigMessage(19);
       return;
     }
+    accelerometerTilt = (blockRead() << 8) + blockRead();
+    if (done == true) {
+      writeConfigMessage(20);
+      return;
+    }
     writeIntIntoEEPROM(450, accelerometerMultiplier);
     writeIntIntoEEPROM(452, accelerometerDeadZone);
     EEPROM.write(426, orientation);
+    writeIntIntoEEPROM(455, accelerometerTilt);
     Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
 }
 
@@ -316,6 +331,8 @@ void Config::sendConfig() {
     Serial.print(accelerometerDeadZone);
     Serial.print(F(","));
     Serial.print(plungerButtonPush);
+    Serial.print(F(","));
+    Serial.print(accelerometerTilt);
     Serial.print(F(","));
     
     Serial.print(F("END OF DATA\r\n"));

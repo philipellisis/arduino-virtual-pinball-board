@@ -23,6 +23,7 @@ class Config {
     byte accelerometer = 1;
     int accelerometerMultiplier = 100;
     int accelerometerDeadZone = 10;
+    int accelerometerTilt = 800;
     byte plungerButtonPush = 0;
     
 
@@ -32,6 +33,8 @@ class Config {
     void sendConfig();
     void setPlunger();
     void setAccelerometer();
+
+    byte lightShowState = 1;
     
   private:
     bool DEBUG = false;

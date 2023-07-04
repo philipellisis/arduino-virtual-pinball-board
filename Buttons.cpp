@@ -39,7 +39,10 @@ void Buttons::readInputs() {
         if (i == 21) {
           //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(currentButtonState); Serial.print(F("\r\n"));}
           _config->nightMode = currentButtonState;
-        } 
+        }
+        if (_config->lightShowState == 3 || _config->lightShowState == 6) {
+          _config->lightShowState = 4;
+        }
         _joystick->setButton(i, currentButtonState);
         
         

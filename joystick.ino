@@ -6,6 +6,7 @@
 #include <Joystick.h>
 #include "Config.h"
 #include <Wire.h>
+#include "LightShow.h"
 
 Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID,JOYSTICK_TYPE_GAMEPAD,
   24, 0,                  // Button Count, Hat Switch Count
@@ -15,6 +16,7 @@ Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID,JOYSTICK_TYPE_GAMEPAD,
   false, false, false);  // No accelerator, brake, or steering
 Plunger plunger = Plunger();
 Buttons buttons = Buttons();
+LightShow lightShow = LightShow();
 
 Accelerometer accel = Accelerometer();
 Communication comm = Communication();
@@ -34,6 +36,7 @@ void setup() {
   Joystick.begin();
   buttons.init(&Joystick, &config, &outputs);
   plunger.init(&Joystick, &config);
+  lightShow.init(&config, &outputs);
   if (config.accelerometer > 0) {
     accel.init(&Joystick, &config);
   }
@@ -51,9 +54,10 @@ void loop() {
   if (config.accelerometerEprom > 0) {
     accel.accelerometerRead();
   }
+  lightShow.chechSetLights();
   comm.communicate();
   //long int t2 = millis();
-  //if (DEBUG) {Serial.print(F("DEBUG,Time taken by the task: ")); Serial.print((t2-t1)); Serial.print(F(" milliseconds\r\n"));}
+  //Serial.print(F("DEBUG,Time taken by the task: ")); Serial.print((t2-t1)); Serial.print(F(" milliseconds\r\n"));
 
   //Serial.println("arduino is running");
   //delay(100);

@@ -43,6 +43,7 @@ void Communication::communicate() {
         if (dataLocation == 8) {
           //if (DEBUG) {Serial.print(F("DEBUG,9 slots filled, sending outputs\r\n"));}
           if (incomingData[1] == adminNumber) {
+            _config->lightShowState = 0;
             //if (DEBUG) {Serial.print(F("DEBUG,Turning admin on\r\n"));}
             // set admin functions{
             admin = incomingData[2];
@@ -53,7 +54,9 @@ void Communication::communicate() {
           } else {
             //normal operation
             //if (DEBUG) {Serial.print(F("DEBUG,sending output\r\n"));}
+            _config->lightShowState = 1;
             updateOutputs();
+
           }
           dataLocation = 0;
         } else {

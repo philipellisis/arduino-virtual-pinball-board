@@ -74,6 +74,13 @@ void Accelerometer::accelerometerRead() {
     xValue = yValue;
     yValue = -temp;
   }
+  if(buttonState == 0 && (abs(xValue) > _config->accelerometerTilt || abs(yValue) > _config->accelerometerTilt)) {
+    _joystick->setButton(22, 1);
+    buttonState = 1;
+  } else if (buttonState == 1 && (abs(xValue) < _config->accelerometerTilt && abs(yValue) < _config->accelerometerTilt)) {
+    _joystick->setButton(23, 0);
+    buttonState = 0;
+  }
   _joystick->setXAxis(xValue);
   _joystick->setYAxis(yValue);
   //if (DEBUG) {Serial.print(F("DEBUG,AccelX:"));}
