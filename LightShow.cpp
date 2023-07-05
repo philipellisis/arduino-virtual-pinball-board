@@ -9,7 +9,7 @@ void LightShow::init(Config* config, Outputs* outputs) {
   _outputs = outputs;
 }
 
-void LightShow::chechSetLights() {
+void LightShow::checkSetLights() {
   // 0 is in initial state
   // 1 means an output has been received and waiting to reset timer
   // 2 means an input has been received and lights are on high

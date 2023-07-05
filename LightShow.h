@@ -14,7 +14,7 @@ class LightShow {
     void incrementRandom();
     void setLightsRandom();
     void setLightsHigh();
-    void chechSetLights();
+    void checkSetLights();
     
   private:
     Config* _config;
