@@ -12,7 +12,7 @@ void Config::init() {
   byte eepromCheck;
   EEPROM.get(1000, eepromCheck);
 
-  if (eepromCheck == 100) {
+  if (eepromCheck == 101) {
     //if (DEBUG) {Serial.print(F("DEBUG,eeprom check indicates values are all saved, reading from eeprom\r\n"));}
     // get first 62 bank maximum values
     for (int i = 0; i < 63; i++) {
@@ -104,7 +104,7 @@ void Config::saveConfig() {
     EEPROM.write(454, plungerButtonPush);
     writeIntIntoEEPROM(455, accelerometerTilt);
 
-    EEPROM.write(1000, 100);
+    EEPROM.write(1000, 101);
     Serial.print(F("RESPONSE,Config saved into EEPROM\r\n"));
 }
 

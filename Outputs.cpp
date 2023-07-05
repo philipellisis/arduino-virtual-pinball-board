@@ -35,7 +35,7 @@ void Outputs::init(Config* config) {
 }
 
 void Outputs::updateOutput(byte outputId, byte outputValue) {
-  if (_config->maxOutputState[outputId] > 0 && outputValue > _config->maxOutputState[outputId]) {
+  if (outputValue > _config->maxOutputState[outputId]) {
     outputValue = _config->maxOutputState[outputId];
   }
   if (_config->nightMode == true && bitRead(_config->toySpecialOption[outputId],0) == 1) {
