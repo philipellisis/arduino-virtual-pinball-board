@@ -14,6 +14,25 @@ enum admin_type {
     SET_ACCEL = 10,
 };
 
+  // 1 means an output has been received and waiting to reset timer
+  // 2 means an input has been received and lights are on high
+  // 3 means an input is ready -- it will also be here when in random mode if it sits here for too long
+  // 4 means an input has been received and lights are on low
+  // 5 means an output has been received in the last 10 seconds
+  // 6 means it's in random mode and just waiting for the next update
+  // 7 means input has been recieved and lights are on high, waiting for button to be depressed
+enum light_show_state {
+  DISABLED = 0,
+  OUTPUT_RECEIVED_RESET_TIMER = 1,
+  INPUT_RECEIVED_SET_LIGHTS_LOW = 2,
+  WAITING_INPUT = 3,
+  INPUT_RECEIVED_SET_LIGHTS_HIGH = 4,
+  INPUT_RECEIVED_BUTTON_STILL_PRESSED = 7,
+  OUTPUT_RECEIVED = 5,
+  IN_RANDOM_MODE_WAITING_INPUT = 6
+
+};
+
 enum eeprom {
   PLUNGER_MIN = 1,
   PLUNGER_MAX = 2,

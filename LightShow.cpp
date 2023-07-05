@@ -1,4 +1,5 @@
 #include "LightShow.h"
+#include "Enums.h"
 
 
 LightShow::LightShow() {
@@ -10,60 +11,53 @@ void LightShow::init(Config* config, Outputs* outputs) {
 }
 
 void LightShow::checkSetLights() {
-  // 0 is in initial state
-  // 1 means an output has been received and waiting to reset timer
-  // 2 means an input has been received and lights are on high
-  // 3 means an input is ready -- it will also be here when in random mode if it sits here for too long
-  // 4 means an input has been received and lights are on low
-  // 5 means an output has been received in the last 10 seconds
-  // 6 means it's in random mode and just waiting for the next update
+ //starts in OUTPUT_RECEIVED_RESET_TIMER, but effectively starts in OUTPUT_RECEIVED, then to WAITING_INPUT after 10 seconds
   long int currentTime = millis();
 
-  // an input has been received and lights are on high
-  if (_config->lightShowState == 2) {
-    if (currentTime - timeInState > 500) {
-      setLightsNormal();
-      //if (DEBUG) {Serial.print(F("DEBUG,no button input found, setting lights back to low\r\n"));}
-      _config->lightShowState = 3;
-    }
-  }
-
-  // means an input has been received and lights are on low
-  if (_config->lightShowState == 4) {
-    setLightsHigh();
-    //if (DEBUG) {Serial.print(F("DEBUG,button input found, setting lights high\r\n"));}
-    timeInState = currentTime;
-    _config->lightShowState = 2;
-  }
-
   //an output has been received and waiting to reset timer
-  if (_config->lightShowState == 1) {
+  if (_config->lightShowState == OUTPUT_RECEIVED_RESET_TIMER) {
     timeInState = currentTime;
     //if (DEBUG) {Serial.print(F("DEBUG,output received, resetting timer\r\n"));}
-    _config->lightShowState = 5;
+    _config->lightShowState = OUTPUT_RECEIVED;
   }
 
-  //an output has been received in the last 10 seconds
-  if (_config->lightShowState == 5) {
-    if (currentTime - timeInState > 10000) {
+  // an input has been received and lights are on high
+  if (_config->lightShowState == INPUT_RECEIVED_SET_LIGHTS_LOW) {
       setLightsNormal();
-      //if (DEBUG) {Serial.print(F("DEBUG,output received, setting to normal\r\n"));}
-      _config->lightShowState = 3;
-    }
+      timeInState = currentTime;
+      _config->lightShowState = WAITING_INPUT;
   }
 
   //here an output has not been received in 10 seconds, and now waiting for button input
-  if (_config->lightShowState == 3) {
-    if (currentTime - timeInState > 10000) {
+  if (_config->lightShowState == WAITING_INPUT) {
+    if (currentTime - timeInState > 20000) {
       setLightsRandom();
-      _config->lightShowState = 6;
+      _config->lightShowState = IN_RANDOM_MODE_WAITING_INPUT;
       //if (DEBUG) {Serial.print(F("DEBUG,Staring light show random\r\n"));}
       timeInState = currentTime;
     }
   }
 
+  // means an input has been received and lights are on low
+  if (_config->lightShowState == INPUT_RECEIVED_SET_LIGHTS_HIGH) {
+    setLightsHigh();
+    //if (DEBUG) {Serial.print(F("DEBUG,button input found, setting lights high\r\n"));}
+    timeInState = currentTime;
+    _config->lightShowState = INPUT_RECEIVED_BUTTON_STILL_PRESSED;
+  }
+
+
+  //an output has been received in the last 10 seconds
+  if (_config->lightShowState == OUTPUT_RECEIVED) {
+    if (currentTime - timeInState > 10000) {
+      setLightsNormal();
+      //if (DEBUG) {Serial.print(F("DEBUG,output received, setting to normal\r\n"));}
+      _config->lightShowState = WAITING_INPUT;
+    }
+  }
+
   //in random mode
-  if (_config->lightShowState == 6) {
+  if (_config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT) {
     if (currentTime - timeInState > 10) {
       incrementRandom();
       timeInState = currentTime;

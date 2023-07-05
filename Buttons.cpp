@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <Joystick.h>
 #include "ShiftIn.h"
+#include "Enums.h"
 
 ShiftIn<3> shift;
 
@@ -28,7 +29,7 @@ void Buttons::init(Joystick_* joystick, Config* config, Outputs* outputs) {
 }
 
 void Buttons::readInputs() {
-
+  bool buttonPushed = false;
   // read shift register values
   if(shift.update()) {
     //if (DEBUG) {Serial.print(F("DEBUG"));}
@@ -40,8 +41,8 @@ void Buttons::readInputs() {
           //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(currentButtonState); Serial.print(F("\r\n"));}
           _config->nightMode = currentButtonState;
         }
-        if (_config->lightShowState == 3 || _config->lightShowState == 6) {
-          _config->lightShowState = 4;
+        if (currentButtonState == 1 && i != 21) {
+          buttonPushed = true;
         }
         _joystick->setButton(i, currentButtonState);
         
@@ -57,6 +58,15 @@ void Buttons::readInputs() {
       }
     }
     //if (DEBUG) {Serial.print("\r\n");}
+  }
+  if (buttonPushed) {
+    if (_config->lightShowState == WAITING_INPUT || _config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT) {
+      _config->lightShowState = INPUT_RECEIVED_SET_LIGHTS_HIGH;
+    }
+  } else {
+    if (_config->lightShowState == INPUT_RECEIVED_BUTTON_STILL_PRESSED) {
+      _config->lightShowState = INPUT_RECEIVED_SET_LIGHTS_LOW;
+    }
   }
 }
 
