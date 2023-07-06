@@ -59,6 +59,7 @@ void LightShow::checkSetLights() {
   //in random mode
   if (_config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT) {
     if (currentTime - timeInState > 10) {
+      //if (DEBUG) {Serial.print(F("DEBUG,Incrementing light show random\r\n"));}
       incrementRandom();
       timeInState = currentTime;
     }
@@ -85,10 +86,11 @@ void LightShow::setLightsHigh() {
 void LightShow::setLightsRandom() {
   for (int i = 0; i < 62; i++) {
     if (_config->toySpecialOption[i] == 2) {
-      _outputs->updateOutput(i, i * 4);
+      byte rnd = random(256);
+      _outputs->updateOutput(i, rnd);
       // TODO use random to set values and direction
-      outputDirection[i] = 1;
-      outputValues[i] = i*4;
+      outputDirection[i] = rnd % 2;
+      outputValues[i] = rnd;
     }
   }
 }
@@ -96,16 +98,23 @@ void LightShow::setLightsRandom() {
 void LightShow::incrementRandom() {
   for (int i = 0; i < 62; i++) {
     if (_config->toySpecialOption[i] == 2) {
+      // if (i == 16) {
+      //   if (DEBUG) {Serial.print(F("DEBUG,output 16, direction = "));}
+      //   if (DEBUG) {Serial.print(outputDirection[i]);}
+      //   if (DEBUG) {Serial.print(F(" intensity = "));}
+      //   if (DEBUG) {Serial.print(outputValues[i]);}
+      //   if (DEBUG) {Serial.print(F("\r\n"));}
+      // }
       if (outputDirection[i] == 1) {
         if (outputValues[i] == 255) {
-          outputDirection[i] == 0;
+          outputDirection[i] = 0;
         } else {
           outputValues[i] += 1;
           _outputs->updateOutput(i, outputValues[i]);
         }
       } else {
         if (outputValues[i] == 0) {
-          outputDirection[i] == 1;
+          outputDirection[i] = 1;
         } else {
           outputValues[i] -= 1;
           _outputs->updateOutput(i, outputValues[i]);

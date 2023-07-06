@@ -29,7 +29,7 @@ void Buttons::init(Joystick_* joystick, Config* config, Outputs* outputs) {
 }
 
 void Buttons::readInputs() {
-  bool buttonPushed = false;
+  byte buttonPushed = 2;
   // read shift register values
   if(shift.update()) {
     //if (DEBUG) {Serial.print(F("DEBUG"));}
@@ -42,7 +42,9 @@ void Buttons::readInputs() {
           _config->nightMode = currentButtonState;
         }
         if (currentButtonState == 1 && i != 21) {
-          buttonPushed = true;
+          buttonPushed = 1;
+        } else if (currentButtonState == 0 && i != 21 && buttonPushed == 2) {
+          buttonPushed = 0;
         }
         _joystick->setButton(i, currentButtonState);
         
@@ -59,11 +61,11 @@ void Buttons::readInputs() {
     }
     //if (DEBUG) {Serial.print("\r\n");}
   }
-  if (buttonPushed) {
+  if (buttonPushed == 1) {
     if (_config->lightShowState == WAITING_INPUT || _config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT) {
       _config->lightShowState = INPUT_RECEIVED_SET_LIGHTS_HIGH;
     }
-  } else {
+  } else if (buttonPushed == 0) {
     if (_config->lightShowState == INPUT_RECEIVED_BUTTON_STILL_PRESSED) {
       _config->lightShowState = INPUT_RECEIVED_SET_LIGHTS_LOW;
     }
