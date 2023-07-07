@@ -19,10 +19,13 @@ class LightShow {
   private:
     Config* _config;
     Outputs* _outputs;
-    bool DEBUG = true;
+    bool DEBUG = false;
     long int timeInState;
     byte outputValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     byte outputDirection[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    byte startLight = 0;
+    byte finishLight = 0;
+    byte incrementor = 5;
 };
 
 #endif
