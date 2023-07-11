@@ -11,6 +11,7 @@ class Plunger {
     void init(Joystick_* joystick, Config* config);
     void plungerRead();
     void sendPlungerState();
+    void resetPlunger();
     
   private:
     bool DEBUG = false;
@@ -19,6 +20,7 @@ class Plunger {
     int adjustedValue;
     Config* _config;
     byte buttonState;
+    byte buttonState2;
 };
 
 #endif

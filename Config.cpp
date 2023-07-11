@@ -17,20 +17,8 @@ void Config::init() {
     // get first 62 bank maximum values
     for (int i = 0; i < 63; i++) {
       EEPROM.get(i, toySpecialOption[i]);
-    }
-  
-    // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
       EEPROM.get(i + 100, turnOffState[i]);
-    }
-  
-    // get next 62 bank maximum values
-    for (int i = 0; i < 62; i++) {
       EEPROM.get(i + 200, maxOutputState[i]);
-    }
-  
-    // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
       EEPROM.get(i + 300, maxOutputTime[i]);
     }
 
@@ -40,8 +28,6 @@ void Config::init() {
     
     for (int i = 0; i < 4; i++) {
       EEPROM.get(i + 407, solenoidButtonMap[i]);
-    }
-    for (int i = 0; i < 4; i++) {
       EEPROM.get(i + 417, solenoidOutputMap[i]);
     }
 
@@ -55,6 +41,7 @@ void Config::init() {
     EEPROM.get(454, plungerButtonPush);
 
     accelerometerTilt = readIntFromEEPROM(455);
+    accelerometerMax = readIntFromEEPROM(457);
   } else {
     //save default config in case it's never been done before
     saveConfig();
@@ -67,20 +54,8 @@ void Config::saveConfig() {
     // get first 62 bank maximum values
     for (int i = 0; i < 63; i++) {
       EEPROM.write(i, toySpecialOption[i]);
-    }
-  
-    // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
       EEPROM.write(i + 100, turnOffState[i]);
-    }
-  
-    // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
       EEPROM.write(i + 200, maxOutputState[i]);
-    }
-  
-    // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
       EEPROM.write(i + 300, maxOutputTime[i]);
     }
   
@@ -103,112 +78,55 @@ void Config::saveConfig() {
 
     EEPROM.write(454, plungerButtonPush);
     writeIntIntoEEPROM(455, accelerometerTilt);
+    writeIntIntoEEPROM(457, accelerometerMax);
 
     EEPROM.write(1000, 101);
     Serial.print(F("RESPONSE,Config saved into EEPROM\r\n"));
 }
 
 void Config::updateConfigFromSerial() {
-    done = false;
+    done = 0;
     // get first 62 bank maximum values
     for (int i = 0; i < 63; i++) {
-      toySpecialOption[i] = blockRead();
-      if (done == true) {
-        writeConfigMessage(1);
-        return;
-      }
+      toySpecialOption[i] = blockRead(1);
     }
   
     // get next 62 bank maximum values
     for (int i = 0; i < 63; i++) {
-      turnOffState[i] = blockRead();
-      if (done == true) {
-        writeConfigMessage(2);
-        return;
-      }
+      turnOffState[i] = blockRead(2);
     }
   
     // get next 62 bank maximum values
     for (int i = 0; i < 63; i++) {
-      maxOutputState[i] = blockRead();
-      if (done == true) {
-        writeConfigMessage(3);
-        return;
-      }
+      maxOutputState[i] = blockRead(3);
     }
   
     // get next 62 bank maximum values
     for (int i = 0; i < 63; i++) {
-      maxOutputTime[i] = blockRead();
-      if (done == true) {
-        writeConfigMessage(4);
-        return;
-      }
+      maxOutputTime[i] = blockRead(4);
+
     }
 
-    plungerMax = (blockRead() << 8) + blockRead();
-    if (done == true) {
-      writeConfigMessage(5);
-      return;
-    }
-    plungerMin = (blockRead() << 8) + blockRead();
-    if (done == true) {
-      writeConfigMessage(6);
-      return;
-    }
-    plungerMid = (blockRead() << 8) + blockRead();
-    if (done == true) {
-      writeConfigMessage(7);
-      return;
+    plungerMax = (blockRead(5) << 8) + blockRead(6);
+    plungerMin = (blockRead(7) << 8) + blockRead(8);
+    plungerMid = (blockRead(9) << 8) + blockRead(10);
+    for (int i = 0; i < 4; i++) {
+      solenoidButtonMap[i] = blockRead(11);
     }
     for (int i = 0; i < 4; i++) {
-      solenoidButtonMap[i] = blockRead();
-      if (done == true) {
-        writeConfigMessage(8);
-        return;
-      }
-    }
-    for (int i = 0; i < 4; i++) {
-      solenoidOutputMap[i] = blockRead();
-      if (done == true) {
-        writeConfigMessage(9);
-        return;
-      }
+      solenoidOutputMap[i] = blockRead(12);
     }
 
-    orientation = blockRead();
-    if (done == true) {
-      writeConfigMessage(10);
-      return;
-    }
+    orientation = blockRead(13);
+    accelerometer = blockRead(14);
+    accelerometerMultiplier = (blockRead(15) << 8) + blockRead(16);
+    accelerometerDeadZone = (blockRead(17) << 8) + blockRead(18);
+    plungerButtonPush = blockRead(19);
+    accelerometerTilt = (blockRead(20) << 8) + blockRead(21);
+    accelerometerMax = (blockRead(22) << 8) + blockRead(23);
 
-    accelerometer = blockRead();
-    Serial.print(F("DEBUG,Config: setting accelerometer"));Serial.print(accelerometer); Serial.print(F("\r\n"));
-    if (done == true) {
-      writeConfigMessage(11);
-      return;
-    }
-
-    accelerometerMultiplier = (blockRead() << 8) + blockRead();
-    if (done == true) {
-      writeConfigMessage(12);
-      return;
-    }
-    accelerometerDeadZone = (blockRead() << 8) + blockRead();
-    if (done == true) {
-      writeConfigMessage(13);
-      return;
-    }
-
-    plungerButtonPush = blockRead();
-    if (done == true) {
-      writeConfigMessage(14);
-      return;
-    }
-
-    accelerometerTilt = (blockRead() << 8) + blockRead();
-    if (done == true) {
-      writeConfigMessage(17);
+    if (done > 0) {
+      writeConfigMessage(done);
       return;
     }
     
@@ -216,26 +134,17 @@ void Config::updateConfigFromSerial() {
 }
 
 void Config::setPlunger() {
-    done = false;
-    plungerMax = (blockRead() << 8) + blockRead();
-    Serial.print(F("DEBUG,plunger max set to")); Serial.print(plungerMax); Serial.print(F("\r\n"));
-    if (done == true) {
-      writeConfigMessage(14);
+    done = 0;
+    plungerMax = (blockRead(50) << 8) + blockRead(51);
+    plungerMin = (blockRead(52) << 8) + blockRead(53);
+    plungerMid = (blockRead(54) << 8) + blockRead(55);
+    if (done > 0) {
+      writeConfigMessage(done);
       return;
     }
-    plungerMin = (blockRead() << 8) + blockRead();
-    Serial.print(F("DEBUG,plunger min set to")); Serial.print(plungerMin); Serial.print(F("\r\n"));
-    if (done == true) {
-      writeConfigMessage(15);
-      return;
-    }
-    plungerMid = (blockRead() << 8) + blockRead();
-    Serial.print(F("DEBUG,plunger mid set to")); Serial.print(plungerMid); Serial.print(F("\r\n"));
-    if (done == true) {
-      writeConfigMessage(16);
-      return;
-    }
-    plungerButtonPush = blockRead();
+
+
+    plungerButtonPush = blockRead(56);
     writeIntIntoEEPROM(401, plungerMax);
     writeIntIntoEEPROM(403, plungerMin);
     writeIntIntoEEPROM(405, plungerMid);
@@ -246,31 +155,23 @@ void Config::setPlunger() {
 }
 
 void Config::setAccelerometer() {
-    done = false;
-    accelerometerMultiplier = (blockRead() << 8) + blockRead();
-    if (done == true) {
-      writeConfigMessage(17);
+    done = 0;
+    accelerometerMultiplier = (blockRead(100) << 8) + blockRead(101);
+    accelerometerDeadZone = (blockRead(102) << 8) + blockRead(103);
+    orientation = blockRead(104);
+    accelerometerTilt = (blockRead(105) << 8) + blockRead(106);
+    accelerometerMax = (blockRead(107) << 8) + blockRead(108);
+
+    if (done > 0) {
+      writeConfigMessage(done);
       return;
     }
-    accelerometerDeadZone = (blockRead() << 8) + blockRead();
-    if (done == true) {
-      writeConfigMessage(18);
-      return;
-    }
-    orientation = blockRead();
-    if (done == true) {
-      writeConfigMessage(19);
-      return;
-    }
-    accelerometerTilt = (blockRead() << 8) + blockRead();
-    if (done == true) {
-      writeConfigMessage(20);
-      return;
-    }
+
     writeIntIntoEEPROM(450, accelerometerMultiplier);
     writeIntIntoEEPROM(452, accelerometerDeadZone);
     EEPROM.write(426, orientation);
     writeIntIntoEEPROM(455, accelerometerTilt);
+    writeIntIntoEEPROM(457, accelerometerMax);
     Serial.print(F("RESPONSE,SAVE CONFIG SUCCESS\r\n"));
 }
 
@@ -334,11 +235,16 @@ void Config::sendConfig() {
     Serial.print(F(","));
     Serial.print(accelerometerTilt);
     Serial.print(F(","));
+    Serial.print(accelerometerMax);
+    Serial.print(F(","));
     
     Serial.print(F("END OF DATA\r\n"));
 }
 
-byte Config::blockRead() {
+byte Config::blockRead(byte errorCode) {
+    if (done > 0) {
+      return 0;
+    }
     long int t1 = millis();
     long int t2 = millis();
     while ((t2 - t1) < 5000) {
@@ -348,7 +254,7 @@ byte Config::blockRead() {
       t2 = millis();
       delay(50);
     }
-    done = true;
+    done = errorCode;
     return 0;
 }
 

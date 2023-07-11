@@ -24,10 +24,11 @@ class Config {
     int accelerometerMultiplier = 100;
     int accelerometerDeadZone = 10;
     int accelerometerTilt = 800;
+    int accelerometerMax = 1000;
     byte plungerButtonPush = 0;
     
 
-    bool done = false;
+    byte done = 0;
     bool nightMode = false;
     void updateConfigFromSerial();
     void sendConfig();
@@ -38,7 +39,7 @@ class Config {
     
   private:
     bool DEBUG = false;
-    byte Config::blockRead();
+    byte Config::blockRead(byte errorCode);
     void writeIntIntoEEPROM(int address, int number);
     int readIntFromEEPROM(int address);
     void writeConfigMessage(int errorCode);

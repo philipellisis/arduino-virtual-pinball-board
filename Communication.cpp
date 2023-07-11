@@ -95,10 +95,12 @@ void Communication::sendAdmin() {
     }
     if (admin == SET_PLUNGER) {
       _config->setPlunger();
+      _plunger->resetPlunger();
       admin = 3;
     }
     if (admin == SET_ACCEL) {
       _config->setAccelerometer();
+      _accelerometer->resetAccelerometer();
       admin = 4;
     }
     if (admin == SAVE_CONFIG) {

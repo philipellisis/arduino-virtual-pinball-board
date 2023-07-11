@@ -12,6 +12,7 @@ class Accelerometer {
     void init(Joystick_* joystick, Config* config);
     void accelerometerRead();
     void sendAccelerometerState();
+    void resetAccelerometer();
     
   private:
     bool DEBUG = false;

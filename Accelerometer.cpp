@@ -12,13 +12,11 @@ Accelerometer::Accelerometer() {
 void Accelerometer::init(Joystick_* joystick, Config* config) {
   _joystick = joystick;
   _config = config;
-  _joystick->setXAxisRange(-1500, 1500);
-  _joystick->setYAxisRange(-1500, 1500);
+
   byte count = 0;
   while (!mpu.begin() && _config->accelerometer == 0) {
     //if (DEBUG) {Serial.print(F("DEBUG,Failed to find MPU6050 chip\r\n"));}
     delay(5000);
-
   }
   
   //setupt motion detection
@@ -42,9 +40,14 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
   xValueOffset = xValueOffset/10;
   yValueOffset = yValueOffset/10;
 
-
+  resetAccelerometer();
   
   //if (DEBUG) {Serial.print(F("DEBUG,MPU6050 Found!\r\n"));}
+}
+
+void Accelerometer::resetAccelerometer() {
+  _joystick->setXAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
+  _joystick->setYAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
 }
 
 void Accelerometer::accelerometerRead() {
@@ -66,7 +69,7 @@ void Accelerometer::accelerometerRead() {
   int temp = xValue;
   if (_config->orientation == 1) {
     xValue = -yValue;
-    yValue = -temp;
+    yValue = temp;
   } else if (_config->orientation == 2) {
     xValue = -xValue;
     yValue = -yValue;

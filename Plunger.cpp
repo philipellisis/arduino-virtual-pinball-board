@@ -14,27 +14,31 @@ Plunger::Plunger() {
 
 void Plunger::init(Joystick_* joystick, Config* config) {
   _config = config;
-  plungerScaleFactor = (float)_config->plungerMid / (float)_config->plungerMax;
   _joystick = joystick;
-  _joystick->setZAxisRange(_config->plungerMin, _config->plungerMax);
+  resetPlunger();
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: initialized joystick\r\n"));}
+}
+
+void Plunger::resetPlunger() {
+  plungerScaleFactor = (float)_config->plungerMid / (float)_config->plungerMax;
+  _joystick->setZAxisRange(_config->plungerMin, (_config->plungerMax - _config->plungerMid) * plungerScaleFactor + _config->plungerMid);
 }
 
 void Plunger::plungerRead() {
   int sensorValue = analogRead(23);
-  if( (_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3) && buttonState == 0 && sensorValue >= _config->plungerMax - 5) {
+  if( (_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3) && buttonState == 0 && sensorValue >= _config->plungerMax - 10) {
     _joystick->setButton(23, 1);
     buttonState = 1;
-  } else if ((_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3)  && buttonState == 1 && sensorValue < _config->plungerMax - 5 ) {
+  } else if ((_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3)  && buttonState == 1 && sensorValue < _config->plungerMax - 10 ) {
     _joystick->setButton(23, 0);
     buttonState = 0;
   }
-  if( _config->plungerButtonPush >= 2 && buttonState == 0 && sensorValue <= _config->plungerMin + 5) {
+  if( _config->plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= _config->plungerMin + 10) {
     _joystick->setButton(23, 1);
-    buttonState = 1;
-  } else if (_config->plungerButtonPush >= 2 && buttonState == 1 && sensorValue > _config->plungerMin + 5 ) {
+    buttonState2 = 1;
+  } else if (_config->plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > _config->plungerMin + 10 ) {
     _joystick->setButton(23, 0);
-    buttonState = 0;
+    buttonState2 = 0;
   }
   
   if (sensorValue <= _config->plungerMid) {
