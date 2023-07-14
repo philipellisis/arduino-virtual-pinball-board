@@ -48,6 +48,7 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
 void Accelerometer::resetAccelerometer() {
   _joystick->setXAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
   _joystick->setYAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
+  mpu.setAccelerometerRange(_config->accelerometerSensitivity);
 }
 
 void Accelerometer::accelerometerRead() {
@@ -58,8 +59,8 @@ void Accelerometer::accelerometerRead() {
   sensors_event_t a;
   mpu_accel->getEvent(&a);
 
-  xValue = floor((a.acceleration.x - xValueOffset)*_config->accelerometerMultiplier);
-  yValue = floor((a.acceleration.y - yValueOffset)*_config->accelerometerMultiplier);
+  xValue = floor((a.acceleration.x - xValueOffset)*100);
+  yValue = floor((a.acceleration.y - yValueOffset)*100);
   if (abs(xValue) < _config->accelerometerDeadZone) {
     xValue = 0;
   }

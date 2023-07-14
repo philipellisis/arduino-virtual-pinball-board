@@ -21,7 +21,7 @@ class Config {
     byte orientation = 0;
     byte accelerometerEprom = 0;
     byte accelerometer = 1;
-    int accelerometerMultiplier = 100;
+    byte accelerometerSensitivity = 0;
     int accelerometerDeadZone = 10;
     int accelerometerTilt = 800;
     int accelerometerMax = 1000;

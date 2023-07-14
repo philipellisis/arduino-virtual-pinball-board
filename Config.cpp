@@ -35,7 +35,7 @@ void Config::init() {
     EEPROM.get(427, accelerometer);
     accelerometerEprom = accelerometer;
 
-    accelerometerMultiplier = readIntFromEEPROM(450);
+    EEPROM.get(450, accelerometerSensitivity);
     accelerometerDeadZone = readIntFromEEPROM(452);
 
     EEPROM.get(454, plungerButtonPush);
@@ -73,7 +73,7 @@ void Config::saveConfig() {
     EEPROM.write(426, orientation);
     EEPROM.write(427, accelerometer);
 
-    writeIntIntoEEPROM(450, accelerometerMultiplier);
+    EEPROM.write(450, accelerometerSensitivity);
     writeIntIntoEEPROM(452, accelerometerDeadZone);
 
     EEPROM.write(454, plungerButtonPush);
@@ -119,11 +119,11 @@ void Config::updateConfigFromSerial() {
 
     orientation = blockRead(13);
     accelerometer = blockRead(14);
-    accelerometerMultiplier = (blockRead(15) << 8) + blockRead(16);
-    accelerometerDeadZone = (blockRead(17) << 8) + blockRead(18);
-    plungerButtonPush = blockRead(19);
-    accelerometerTilt = (blockRead(20) << 8) + blockRead(21);
-    accelerometerMax = (blockRead(22) << 8) + blockRead(23);
+    accelerometerSensitivity = blockRead(15);
+    accelerometerDeadZone = (blockRead(16) << 8) + blockRead(17);
+    plungerButtonPush = blockRead(18);
+    accelerometerTilt = (blockRead(19) << 8) + blockRead(20);
+    accelerometerMax = (blockRead(21) << 8) + blockRead(22);
 
     if (done > 0) {
       writeConfigMessage(done);
@@ -156,7 +156,7 @@ void Config::setPlunger() {
 
 void Config::setAccelerometer() {
     done = 0;
-    accelerometerMultiplier = (blockRead(100) << 8) + blockRead(101);
+    accelerometerSensitivity = blockRead(101);
     accelerometerDeadZone = (blockRead(102) << 8) + blockRead(103);
     orientation = blockRead(104);
     accelerometerTilt = (blockRead(105) << 8) + blockRead(106);
@@ -167,7 +167,7 @@ void Config::setAccelerometer() {
       return;
     }
 
-    writeIntIntoEEPROM(450, accelerometerMultiplier);
+    EEPROM.write(450, accelerometerSensitivity);
     writeIntIntoEEPROM(452, accelerometerDeadZone);
     EEPROM.write(426, orientation);
     writeIntIntoEEPROM(455, accelerometerTilt);
@@ -227,7 +227,7 @@ void Config::sendConfig() {
     Serial.print(F(","));
     Serial.print(accelerometer);
     Serial.print(F(","));
-    Serial.print(accelerometerMultiplier);
+    Serial.print(accelerometerSensitivity);
     Serial.print(F(","));
     Serial.print(accelerometerDeadZone);
     Serial.print(F(","));
