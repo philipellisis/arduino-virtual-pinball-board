@@ -81,7 +81,7 @@ void Accelerometer::accelerometerRead() {
     _joystick->setButton(22, 1);
     buttonState = 1;
   } else if (buttonState == 1 && (abs(xValue) < _config->accelerometerTilt && abs(yValue) < _config->accelerometerTilt)) {
-    _joystick->setButton(23, 0);
+    _joystick->setButton(22, 0);
     buttonState = 0;
   }
   _joystick->setXAxis(xValue);
