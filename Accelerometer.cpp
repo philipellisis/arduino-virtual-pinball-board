@@ -19,17 +19,34 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
     delay(5000);
   }
   
-  //setupt motion detection
+  //setup motion detection
+  // MPU6050_BAND_5_HZ 
+  // MPU6050_BAND_10_HZ 
+  // MPU6050_BAND_21_HZ 
+  // MPU6050_BAND_44_HZ 
+  // MPU6050_BAND_94_HZ 
+  // MPU6050_BAND_184_HZ 
+  // MPU6050_BAND_260_HZ 
+  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
+
+  // MPU6050_HIGHPASS_DISABLE
+  // MPU6050_HIGHPASS_5_HZ
+  // MPU6050_HIGHPASS_2_5_HZ
+  // MPU6050_HIGHPASS_1_25_HZ
+  // MPU6050_HIGHPASS_0_63_HZ
+  // MPU6050_HIGHPASS_UNUSED
+  // MPU6050_HIGHPASS_HOLD
   mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
+
   mpu.setMotionDetectionThreshold(1);
   mpu.setMotionDetectionDuration(20);
   mpu.setInterruptPinLatch(true);  // Keep it latched.  Will turn off when reinitialized.
   mpu.setInterruptPinPolarity(true);
   mpu.setMotionInterrupt(true);
-
+  resetAccelerometer();
   //assign accelerometer
   mpu_accel = mpu.getAccelerometerSensor();
-
+  delay(100);
   sensors_event_t a;
   while (count < 10) {
     mpu_accel->getEvent(&a);
@@ -40,7 +57,7 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
   xValueOffset = xValueOffset/10;
   yValueOffset = yValueOffset/10;
 
-  resetAccelerometer();
+  
   
   //if (DEBUG) {Serial.print(F("DEBUG,MPU6050 Found!\r\n"));}
 }
@@ -48,6 +65,7 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
 void Accelerometer::resetAccelerometer() {
   _joystick->setXAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
   _joystick->setYAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
+
   mpu.setAccelerometerRange(_config->accelerometerSensitivity);
 }
 
