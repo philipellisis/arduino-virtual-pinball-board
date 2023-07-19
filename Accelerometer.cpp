@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <Joystick.h>
 #include <Adafruit_MPU6050.h>
+#include "Enums.h"
 
 
 Adafruit_MPU6050 mpu;
@@ -86,15 +87,27 @@ void Accelerometer::accelerometerRead() {
     yValue = 0;
   }
   int temp = xValue;
-  if (_config->orientation == 1) {
+  if (_config->orientation == RIGHT) {
     xValue = -yValue;
     yValue = temp;
-  } else if (_config->orientation == 2) {
+  } else if (_config->orientation == FORWARD) {
     xValue = -xValue;
     yValue = -yValue;
-  } else if (_config->orientation == 3) {
+  } else if (_config->orientation == LEFT) {
     xValue = yValue;
     yValue = -temp;
+  } else if (_config->orientation == UP_BACK) {
+    xValue = -xValue;
+    yValue = yValue;
+  } else if (_config->orientation == UP_RIGHT) {
+    xValue = -yValue;
+    yValue = -temp;
+  } else if (_config->orientation == UP_FORWARD) {
+    xValue = xValue;
+    yValue = -yValue;
+  } else if (_config->orientation == UP_LEFT) {
+    xValue = yValue;
+    yValue = temp;
   }
   if(buttonState == 0 && (abs(xValue) > _config->accelerometerTilt || abs(yValue) > _config->accelerometerTilt)) {
     _joystick->setButton(22, 1);

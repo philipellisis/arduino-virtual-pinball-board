@@ -41,4 +41,16 @@ enum eeprom {
   OUTPUT_X_MAX_ON = 100, // max of 3 expansion boards -- 16, 32, 48
   OUTPUT_X_MAX_TIME = 200, // max of 3 expansion boards -- 16, 32, 48
 };
+
+enum accel_direction {
+  BACK = 0,
+  RIGHT = 1,
+  FORWARD = 2,
+  LEFT = 3,
+  UP_BACK = 4,
+  UP_RIGHT = 5,
+  UP_FORWARD = 6,
+  UP_LEFT = 7,
+};
+
 #endif

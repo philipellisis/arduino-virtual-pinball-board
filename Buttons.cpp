@@ -51,10 +51,14 @@ void Buttons::readInputs() {
         
         lastButtonState[i] = currentButtonState;
         for (int j = 0; j < 4; j++) {
-          if (currentButtonState == 1 && _config->solenoidButtonMap[j] == i) {
-            _outputs->updateOutput(_config->solenoidOutputMap[j], 255);
-          } else if (currentButtonState == 0 && _config->solenoidButtonMap[j] == i) {
-            _outputs->updateOutput(_config->solenoidOutputMap[j], 0);
+          if (currentButtonState == 1 && _config->solenoidButtonMap[j] > 0 && _config->solenoidButtonMap[j] - 1  == i) {
+            if (_config->solenoidOutputMap[j] > 0) {
+              _outputs->updateOutput(_config->solenoidOutputMap[j] - 1, 255);
+            }
+          } else if (currentButtonState == 0 && _config->solenoidButtonMap[j] > 0 && _config->solenoidButtonMap[j] - 1 == i) {
+            if (_config->solenoidOutputMap[j] > 0) {
+              _outputs->updateOutput(_config->solenoidOutputMap[j] - 1, 0);
+            }
           }
         }
       }
