@@ -26,6 +26,11 @@ class LightShow {
     byte startLight = 0;
     byte finishLight = 0;
     byte incrementor = 5;
+
+    byte currentStartLight = 0;
+    byte currentFinishLight = 0;
+    bool doneSettingLights = true;
+    void setStartFinishLoops();
 };
 
 #endif

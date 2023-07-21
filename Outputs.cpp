@@ -19,19 +19,24 @@ void Outputs::init(Config* config) {
   _config = config;
   pwm.begin();
   pwm.setOscillatorFrequency(27000000);
-  pwm.setPWMFreq(1600);  // This is the maximum PWM frequency
+  pwm.setPWMFreq(90);  // This is the maximum PWM frequency
   pwm1.begin();
   pwm1.setOscillatorFrequency(27000000);
-  pwm1.setPWMFreq(1600);  // This is the maximum PWM frequency
+  pwm1.setPWMFreq(90);  // This is the maximum PWM frequency
   pwm2.begin();
   pwm2.setOscillatorFrequency(27000000);
-  pwm2.setPWMFreq(1600);  // This is the maximum PWM frequency
+  pwm2.setPWMFreq(90);  // This is the maximum PWM frequency
   Wire.setClock(400000);
+  Wire.setWireTimeout(3000, true);
 
+  turnOff();
+
+}
+
+void Outputs::turnOff() {
   for (int i = 0; i < 62; i++) {
     updateOutput(i, 0);
   }
-
 }
 
 void Outputs::updateOutput(byte outputId, byte outputValue) {

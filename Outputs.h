@@ -15,6 +15,7 @@ class Outputs {
     void updateOutput(byte outputId, byte outputValue);
     void sendOutputState();
     void checkResetOutputs();
+    void turnOff();
     
   private:
     Config* _config;

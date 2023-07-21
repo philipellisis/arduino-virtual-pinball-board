@@ -109,6 +109,8 @@ void Communication::sendAdmin() {
     }
     if (admin == OFF) {
       admin = 0;
+      _config->lightShowState = OUTPUT_RECEIVED_RESET_TIMER;
+      _outputs->turnOff();
     }
     if (admin == CONNECT) {
       Serial.print(F("DEBUG,CSD Board Connected\r\n"));
