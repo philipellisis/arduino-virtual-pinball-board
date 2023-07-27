@@ -18,6 +18,7 @@ class Communication {
     
   private:
     bool DEBUG = false;
+    char* connectedString = "DEBUG,CSD Board Connected\r\n";
     byte firstNumber = 0; //0 normally
     byte bankOffset = 200; //200 normally
     byte adminNumber = 250; //250 normally

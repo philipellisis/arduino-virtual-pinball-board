@@ -22,11 +22,15 @@ class Config {
     byte accelerometerEprom = 0;
     byte accelerometer = 1;
     byte accelerometerSensitivity = 0;
-    int accelerometerDeadZone = 10;
+    int accelerometerDeadZone = 30;
     int accelerometerTilt = 800;
     int accelerometerMax = 1000;
     byte plungerButtonPush = 0;
-    
+
+    byte plungerAverageRead = 10;
+    byte nightModeButton = 21;
+    byte plungerLaunchButton = 23;
+    byte tiltButton = 22;
 
     byte done = 0;
     bool nightMode = false;
@@ -39,10 +43,12 @@ class Config {
     
   private:
     bool DEBUG = false;
-    byte Config::blockRead(byte errorCode);
+    byte Config::blockRead();
     void writeIntIntoEEPROM(int address, int number);
     int readIntFromEEPROM(int address);
-    void writeConfigMessage(int errorCode);
+    void printError();
+    void printComma();
+    void printSuccess();
     
     
 };

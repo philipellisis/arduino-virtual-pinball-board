@@ -25,19 +25,30 @@ void Plunger::resetPlunger() {
 }
 
 void Plunger::plungerRead() {
-  int sensorValue = analogRead(23);
-  if( (_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3) && buttonState == 0 && sensorValue >= _config->plungerMax - 10) {
-    _joystick->setButton(23, 1);
+  unsigned long sensorValue = analogRead(23);
+  for (int i = 0; i < _config->plungerAverageRead; i++) {
+    sensorValue += analogRead(23);
+  }
+  // Serial.print("sensorraw: ");
+  // Serial.print(sensorValue);
+  // Serial.print("\r\n");
+  sensorValue = sensorValue / (_config->plungerAverageRead + 1);
+  // Serial.print("sensornorm: ");
+  // Serial.print(sensorValue);
+  // Serial.print("\r\n");
+
+  if( (_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3) && buttonState == 0 && sensorValue >= _config->plungerMax - 15) {
+    _joystick->setButton(_config->plungerLaunchButton, 1);
     buttonState = 1;
-  } else if ((_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3)  && buttonState == 1 && sensorValue < _config->plungerMax - 10 ) {
-    _joystick->setButton(23, 0);
+  } else if ((_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3)  && buttonState == 1 && sensorValue < _config->plungerMax - 15 ) {
+    _joystick->setButton(_config->plungerLaunchButton, 0);
     buttonState = 0;
   }
   if( _config->plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= _config->plungerMin + 10) {
-    _joystick->setButton(23, 1);
+    _joystick->setButton(_config->plungerLaunchButton, 1);
     buttonState2 = 1;
   } else if (_config->plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > _config->plungerMin + 10 ) {
-    _joystick->setButton(23, 0);
+    _joystick->setButton(_config->plungerLaunchButton, 0);
     buttonState2 = 0;
   }
   
@@ -51,7 +62,7 @@ void Plunger::plungerRead() {
 }
 
 void Plunger::sendPlungerState() {
-  Serial.print(F("PLUNGER,"));
+  Serial.print(F("P,"));
   Serial.print(analogRead(23));
   Serial.print("\r\n");
 }

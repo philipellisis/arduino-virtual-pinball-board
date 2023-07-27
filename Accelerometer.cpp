@@ -110,10 +110,10 @@ void Accelerometer::accelerometerRead() {
     yValue = temp;
   }
   if(buttonState == 0 && (abs(xValue) > _config->accelerometerTilt || abs(yValue) > _config->accelerometerTilt)) {
-    _joystick->setButton(22, 1);
+    _joystick->setButton(_config->tiltButton, 1);
     buttonState = 1;
   } else if (buttonState == 1 && (abs(xValue) < _config->accelerometerTilt && abs(yValue) < _config->accelerometerTilt)) {
-    _joystick->setButton(22, 0);
+    _joystick->setButton(_config->tiltButton, 0);
     buttonState = 0;
   }
   _joystick->setXAxis(xValue);
@@ -129,7 +129,7 @@ void Accelerometer::accelerometerRead() {
 void Accelerometer::sendAccelerometerState() {
   sensors_event_t a;
   mpu_accel->getEvent(&a);
-  Serial.print(F("ACCEL,"));
+  Serial.print(F("A,"));
   Serial.print((a.acceleration.x - xValueOffset));
   Serial.print(F(","));
   Serial.print((a.acceleration.y - yValueOffset));

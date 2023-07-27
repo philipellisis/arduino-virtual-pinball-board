@@ -37,13 +37,13 @@ void Buttons::readInputs() {
       bool currentButtonState = !shift.state(i);
       //if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i]) {
-        if (i == 21) {
+        if (i == _config->nightModeButton) {
           //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(currentButtonState); Serial.print(F("\r\n"));}
           _config->nightMode = currentButtonState;
         }
-        if (currentButtonState == 1 && i != 21) {
+        if (currentButtonState == 1) {
           buttonPushed = 1;
-        } else if (currentButtonState == 0 && i != 21 && buttonPushed == 2) {
+        } else if (currentButtonState == 0 && buttonPushed == 2) {
           buttonPushed = 0;
         }
         _joystick->setButton(i, currentButtonState);
@@ -77,7 +77,7 @@ void Buttons::readInputs() {
 }
 
 void Buttons::sendButtonState() {
-  Serial.print(F("BUTTONS,"));
+  Serial.print(F("B,"));
   for (int i = 0; i < 23; i++) {
     Serial.print(lastButtonState[i]);
     Serial.print(F(","));

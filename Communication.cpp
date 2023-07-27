@@ -48,7 +48,7 @@ void Communication::communicate() {
             // set admin functions{
             admin = incomingData[2];
           } else if (incomingData[1] == connectionNumber) {
-            Serial.print(F("DEBUG,CSD Board Connected\r\n"));
+            Serial.print(connectedString);
           } else if (incomingData[1] == outputSingleNumber) {
             _outputs->updateOutput(incomingData[2], incomingData[3]);
           } else {
@@ -113,7 +113,7 @@ void Communication::sendAdmin() {
       _outputs->turnOff();
     }
     if (admin == CONNECT) {
-      Serial.print(F("DEBUG,CSD Board Connected\r\n"));
+      Serial.print(connectedString);
       admin = 0;
     }
     delay(50);
