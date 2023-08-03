@@ -98,43 +98,27 @@ void Config::saveConfig() {
 void Config::updateConfigFromSerial() {
     done = 0;
     // get first 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      toySpecialOption[i] = blockRead();
-    }
-  
+    readConfigArray(toySpecialOption, 63);
     // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      turnOffState[i] = blockRead();
-    }
-  
+    readConfigArray(turnOffState, 63);
     // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      maxOutputState[i] = blockRead();
-    }
-  
+    readConfigArray(maxOutputState, 63);
     // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      maxOutputTime[i] = blockRead();
+    readConfigArray(maxOutputTime, 63);
 
-    }
-
-    plungerMax = (blockRead() << 8) + blockRead();
-    plungerMin = (blockRead() << 8) + blockRead();
-    plungerMid = (blockRead() << 8) + blockRead();
-    for (int i = 0; i < 4; i++) {
-      solenoidButtonMap[i] = blockRead();
-    }
-    for (int i = 0; i < 4; i++) {
-      solenoidOutputMap[i] = blockRead();
-    }
+    plungerMax = readIntFromByte();
+    plungerMin = readIntFromByte();
+    plungerMid = readIntFromByte();
+    readConfigArray(solenoidButtonMap, 4);
+    readConfigArray(solenoidOutputMap, 4);
 
     orientation = blockRead();
     accelerometer = blockRead();
     accelerometerSensitivity = blockRead();
-    accelerometerDeadZone = (blockRead() << 8) + blockRead();
+    accelerometerDeadZone = readIntFromByte();
     plungerButtonPush = blockRead();
-    accelerometerTilt = (blockRead() << 8) + blockRead();
-    accelerometerMax = (blockRead() << 8) + blockRead();
+    accelerometerTilt = readIntFromByte();
+    accelerometerMax = readIntFromByte();
     plungerAverageRead = blockRead();
     nightModeButton = blockRead();
     plungerLaunchButton = blockRead();
@@ -142,27 +126,24 @@ void Config::updateConfigFromSerial() {
 
     if (done > 0) {
       printError();
-      return;
+    } else {
+      printSuccess();
     }
-    
-    printSuccess();
 }
 
 void Config::setPlunger() {
     done = 0;
-    plungerMax = (blockRead() << 8) + blockRead();
-    plungerMin = (blockRead() << 8) + blockRead();
-    plungerMid = (blockRead() << 8) + blockRead();
+    plungerMax = readIntFromByte();
+    plungerMin = readIntFromByte();
+    plungerMid = readIntFromByte();
+    plungerButtonPush = blockRead();
+    plungerAverageRead = blockRead();
+    plungerLaunchButton = blockRead();
+
     if (done > 0) {
       printError();
       return;
     }
-
-
-    plungerButtonPush = blockRead();
-
-    plungerAverageRead = blockRead();
-    plungerLaunchButton = blockRead();
 
     writeIntIntoEEPROM(401, plungerMax);
     writeIntIntoEEPROM(403, plungerMin);
@@ -171,17 +152,17 @@ void Config::setPlunger() {
     EEPROM.write(459, plungerAverageRead);
     EEPROM.write(461, plungerLaunchButton);
     
-
     printSuccess();
+    
 }
 
 void Config::setAccelerometer() {
     done = 0;
     accelerometerSensitivity = blockRead();
-    accelerometerDeadZone = (blockRead() << 8) + blockRead();
+    accelerometerDeadZone = readIntFromByte();
     orientation = blockRead();
-    accelerometerTilt = (blockRead() << 8) + blockRead();
-    accelerometerMax = (blockRead() << 8) + blockRead();
+    accelerometerTilt = readIntFromByte();
+    accelerometerMax = readIntFromByte();
     tiltButton = blockRead();
 
     if (done > 0) {
@@ -203,74 +184,42 @@ void Config::printError() {
 }
 
 void Config::sendConfig() {
-    // get first 62 bank maximum values
     Serial.print(F("C,"));
-    for (int i = 0; i < 63; i++) {
-      Serial.print(toySpecialOption[i]);
-      printComma();
-    }
-  
-    // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      Serial.print(turnOffState[i]);
-      printComma();
-    }
-  
-    // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      Serial.print(maxOutputState[i]);
-      printComma();
-    }
-  
-    // get next 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      Serial.print(maxOutputTime[i]);
-      printComma();
-    }
-  
-    Serial.print(plungerMax);
-    printComma();
-    Serial.print(plungerMin);
-    printComma();
-    Serial.print(plungerMid);
-    printComma();
-    
-    for (int i = 0; i < 4; i++) {
-      Serial.print(solenoidButtonMap[i]);
-      printComma();
-    }
-    for (int i = 0; i < 4; i++) {
-      Serial.print(solenoidOutputMap[i]);
-      printComma();
-    }
 
-    Serial.print(orientation);
-    printComma();
-    Serial.print(accelerometer);
-    printComma();
-    Serial.print(accelerometerSensitivity);
-    printComma();
-    Serial.print(accelerometerDeadZone);
-    printComma();
-    Serial.print(plungerButtonPush);
-    printComma();
-    Serial.print(accelerometerTilt);
-    printComma();
-    Serial.print(accelerometerMax);
-    printComma();
-    Serial.print(plungerAverageRead);
-    printComma();
-    Serial.print(nightModeButton);
-    printComma();
-    Serial.print(plungerLaunchButton);
-    printComma();
-    Serial.print(tiltButton);
-    printComma();
+    printConfigArray(toySpecialOption, 63);
+    printConfigArray(turnOffState, 63);
+    printConfigArray(maxOutputState, 63);
+    printConfigArray(maxOutputTime, 63);
+  
+    printIntComma(plungerMax);
+    printIntComma(plungerMin);
+    printIntComma(plungerMid);
+    
+    printConfigArray(solenoidButtonMap, 4);
+    printConfigArray(solenoidOutputMap, 4);
+
+    printComma(orientation);
+    printComma(accelerometer);
+    printComma(accelerometerSensitivity);
+    printIntComma(accelerometerDeadZone);
+    printComma(plungerButtonPush);
+    printIntComma(accelerometerTilt);
+    printIntComma(accelerometerMax);
+    printComma(plungerAverageRead);
+    printComma(nightModeButton);
+    printComma(plungerLaunchButton);
+    printComma(tiltButton);
     
     Serial.print(F("E\r\n"));
 }
 
-void Config::printComma() {
+void Config::printComma(byte value) {
+  Serial.print(value);
+  Serial.print(F(","));
+}
+
+void Config::printIntComma(int value) {
+  Serial.print(value);
   Serial.print(F(","));
 }
 
@@ -304,4 +253,20 @@ void Config::writeIntIntoEEPROM(int address, int number)
 int Config::readIntFromEEPROM(int address)
 {
   return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
+}
+
+int Config::readIntFromByte() {
+  return (blockRead() << 8) + blockRead();
+}
+
+void Config::readConfigArray(byte* configArray, byte size) {
+  for (byte i = 0; i < size; i++) {
+    configArray[i] = blockRead();
+  }
+}
+
+void Config::printConfigArray(byte* configArray, byte size) {
+  for (byte i = 0; i < size; i++) {
+    printComma(configArray[i]);
+  }
 }

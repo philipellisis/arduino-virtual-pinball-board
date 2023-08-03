@@ -28,7 +28,7 @@ class Config {
     byte plungerButtonPush = 0;
 
     byte plungerAverageRead = 10;
-    byte nightModeButton = 21;
+    byte nightModeButton = 14;
     byte plungerLaunchButton = 23;
     byte tiltButton = 22;
 
@@ -47,8 +47,12 @@ class Config {
     void writeIntIntoEEPROM(int address, int number);
     int readIntFromEEPROM(int address);
     void printError();
-    void printComma();
+    void printComma(byte value);
+    void printIntComma(int value);
     void printSuccess();
+    int readIntFromByte();
+    void readConfigArray(byte* configArray, byte size);
+    void printConfigArray(byte* configArray, byte size);
     
     
 };

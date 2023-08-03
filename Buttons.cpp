@@ -37,9 +37,17 @@ void Buttons::readInputs() {
       bool currentButtonState = !shift.state(i);
       //if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i]) {
-        if (i == _config->nightModeButton) {
-          //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(currentButtonState); Serial.print(F("\r\n"));}
-          _config->nightMode = currentButtonState;
+        // mod 24 so that the button number is always between 0 and 23
+        if (i == _config->nightModeButton % 24) {
+          
+          if (_config->nightModeButton < 24) {
+            _config->nightMode = currentButtonState;
+          } else {
+            if (currentButtonState == 1) {
+              //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(_config->nightMode); Serial.print(F("\r\n"));}
+              _config->nightMode = !_config->nightMode;
+            }
+          }
         }
         if (currentButtonState == 1) {
           buttonPushed = 1;
