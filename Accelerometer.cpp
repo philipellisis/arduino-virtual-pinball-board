@@ -15,9 +15,23 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
   _config = config;
 
   byte count = 0;
-  while (!mpu.begin() && _config->accelerometer == 0) {
+  if (!mpu.begin()) {
+    delay(1000);
+  }
+  while (!mpu.begin()) {
     //if (DEBUG) {Serial.print(F("DEBUG,Failed to find MPU6050 chip\r\n"));}
-    delay(5000);
+    delay(100);
+    if (count > 10) {
+      _config->accelerometer = 0;
+      _config->accelerometerEprom = 0;
+      break;
+    }
+    count++;
+  }
+  if (count > 10) {
+    return;
+  } else {
+    count = 0;
   }
   
   //setup motion detection
