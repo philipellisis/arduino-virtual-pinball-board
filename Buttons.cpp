@@ -1,10 +1,10 @@
 #include "Buttons.h"
 #include <Arduino.h>
 #include <Joystick.h>
-#include "ShiftIn.h"
+#include "ButtonReader.h"
 #include "Enums.h"
 
-ShiftIn<3> shift;
+ButtonReader buttonReader;
 
 // Pin 18, A0 = UP
 // Pin 19, A1 = RIGHT
@@ -15,7 +15,7 @@ ShiftIn<3> shift;
 Buttons::Buttons() {
   // Initialize Button Pins
   //if (DEBUG) {Serial.print(F("DEBUG,buttons: About to initialize pins\r\n"));}
-  shift.begin(4, 1, 0);
+  buttonReader.init();
   //if (DEBUG) {Serial.print(F("DEBUG,buttons: pins initialized\r\n"));}
   
 }
@@ -31,10 +31,10 @@ void Buttons::init(Joystick_* joystick, Config* config, Outputs* outputs) {
 void Buttons::readInputs() {
   byte buttonPushed = 2;
   // read shift register values
-  if(shift.update()) {
+  if(buttonReader.update()) {
     //if (DEBUG) {Serial.print(F("DEBUG"));}
-    for(int i = 0; i < shift.getDataWidth(); i++) {
-      bool currentButtonState = !shift.state(i);
+    for(int i = 0; i < 24; i++) {
+      bool currentButtonState = !buttonReader.state(i);
       //if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i]) {
         // mod 24 so that the button number is always between 0 and 23
