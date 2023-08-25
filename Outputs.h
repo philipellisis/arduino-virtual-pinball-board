@@ -19,6 +19,7 @@ class Outputs {
     
   private:
     Config* _config;
+    void updateOutputInternal(byte outputId, byte outputValue);
     bool DEBUG = false;
     byte numberOutputs = 15;
     byte outputList[15] = {5,6,10,9,8,7,12,18,19,20,21,22,14,15,16};

@@ -117,7 +117,7 @@ void Communication::sendAdmin() {
       admin = 0;
     }
     if (admin == VERSION) {
-      Serial.print(F("VERSION,1.6.0\r\n"));
+      Serial.print(F("VERSION,1.7.0\r\n"));
       admin = 0;
     }
     delay(50);

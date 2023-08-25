@@ -43,9 +43,31 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
   if (outputValue > _config->maxOutputState[outputId]) {
     outputValue = _config->maxOutputState[outputId];
   }
-  if (_config->nightMode == true && bitRead(_config->toySpecialOption[outputId],0) == 1) {
+  if (_config->nightMode == true && (_config->toySpecialOption[outputId] == 1 || _config->toySpecialOption[outputId] == 3)) {
     outputValue = 0;
   }
+  if (_config->toySpecialOption[outputId] == 3 && outputValues[outputId] > 0) {
+    for (int i = 0; i < 62; i++) {
+      if(_config->toySpecialOption[i] == 3 && outputValues[i] == 0) {
+        outputId = i;
+        Serial.print(F("DEBUG,switching to another unused output since this one already enabled\r\n"));
+        break;
+      }
+    }
+  }
+  if (_config->toySpecialOption[outputId] == 3 && outputValue == 0) {
+    for (int i = 0; i < 62; i++) {
+      if(_config->toySpecialOption[i] == 3 && outputValues[i] > 0) {
+        updateOutputInternal(i, 0);
+        Serial.print(F("DEBUG,turning off shared outputs\r\n"));
+      }
+    }
+  } else {
+    updateOutputInternal(outputId, outputValue);
+  }
+}
+
+void Outputs::updateOutputInternal(byte outputId, byte outputValue) {
   //if (DEBUG) {Serial.print(F("DEBUG,output ")); Serial.print(outputId); Serial.print(F(" set to ")); Serial.print(outputValue); Serial.print("\r\n");}
   outputValues[outputId] = outputValue;
   if (outputValue != 0) {
