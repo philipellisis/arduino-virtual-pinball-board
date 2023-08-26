@@ -9,10 +9,10 @@ void LightShow::init(Config* config, Outputs* outputs) {
   _config = config;
   _outputs = outputs;
   for (int i = 0; i < 62; i++) {
-    if (_config->toySpecialOption[i] == 2 && startLight == 0) {
+    if ((_config->toySpecialOption[i] == LIGHT_SHOW_MEDIUM || _config->toySpecialOption[i] == LIGHT_SHOW_HIGH) && startLight == 0) {
       startLight = i;
     }
-    if (_config->toySpecialOption[i] == 2) {
+    if ((_config->toySpecialOption[i] == LIGHT_SHOW_MEDIUM || _config->toySpecialOption[i] == LIGHT_SHOW_HIGH)) {
       finishLight = i + 1;
     }
   }
@@ -103,8 +103,10 @@ void LightShow::setLightsNormal() {
   setStartFinishLoops();
 
   for (int i = currentStartLight; i < currentFinishLight; i++) {
-    if (_config->toySpecialOption[i] == 2) {
+    if (_config->toySpecialOption[i] == LIGHT_SHOW_MEDIUM) {
       _outputs->updateOutput(i, 60);
+    } else if (_config->toySpecialOption[i] == LIGHT_SHOW_HIGH) {
+        _outputs->updateOutput(i, 255);
     }
   }
 }
@@ -114,7 +116,7 @@ void LightShow::setLightsHigh() {
   setStartFinishLoops();
 
   for (int i = currentStartLight; i < currentFinishLight; i++) {
-    if (_config->toySpecialOption[i] == 2) {
+    if (_config->toySpecialOption[i] == LIGHT_SHOW_MEDIUM) {
       _outputs->updateOutput(i, 255);
     }
   }
@@ -125,7 +127,7 @@ void LightShow::setLightsRandom() {
   setStartFinishLoops();
 
   for (int i = currentStartLight; i < currentFinishLight; i++) {
-    if (_config->toySpecialOption[i] == 2) {
+    if (_config->toySpecialOption[i] == LIGHT_SHOW_MEDIUM || _config->toySpecialOption[i] == LIGHT_SHOW_HIGH ) {
       byte rnd = random(256);
       _outputs->updateOutput(i, rnd);
       outputDirection[i] = rnd % 2;
@@ -144,7 +146,7 @@ void LightShow::incrementRandom() {
     //   Serial.print(outputValues[i]);
     //   Serial.print(F("\r\n"));
     // }
-    if (_config->toySpecialOption[i] == 2) {
+    if (_config->toySpecialOption[i] == LIGHT_SHOW_MEDIUM || _config->toySpecialOption[i] == LIGHT_SHOW_HIGH ) {
       if (outputDirection[i] == 1) {
         if (outputValues[i] >= 255 - incrementor) {
           outputDirection[i] = 0;

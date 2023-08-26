@@ -33,6 +33,13 @@ enum light_show_state {
   IN_RANDOM_MODE_WAITING_INPUT = 6
 
 };
+enum output_type {
+  NONE = 0,
+  NOISY = 1,
+  LIGHT_SHOW_MEDIUM = 2,
+  LIGHT_SHOW_HIGH = 3,
+  SHARED = 4,
+};
 
 enum eeprom {
   PLUNGER_MIN = 1,

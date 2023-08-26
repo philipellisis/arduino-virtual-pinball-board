@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include <Adafruit_PWMServoDriver.h>
 #include <Wire.h>
-
+#include "Enums.h"
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
@@ -43,23 +43,23 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
   if (outputValue > _config->maxOutputState[outputId]) {
     outputValue = _config->maxOutputState[outputId];
   }
-  if (_config->nightMode == true && (_config->toySpecialOption[outputId] == 1 || _config->toySpecialOption[outputId] == 3)) {
+  if (_config->nightMode == true && (_config->toySpecialOption[outputId] == NOISY || _config->toySpecialOption[outputId] == SHARED)) {
     outputValue = 0;
   }
-  if (_config->toySpecialOption[outputId] == 3 && outputValues[outputId] > 0) {
-    for (int i = 0; i < 62; i++) {
-      if(_config->toySpecialOption[i] == 3 && outputValues[i] == 0) {
+  if (_config->toySpecialOption[outputId] == SHARED && outputValues[outputId] > 0) {
+    for (int i = 0; i < 9; i++) {
+      if(_config->toySpecialOption[i] == SHARED && outputValues[i] == 0) {
         outputId = i;
-        Serial.print(F("DEBUG,switching to another unused output since this one already enabled\r\n"));
+        //Serial.print(F("DEBUG,switching to another unused output since this one already enabled\r\n"));
         break;
       }
     }
   }
-  if (_config->toySpecialOption[outputId] == 3 && outputValue == 0) {
-    for (int i = 0; i < 62; i++) {
-      if(_config->toySpecialOption[i] == 3 && outputValues[i] > 0) {
+  if (_config->toySpecialOption[outputId] == SHARED && outputValue == 0) {
+    for (int i = 0; i < 9; i++) {
+      if(_config->toySpecialOption[i] == SHARED && outputValues[i] > 0) {
         updateOutputInternal(i, 0);
-        Serial.print(F("DEBUG,turning off shared outputs\r\n"));
+        //Serial.print(F("DEBUG,turning off shared outputs\r\n"));
       }
     }
   } else {
