@@ -15,9 +15,9 @@ class Buttons {
     
     
   private:
+    byte buttonOffset = 0;
     bool DEBUG = false;
-    int numberInputs = 24;
-    bool lastButtonState[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    bool lastButtonState[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     Joystick_* _joystick;
     Config* _config;
     Outputs* _outputs;

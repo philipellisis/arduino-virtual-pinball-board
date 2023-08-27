@@ -13,13 +13,14 @@ Communication::Communication() {
 
 
 
-void Communication::init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs) {
+void Communication::init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs, Joystick_* joystick) {
   //if (DEBUG) {Serial.print(F("Communication: initializing Communication\r\n"));}
   _outputs = outputs;
   _plunger = plunger;
   _accelerometer = accel;
   _buttons = buttons;
   _config = config;
+  _joystick = joystick;
 }
 
 void Communication::communicate() {
@@ -51,6 +52,25 @@ void Communication::communicate() {
             Serial.print(connectedString);
           } else if (incomingData[1] == outputSingleNumber) {
             _outputs->updateOutput(incomingData[2], incomingData[3]);
+          } else if (incomingData[1] == outputButtonNumber) {
+            if (incomingData[2] < 28) {
+              _joystick->setButton(incomingData[2], 1);
+              delay(100);
+              _joystick->setButton(incomingData[2], 0);
+            } else if (incomingData[2] == 28) {
+              _joystick->setXAxis(-_config->accelerometerMax);
+            } else if (incomingData[2] == 29) {
+              _joystick->setXAxis(_config->accelerometerMax);
+            } else if (incomingData[2] == 30) {
+              _joystick->setYAxis(-_config->accelerometerMax);
+            } else if (incomingData[2] == 31) {
+              _joystick->setYAxis(_config->accelerometerMax);
+            } else if (incomingData[2] == 32) {
+              _joystick->setZAxis(-100000);
+            } else {
+              _joystick->setZAxis(100000);
+            }
+
           } else {
             //normal operation
             //if (DEBUG) {Serial.print(F("DEBUG,sending output\r\n"));}
@@ -71,54 +91,60 @@ void Communication::communicate() {
 }
 
 void Communication::sendAdmin() {
+
+
+    
+
   if (admin > 0) {
-    //if (DEBUG) {Serial.print(F("DEBUG,going into admin mode\r\n"));}
-    if (admin == BUTTONS) {
+    switch (admin)
+    {
+    case BUTTONS:
       _buttons->sendButtonState();
-    }
-    if (admin == OUTPUTS) {
+      break;
+    case OUTPUTS:
       _outputs->sendOutputState();
-    }
-    if (admin == PLUNGER) {
+      break;
+    case PLUNGER:
       _plunger->sendPlungerState();
-    }
-    if (admin == ACCEL) {
+      break;
+    case ACCEL:
       _accelerometer->sendAccelerometerState();
-    }
-    if (admin == SEND_CONFIG) {
+      break;
+    case SEND_CONFIG:
       _config->sendConfig();
       admin = 0;
-    }
-    if (admin == GET_CONFIG) {
+      break;
+    case GET_CONFIG:
       _config->updateConfigFromSerial();
       admin = 0;
-    }
-    if (admin == SET_PLUNGER) {
+      break;
+    case SET_PLUNGER:
       _config->setPlunger();
       _plunger->resetPlunger();
       admin = 3;
-    }
-    if (admin == SET_ACCEL) {
+      break;
+    case SET_ACCEL:
       _config->setAccelerometer();
       _accelerometer->resetAccelerometer();
       admin = 4;
-    }
-    if (admin == SAVE_CONFIG) {
+      break;
+    case SAVE_CONFIG:
       _config->saveConfig();
       admin = 0;
-    }
-    if (admin == OFF) {
+      break;
+    case OFF:
       admin = 0;
       _config->lightShowState = OUTPUT_RECEIVED_RESET_TIMER;
       _outputs->turnOff();
-    }
-    if (admin == CONNECT) {
+      break;
+    case CONNECT:
       Serial.print(connectedString);
       admin = 0;
-    }
-    if (admin == VERSION) {
-      Serial.print(F("VERSION,1.7.0\r\n"));
+      break;
+    case VERSION:
+      Serial.print(F("V,1.7.0\r\n"));
       admin = 0;
+      break;
     }
     delay(50);
   }

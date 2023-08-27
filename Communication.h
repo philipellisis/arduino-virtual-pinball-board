@@ -12,7 +12,7 @@ class Communication {
   
   public:
     Communication();
-    void init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs);
+    void init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs, Joystick_* joystick);
     //void init();
     void communicate();
     
@@ -24,6 +24,7 @@ class Communication {
     byte adminNumber = 250; //250 normally
     byte connectionNumber = 251;//251 normally
     byte outputSingleNumber = 252;//252 normally
+    byte outputButtonNumber = 253;//252 normally
     byte maxNumber = 255; //255 normally
     float scaleFactor = 255/float(maxNumber-firstNumber);
     Accelerometer* _accelerometer;
@@ -31,6 +32,7 @@ class Communication {
     Buttons* _buttons;
     Config* _config;
     Outputs* _outputs;
+    Joystick_* _joystick;
     byte incomingData[10];
     int dataLocation = 0;
     void updateOutputs();
