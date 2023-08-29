@@ -55,21 +55,22 @@ void Communication::communicate() {
           } else if (incomingData[1] == outputButtonNumber) {
             if (incomingData[2] < 28) {
               _joystick->setButton(incomingData[2], 1);
-              delay(100);
+              delay(500);
               _joystick->setButton(incomingData[2], 0);
             } else if (incomingData[2] == 28) {
-              _joystick->setXAxis(-_config->accelerometerMax);
+              _joystick->setXAxis(-100000);
             } else if (incomingData[2] == 29) {
-              _joystick->setXAxis(_config->accelerometerMax);
+              _joystick->setXAxis(100000);
             } else if (incomingData[2] == 30) {
-              _joystick->setYAxis(-_config->accelerometerMax);
+              _joystick->setYAxis(-100000);
             } else if (incomingData[2] == 31) {
-              _joystick->setYAxis(_config->accelerometerMax);
+              _joystick->setYAxis(100000);
             } else if (incomingData[2] == 32) {
               _joystick->setZAxis(-100000);
             } else {
               _joystick->setZAxis(100000);
             }
+            delay(500);
 
           } else {
             //normal operation
