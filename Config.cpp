@@ -47,6 +47,7 @@ void Config::init() {
     EEPROM.get(460, nightModeButton);
     EEPROM.get(461, plungerLaunchButton);
     EEPROM.get(462, tiltButton);
+    EEPROM.get(463, shiftButton);
 
   } else {
     //save default config in case it's never been done before
@@ -90,6 +91,7 @@ void Config::saveConfig() {
     EEPROM.write(460, nightModeButton);
     EEPROM.write(461, plungerLaunchButton);
     EEPROM.write(462, tiltButton);
+    EEPROM.write(463, shiftButton);
 
     EEPROM.write(1000, 101);
     printSuccess();
@@ -123,6 +125,7 @@ void Config::updateConfigFromSerial() {
     nightModeButton = blockRead();
     plungerLaunchButton = blockRead();
     tiltButton = blockRead();
+    shiftButton = blockRead();
 
     if (done > 0) {
       printError();
@@ -209,6 +212,7 @@ void Config::sendConfig() {
     printComma(nightModeButton);
     printComma(plungerLaunchButton);
     printComma(tiltButton);
+    printComma(shiftButton);
     
     Serial.print(F("E\r\n"));
 }

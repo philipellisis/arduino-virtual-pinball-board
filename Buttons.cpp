@@ -55,7 +55,7 @@ void Buttons::readInputs() {
           buttonPushed = 0;
         }
         
-        if (i > 3 && i < 8 && lastButtonState[8] == 1) {
+        if (i > 3 && i < 8 && lastButtonState[_config->shiftButton] == 1) {
           buttonOffset = 20;
         } else {
           buttonOffset = 0;

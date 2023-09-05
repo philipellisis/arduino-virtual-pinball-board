@@ -53,22 +53,29 @@ void Communication::communicate() {
           } else if (incomingData[1] == outputSingleNumber) {
             _outputs->updateOutput(incomingData[2], incomingData[3]);
           } else if (incomingData[1] == outputButtonNumber) {
-            if (incomingData[2] < 28) {
-              _joystick->setButton(incomingData[2], 1);
-              delay(500);
-              _joystick->setButton(incomingData[2], 0);
-            } else if (incomingData[2] == 28) {
-              _joystick->setXAxis(-100000);
-            } else if (incomingData[2] == 29) {
-              _joystick->setXAxis(100000);
-            } else if (incomingData[2] == 30) {
-              _joystick->setYAxis(-100000);
-            } else if (incomingData[2] == 31) {
-              _joystick->setYAxis(100000);
-            } else if (incomingData[2] == 32) {
-              _joystick->setZAxis(-100000);
-            } else {
-              _joystick->setZAxis(100000);
+            switch(incomingData[2]) {
+              case 28:
+                _joystick->setXAxis(-100000);
+                break;
+              case 29:
+                _joystick->setXAxis(100000);
+                break;
+              case 30:
+                _joystick->setYAxis(-100000);
+                break;
+              case 31:
+                _joystick->setYAxis(100000);
+                break;
+              case 32:
+                _joystick->setZAxis(-100000);
+                break;
+              case 33:
+                _joystick->setZAxis(100000);
+                break;
+              default:
+                _joystick->setButton(incomingData[2], 1);
+                delay(500);
+                _joystick->setButton(incomingData[2], 0);
             }
             delay(500);
 
@@ -143,7 +150,7 @@ void Communication::sendAdmin() {
       admin = 0;
       break;
     case VERSION:
-      Serial.print(F("V,1.7.0\r\n"));
+      Serial.print(F("V,1.8.0\r\n"));
       admin = 0;
       break;
     }

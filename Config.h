@@ -31,6 +31,7 @@ class Config {
     byte nightModeButton = 14;
     byte plungerLaunchButton = 23;
     byte tiltButton = 22;
+    byte shiftButton = 2;
 
     byte done = 0;
     bool nightMode = false;
