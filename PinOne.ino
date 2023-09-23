@@ -50,12 +50,14 @@ void setup() {
 void loop() {
   //long int t1 = millis();
   buttons.readInputs();
-  plunger.plungerRead();
-  if (config.accelerometerEprom > 0) {
-    accel.accelerometerRead();
+  if(!USBDevice.isSuspended()) {
+    plunger.plungerRead();
+    if (config.accelerometerEprom > 0) {
+      accel.accelerometerRead();
+    }
+    lightShow.checkSetLights();
+    comm.communicate();
   }
-  lightShow.checkSetLights();
-  comm.communicate();
   //long int t2 = millis();
   //Serial.print(F("DEBUG,Time taken by the task: ")); Serial.print((t2-t1)); Serial.print(F(" milliseconds\r\n"));
 
