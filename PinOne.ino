@@ -50,7 +50,7 @@ void setup() {
 void loop() {
   //long int t1 = millis();
   buttons.readInputs();
-  if(!USBDevice.isSuspended()) {
+  if (!USBDevice.isSuspended()) {
     plunger.plungerRead();
     if (config.accelerometerEprom > 0) {
       accel.accelerometerRead();
