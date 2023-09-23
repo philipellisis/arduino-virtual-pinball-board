@@ -64,5 +64,5 @@ void Plunger::plungerRead() {
 void Plunger::sendPlungerState() {
   Serial.print(F("P,"));
   Serial.print(analogRead(23));
-  Serial.print("\r\n");
+  Serial.print(F("\r\n"));
 }
