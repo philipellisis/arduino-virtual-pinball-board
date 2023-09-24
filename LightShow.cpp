@@ -128,7 +128,7 @@ void LightShow::setLightsRandom() {
 
   for (int i = currentStartLight; i < currentFinishLight; i++) {
     if (_config->toySpecialOption[i] == LIGHT_SHOW_MEDIUM || _config->toySpecialOption[i] == LIGHT_SHOW_HIGH ) {
-      byte rnd = random(256);
+      byte rnd = rand() % 256;
       _outputs->updateOutput(i, rnd);
       outputDirection[i] = rnd % 2;
       outputValues[i] = rnd;
