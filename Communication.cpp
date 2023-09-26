@@ -104,6 +104,7 @@ void Communication::sendAdmin() {
     
 
   if (admin > 0) {
+    delay(50);
     switch (admin)
     {
     case BUTTONS:
@@ -154,7 +155,7 @@ void Communication::sendAdmin() {
       admin = 0;
       break;
     }
-    delay(50);
+    
   }
 }
 

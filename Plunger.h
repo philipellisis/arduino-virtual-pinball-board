@@ -21,6 +21,7 @@ class Plunger {
     Config* _config;
     byte buttonState;
     byte buttonState2;
+    int priorValue;
 };
 
 #endif

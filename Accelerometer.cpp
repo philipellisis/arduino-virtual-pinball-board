@@ -1,12 +1,11 @@
 #include "Accelerometer.h"
 #include <Arduino.h>
 #include <Joystick.h>
-#include <Adafruit_MPU6050.h>
+#include "MPU6050.h"
 #include "Enums.h"
 
 
-Adafruit_MPU6050 mpu;
-Adafruit_Sensor *mpu_accel;
+MPU6050 mpu;
 Accelerometer::Accelerometer() {
 }
 
@@ -15,10 +14,10 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
   _config = config;
 
   byte count = 0;
-  if (!mpu.begin()) {
+  if (!mpu.init()) {
     delay(1000);
   }
-  while (!mpu.begin()) {
+  while (!mpu.init()) {
     //if (DEBUG) {Serial.print(F("DEBUG,Failed to find MPU6050 chip\r\n"));}
     delay(100);
     if (count > 10) {
@@ -33,40 +32,15 @@ void Accelerometer::init(Joystick_* joystick, Config* config) {
   } else {
     count = 0;
   }
-  
-  //setup motion detection
-  // MPU6050_BAND_5_HZ 
-  // MPU6050_BAND_10_HZ 
-  // MPU6050_BAND_21_HZ 
-  // MPU6050_BAND_44_HZ 
-  // MPU6050_BAND_94_HZ 
-  // MPU6050_BAND_184_HZ 
-  // MPU6050_BAND_260_HZ 
-  mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
 
-  // MPU6050_HIGHPASS_DISABLE
-  // MPU6050_HIGHPASS_5_HZ
-  // MPU6050_HIGHPASS_2_5_HZ
-  // MPU6050_HIGHPASS_1_25_HZ
-  // MPU6050_HIGHPASS_0_63_HZ
-  // MPU6050_HIGHPASS_UNUSED
-  // MPU6050_HIGHPASS_HOLD
-  mpu.setHighPassFilter(MPU6050_HIGHPASS_0_63_HZ);
-
-  mpu.setMotionDetectionThreshold(1);
-  mpu.setMotionDetectionDuration(20);
-  mpu.setInterruptPinLatch(true);  // Keep it latched.  Will turn off when reinitialized.
-  mpu.setInterruptPinPolarity(true);
-  mpu.setMotionInterrupt(true);
+  mpu.config();
   resetAccelerometer();
   //assign accelerometer
-  mpu_accel = mpu.getAccelerometerSensor();
   delay(100);
-  sensors_event_t a;
   while (count < 10) {
-    mpu_accel->getEvent(&a);
-    xValueOffset += a.acceleration.x;
-    yValueOffset += a.acceleration.y;
+    mpu.read();
+    xValueOffset += mpu.getX();
+    yValueOffset += mpu.getY();
     count++;
   }
   xValueOffset = xValueOffset/10;
@@ -89,11 +63,10 @@ void Accelerometer::accelerometerRead() {
   //yValue = 0;
   //if(mpu.getMotionInterruptStatus()) {
   /* Get new sensor events with the readings */
-  sensors_event_t a;
-  mpu_accel->getEvent(&a);
+  mpu.read();
 
-  xValue = floor((a.acceleration.x - xValueOffset)*100);
-  yValue = floor((a.acceleration.y - yValueOffset)*100);
+  xValue = floor((mpu.getX() - xValueOffset)*100);
+  yValue = floor((mpu.getY() - yValueOffset)*100);
   if (abs(xValue) < _config->accelerometerDeadZone) {
     xValue = 0;
   }
@@ -130,8 +103,10 @@ void Accelerometer::accelerometerRead() {
     _joystick->setButton(_config->tiltButton, 0);
     buttonState = 0;
   }
+
   _joystick->setXAxis(xValue);
   _joystick->setYAxis(yValue);
+
   //if (DEBUG) {Serial.print(F("DEBUG,AccelX:"));}
   //if (DEBUG) {Serial.print(xValue);}
   //if (DEBUG) {Serial.print(F(","));}
@@ -141,12 +116,10 @@ void Accelerometer::accelerometerRead() {
 }
 
 void Accelerometer::sendAccelerometerState() {
-  sensors_event_t a;
-  mpu_accel->getEvent(&a);
   Serial.print(F("A,"));
-  Serial.print((a.acceleration.x - xValueOffset));
+  Serial.print((mpu.getX() - xValueOffset));
   Serial.print(F(","));
-  Serial.print((a.acceleration.y - yValueOffset));
+  Serial.print((mpu.getY() - yValueOffset));
   Serial.print(F(","));
   Serial.print(xValue);
   Serial.print(F(","));

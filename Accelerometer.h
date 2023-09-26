@@ -22,6 +22,8 @@ class Accelerometer {
     Joystick_* _joystick;
     int xValue;
     int yValue;
+    int priorXValue;
+    int priorYValue;
     byte buttonState;
 };
 
