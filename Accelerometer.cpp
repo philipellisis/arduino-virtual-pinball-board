@@ -67,10 +67,10 @@ void Accelerometer::accelerometerRead() {
 
   xValue = floor((mpu.getX() - xValueOffset)*100);
   yValue = floor((mpu.getY() - yValueOffset)*100);
-  if (abs(xValue) < _config->accelerometerDeadZone) {
+  if (abs(xValue) < _config->accelerometerDeadZone || _config->restingStateCounter != 200) {
     xValue = 0;
   }
-  if (abs(yValue) < _config->accelerometerDeadZone) {
+  if (abs(yValue) < _config->accelerometerDeadZone || _config->restingStateCounter != 200) {
     yValue = 0;
   }
   int temp = xValue;

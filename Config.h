@@ -43,7 +43,7 @@ class Config {
     byte lightShowState = 1;
 
     byte buttonKeyboard[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    
+    byte restingStateCounter = 200;
   private:
     bool DEBUG = false;
     byte Config::blockRead();
