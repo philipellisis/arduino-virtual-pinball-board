@@ -20,7 +20,7 @@ void Plunger::init(Joystick_* joystick, Config* config) {
 }
 
 void Plunger::resetPlunger() {
-  plungerScaleFactor = (float)_config->plungerMid / (float)_config->plungerMax;
+  plungerScaleFactor = (float)(_config->plungerMid - _config->plungerMin) / (float)(_config->plungerMax - _config->plungerMid);
   _joystick->setZAxisRange(_config->plungerMin, (_config->plungerMax - _config->plungerMid) * plungerScaleFactor + _config->plungerMid);
 }
 

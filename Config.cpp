@@ -48,6 +48,10 @@ void Config::init() {
     EEPROM.get(461, plungerLaunchButton);
     EEPROM.get(462, tiltButton);
     EEPROM.get(463, shiftButton);
+    for (int i = 0; i < 27; i++) {
+      EEPROM.get(i + 500, buttonKeyboard[i]);
+    }
+
 
   } else {
     //save default config in case it's never been done before
@@ -92,7 +96,9 @@ void Config::saveConfig() {
     EEPROM.write(461, plungerLaunchButton);
     EEPROM.write(462, tiltButton);
     EEPROM.write(463, shiftButton);
-
+    for (int i = 0; i < 27; i++) {
+      EEPROM.write(i + 500, buttonKeyboard[i]);
+    }
     EEPROM.write(1000, 101);
     printSuccess();
 }
@@ -126,6 +132,7 @@ void Config::updateConfigFromSerial() {
     plungerLaunchButton = blockRead();
     tiltButton = blockRead();
     shiftButton = blockRead();
+    readConfigArray(buttonKeyboard, 27);
 
     if (done > 0) {
       printError();
@@ -213,7 +220,7 @@ void Config::sendConfig() {
     printComma(plungerLaunchButton);
     printComma(tiltButton);
     printComma(shiftButton);
-    
+    printConfigArray(buttonKeyboard, 27);
     Serial.print(F("E\r\n"));
 }
 

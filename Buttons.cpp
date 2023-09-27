@@ -3,6 +3,7 @@
 #include <Joystick.h>
 #include "ButtonReader.h"
 #include "Enums.h"
+#include <Keyboard.h>
 
 ButtonReader buttonReader;
 
@@ -25,6 +26,7 @@ void Buttons::init(Joystick_* joystick, Config* config, Outputs* outputs) {
   _joystick = joystick;
   _config = config;
   _outputs = outputs;
+  Keyboard.begin();
   //if (DEBUG) {Serial.print(F("DEBUG,buttons: initialized joystick\r\n"));}
 }
 
@@ -60,7 +62,16 @@ void Buttons::readInputs() {
         } else {
           buttonOffset = 0;
         }
+        if (_config->buttonKeyboard[i + buttonOffset] > 0) {
+          if (currentButtonState == 1) {
+            Keyboard.press(_config->buttonKeyboard[i + buttonOffset]);
+          } else {
+            Keyboard.release(_config->buttonKeyboard[i + buttonOffset]);
+          }
+        }
         _joystick->setButton(i + buttonOffset, currentButtonState);
+        
+        
         lastButtonState[i] = currentButtonState;
 
         for (int j = 0; j < 4; j++) {

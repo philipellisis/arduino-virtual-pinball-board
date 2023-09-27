@@ -41,6 +41,8 @@ class Config {
     void setAccelerometer();
 
     byte lightShowState = 1;
+
+    byte buttonKeyboard[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     
   private:
     bool DEBUG = false;
