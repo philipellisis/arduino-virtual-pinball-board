@@ -13,6 +13,7 @@ class Accelerometer {
     void accelerometerRead();
     void sendAccelerometerState();
     void resetAccelerometer();
+    void centerAccelerometer();
     
   private:
     bool DEBUG = false;
@@ -25,6 +26,7 @@ class Accelerometer {
     int priorXValue;
     int priorYValue;
     byte buttonState;
+    bool recentered = false;
 };
 
 #endif

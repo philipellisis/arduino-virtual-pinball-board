@@ -26,6 +26,8 @@ void Plunger::resetPlunger() {
 
 void Plunger::plungerRead() {
   unsigned long sensorValue = analogRead(23);
+
+  //TODO: Perhaps only do averaging if the plunger is in active use?
   for (int i = 0; i < _config->plungerAverageRead; i++) {
     sensorValue += analogRead(23);
   }
