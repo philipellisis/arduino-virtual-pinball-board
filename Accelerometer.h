@@ -27,6 +27,7 @@ class Accelerometer {
     int priorYValue;
     byte buttonState;
     bool recentered = false;
+    byte orientation = 0;
 };
 
 #endif

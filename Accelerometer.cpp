@@ -42,23 +42,27 @@ void Accelerometer::init(Joystick_ *joystick, Config *config)
 
   mpu.config();
   resetAccelerometer();
-  // assign accelerometer
-  delay(300);
-  centerAccelerometer();
 
   // if (DEBUG) {Serial.print(F("DEBUG,MPU6050 Found!\r\n"));}
 }
 
 void Accelerometer::centerAccelerometer()
 {
+  delay(400);
+
   byte count = 0;
   xValueOffset = 0;
   yValueOffset = 0;
   while (count < 50)
   {
     mpu.read();
-    xValueOffset += mpu.getX();
+    if (_config->orientation > 7) {
+      xValueOffset += mpu.getZ();
+    } else {
+      xValueOffset += mpu.getX();
+    }
     yValueOffset += mpu.getY();
+
     count++;
   }
   xValueOffset = xValueOffset / 50;
@@ -67,10 +71,16 @@ void Accelerometer::centerAccelerometer()
 
 void Accelerometer::resetAccelerometer()
 {
+  if (_config->orientation > 7) {
+    orientation = _config->orientation - 8;
+  } else {
+    orientation = _config->orientation;
+  }
   _joystick->setXAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
   _joystick->setYAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
 
   mpu.setAccelerometerRange(_config->accelerometerSensitivity);
+  centerAccelerometer();
 }
 
 void Accelerometer::accelerometerRead()
@@ -93,8 +103,13 @@ void Accelerometer::accelerometerRead()
   /* Get new sensor events with the readings */
   mpu.read();
 
-  xValue = floor((mpu.getX() - xValueOffset) * 100);
+  if (_config->orientation > 7) {
+    xValue = floor((mpu.getZ() - xValueOffset) * 100);
+  } else {
+    xValue = floor((mpu.getX() - xValueOffset) * 100);
+  }
   yValue = floor((mpu.getY() - yValueOffset) * 100);
+  
   if (abs(xValue) < _config->accelerometerDeadZone || _config->restingStateCounter != 200)
   {
     xValue = 0;
@@ -104,37 +119,37 @@ void Accelerometer::accelerometerRead()
     yValue = 0;
   }
   int temp = xValue;
-  if (_config->orientation == RIGHT)
+  if (orientation == RIGHT)
   {
     xValue = -yValue;
     yValue = temp;
   }
-  else if (_config->orientation == FORWARD)
+  else if (orientation == FORWARD)
   {
     xValue = -xValue;
     yValue = -yValue;
   }
-  else if (_config->orientation == LEFT)
+  else if (orientation == LEFT)
   {
     xValue = yValue;
     yValue = -temp;
   }
-  else if (_config->orientation == UP_BACK)
+  else if (orientation == UP_BACK)
   {
     xValue = -xValue;
     yValue = yValue;
   }
-  else if (_config->orientation == UP_RIGHT)
+  else if (orientation == UP_RIGHT)
   {
     xValue = -yValue;
     yValue = -temp;
   }
-  else if (_config->orientation == UP_FORWARD)
+  else if (orientation == UP_FORWARD)
   {
     xValue = xValue;
     yValue = -yValue;
   }
-  else if (_config->orientation == UP_LEFT)
+  else if (orientation == UP_LEFT)
   {
     xValue = yValue;
     yValue = temp;
@@ -153,18 +168,34 @@ void Accelerometer::accelerometerRead()
   _joystick->setXAxis(xValue);
   _joystick->setYAxis(yValue);
 
-  // if (DEBUG) {Serial.print(F("DEBUG,AccelX:"));}
-  // if (DEBUG) {Serial.print(xValue);}
-  // if (DEBUG) {Serial.print(F(","));}
-  // if (DEBUG) {Serial.print(F("AccelY:"));}
-  // if (DEBUG) {Serial.print(yValue);}
-  // if (DEBUG) {Serial.print(F("\r\n"));}
+  // Serial.print(F("DEBUG,AccelX:"));
+  // Serial.print(xValue);
+  // Serial.print(F(","));
+  // Serial.print(F("AccelY:"));
+  // Serial.print(yValue);
+  // Serial.print(F(","));
+  // Serial.print(F("offsetX:"));
+  // Serial.print(xValueOffset);
+  // Serial.print(F(","));
+  // Serial.print(F("offsetY:"));
+  // Serial.print(yValueOffset);
+  // Serial.print(F(","));
+  // Serial.print(F("rawX:"));
+  // Serial.print(mpu.getZ());
+  // Serial.print(F(","));
+  // Serial.print(F("rawY:"));
+  // Serial.print(mpu.getY());
+  // Serial.print(F("\r\n"));
 }
 
 void Accelerometer::sendAccelerometerState()
 {
   Serial.print(F("A,"));
-  Serial.print((mpu.getX() - xValueOffset));
+  if (_config->orientation > 7) {
+     Serial.print((mpu.getZ() - xValueOffset));
+  } else {
+     Serial.print((mpu.getX() - xValueOffset));
+  }
   Serial.print(F(","));
   Serial.print((mpu.getY() - yValueOffset));
   Serial.print(F(","));

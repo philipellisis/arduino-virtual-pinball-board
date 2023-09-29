@@ -26,7 +26,7 @@ class Communication {
     byte outputSingleNumber = 252;//252 normally
     byte outputButtonNumber = 253;//252 normally
     byte maxNumber = 255; //255 normally
-    float scaleFactor = 255/float(maxNumber-firstNumber);
+
     Accelerometer* _accelerometer;
     Plunger* _plunger;
     Buttons* _buttons;
@@ -38,6 +38,8 @@ class Communication {
     void updateOutputs();
     int admin = 0;
     void sendAdmin();
+
+    byte previousDOFValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 };
 
 #endif

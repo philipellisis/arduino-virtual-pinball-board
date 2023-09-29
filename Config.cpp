@@ -100,7 +100,6 @@ void Config::saveConfig() {
       EEPROM.write(i + 500, buttonKeyboard[i]);
     }
     EEPROM.write(1000, 101);
-    printSuccess();
 }
 
 void Config::updateConfigFromSerial() {
@@ -132,62 +131,16 @@ void Config::updateConfigFromSerial() {
     plungerLaunchButton = blockRead();
     tiltButton = blockRead();
     shiftButton = blockRead();
-    readConfigArray(buttonKeyboard, 27);
+    readConfigArray(buttonKeyboard, 28);
 
     if (done > 0) {
       printError();
     } else {
+      saveConfig();
       printSuccess();
     }
 }
 
-void Config::setPlunger() {
-    done = 0;
-    plungerMax = readIntFromByte();
-    plungerMin = readIntFromByte();
-    plungerMid = readIntFromByte();
-    plungerButtonPush = blockRead();
-    plungerAverageRead = blockRead();
-    plungerLaunchButton = blockRead();
-
-    if (done > 0) {
-      printError();
-      return;
-    }
-
-    writeIntIntoEEPROM(401, plungerMax);
-    writeIntIntoEEPROM(403, plungerMin);
-    writeIntIntoEEPROM(405, plungerMid);
-    EEPROM.write(454, plungerButtonPush);
-    EEPROM.write(459, plungerAverageRead);
-    EEPROM.write(461, plungerLaunchButton);
-    
-    printSuccess();
-    
-}
-
-void Config::setAccelerometer() {
-    done = 0;
-    accelerometerSensitivity = blockRead();
-    accelerometerDeadZone = readIntFromByte();
-    orientation = blockRead();
-    accelerometerTilt = readIntFromByte();
-    accelerometerMax = readIntFromByte();
-    tiltButton = blockRead();
-
-    if (done > 0) {
-      printError();
-      return;
-    }
-
-    EEPROM.write(450, accelerometerSensitivity);
-    writeIntIntoEEPROM(452, accelerometerDeadZone);
-    EEPROM.write(426, orientation);
-    writeIntIntoEEPROM(455, accelerometerTilt);
-    writeIntIntoEEPROM(457, accelerometerMax);
-    EEPROM.write(462, tiltButton);
-    printSuccess();
-}
 
 void Config::printError() {
   Serial.print(F("R,E\r\n"));

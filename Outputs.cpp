@@ -46,22 +46,37 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
   if (_config->nightMode == true && (_config->toySpecialOption[outputId] == NOISY || _config->toySpecialOption[outputId] == SHARED)) {
     outputValue = 0;
   }
-  if (_config->toySpecialOption[outputId] == SHARED && outputValues[outputId] > 0) {
+  // Serial.print(F("DEBUG,outputID: "));
+  // Serial.print(outputId);
+  // Serial.print(F(" outputValue: "));
+  // Serial.print(outputValue);
+  // Serial.print(F("\r\n"));
+  if (_config->toySpecialOption[outputId] == SHARED && outputValue > 0 && outputValues[outputId] > 0) {
     for (int i = 0; i < 9; i++) {
       if(_config->toySpecialOption[i] == SHARED && outputValues[i] == 0) {
         outputId = i;
-        //Serial.print(F("DEBUG,switching to another unused output since this one already enabled\r\n"));
+        virtualOutputOn[i] = 1;
+        // Serial.print(F("DEBUG,switching to port "));
+        // Serial.print(outputId);
+        // Serial.print(F("\r\n"));
         break;
       }
     }
   }
-  if (_config->toySpecialOption[outputId] == SHARED && outputValue == 0) {
-    for (int i = 0; i < 9; i++) {
-      if(_config->toySpecialOption[i] == SHARED && outputValues[i] > 0) {
-        updateOutputInternal(i, 0);
-        //Serial.print(F("DEBUG,turning off shared outputs\r\n"));
+  if (_config->toySpecialOption[outputId] == SHARED && outputValue == 0 && outputId < 10) {
+    if (virtualOutputOn[outputId] == 0) {
+      for (int i = 0; i < 9; i++) {
+        if(_config->toySpecialOption[i] == SHARED && outputValues[i] > 0 && virtualOutputOn[i] > 0) {
+          // Serial.print(F("DEBUG,turning off port "));
+          // Serial.print(i);
+          // Serial.print(F("\r\n"));
+          updateOutputInternal(i, 0);
+          virtualOutputOn[i] = 0;
+          //Serial.print(F("DEBUG,turning off shared outputs\r\n"));
+        }
       }
     }
+    updateOutputInternal(outputId, outputValue);
   } else {
     updateOutputInternal(outputId, outputValue);
   }

@@ -27,6 +27,7 @@ class Outputs {
     long int timeTurnedOn[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     void updateOutputActual(byte outputId, int outputValueStart, int outputValueFinish);
     byte resetOutputNumber = 0;
+    byte virtualOutputOn[10] = {0,0,0,0,0,0,0,0,0,0};
 };
 
 #endif

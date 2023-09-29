@@ -125,20 +125,8 @@ void Communication::sendAdmin() {
       break;
     case GET_CONFIG:
       _config->updateConfigFromSerial();
-      admin = 0;
-      break;
-    case SET_PLUNGER:
-      _config->setPlunger();
       _plunger->resetPlunger();
-      admin = 3;
-      break;
-    case SET_ACCEL:
-      _config->setAccelerometer();
       _accelerometer->resetAccelerometer();
-      admin = 4;
-      break;
-    case SAVE_CONFIG:
-      _config->saveConfig();
       admin = 0;
       break;
     case OFF:
@@ -164,6 +152,9 @@ void Communication::updateOutputs() {
   int tempBankOffset;
   tempBankOffset = incomingData[1] - bankOffset;
   for (int i = 2; i < 9; i++) {
-    _outputs->updateOutput(tempBankOffset*7 + i-2, int((incomingData[i]-firstNumber) * scaleFactor));
+    if (previousDOFValues[tempBankOffset*7 + i-2] != incomingData[i]) {
+      _outputs->updateOutput(tempBankOffset*7 + i-2, incomingData[i]);
+      previousDOFValues[tempBankOffset*7 + i-2] = incomingData[i];
+    }
   }
 }
