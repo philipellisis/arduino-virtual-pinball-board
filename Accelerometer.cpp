@@ -165,8 +165,15 @@ void Accelerometer::accelerometerRead()
     buttonState = 0;
   }
 
-  _joystick->setXAxis(xValue);
-  _joystick->setYAxis(yValue);
+  if (priorXValue != xValue) {
+    _joystick->setXAxis(xValue);
+    priorXValue = xValue;
+  }
+
+  if (priorYValue != yValue) {
+    _joystick->setYAxis(yValue);
+    priorYValue = yValue;
+  }
 
   // Serial.print(F("DEBUG,AccelX:"));
   // Serial.print(xValue);
