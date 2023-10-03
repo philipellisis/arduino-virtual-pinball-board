@@ -1,0 +1,49 @@
+name: PinOne CI
+
+on:
+    push:
+
+    pull_request:
+
+    schedule:
+        - cron: '0 6 * * *' # run at 08:00 UTC
+
+jobs:
+    pio-run:
+        runs-on: ubuntu-latest
+
+        strategy:
+            matrix:
+                controller: ['micro']
+
+        name: PinOne ${{ matrix.controller }}
+
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Cache pip
+              uses: actions/cache@v3
+              with:
+                path: ~/.cache/pip
+                key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+                restore-keys: |
+                  ${{ runner.os }}-pip-
+
+            - name: Cache PlatformIO
+              uses: actions/cache@v3
+              with:
+                path: ~/.platformio
+                key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+
+            - name: Set up Python
+              uses: actions/setup-python@v3
+
+            - name: Install PlatformIO
+              run: |
+                python -m pip install --upgrade pip
+                pip install --upgrade platformio
+
+            - name: Run PlatformIO
+              run: |
+                cd test/${{ matrix.controller }}
+                pio run
