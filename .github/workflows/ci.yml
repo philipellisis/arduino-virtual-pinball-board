@@ -45,4 +45,10 @@ jobs:
 
             - name: Run PlatformIO
               run: |
-                pio run -t ${{ matrix.controller }}
+                pio run -e ${{ matrix.controller }}
+
+            - name: Upload firmware artifact
+              uses: actions/upload-artifact@v3
+              with:
+                name: PinOne-${{ matrix.controller }}
+                path: .pio/build/micro/firmware.elf
