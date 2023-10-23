@@ -69,7 +69,10 @@ void Plunger::plungerRead() {
     adjustedValue = (sensorValue-_config->plungerMid) * plungerScaleFactor + _config->plungerMid;
   }
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
-  _joystick->setZAxis(adjustedValue);
+  if (priorValue != adjustedValue) {
+    _joystick->setZAxis(adjustedValue);
+    priorValue = adjustedValue;
+  }
 }
 
 void Plunger::sendPlungerState() {
