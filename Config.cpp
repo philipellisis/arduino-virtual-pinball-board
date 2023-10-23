@@ -173,7 +173,7 @@ void Config::sendConfig() {
     printComma(plungerLaunchButton);
     printComma(tiltButton);
     printComma(shiftButton);
-    printConfigArray(buttonKeyboard, 27);
+    printConfigArray(buttonKeyboard, 28);
     Serial.print(F("E\r\n"));
 }
 
