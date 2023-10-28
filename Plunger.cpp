@@ -27,21 +27,25 @@ void Plunger::resetPlunger() {
 void Plunger::plungerRead() {
   unsigned long sensorValue = analogRead(23);
 
-  //TODO: Perhaps only do averaging if the plunger is in active use?
-  for (int i = 0; i < _config->plungerAverageRead; i++) {
-    sensorValue += analogRead(23);
+  if (_config->restingStateCounter < 200) {
+    for (int i = 0; i < _config->plungerAverageRead; i++) {
+      sensorValue += analogRead(23);
+    }
+    // Serial.print("sensorraw: ");
+    // Serial.print(sensorValue);
+    // Serial.print("\r\n");
+    sensorValue = sensorValue / (_config->plungerAverageRead + 1);
   }
-  // Serial.print("sensorraw: ");
-  // Serial.print(sensorValue);
-  // Serial.print("\r\n");
-  sensorValue = sensorValue / (_config->plungerAverageRead + 1);
+
 
   // this checks that the plunger is sitting stationary. If so, it will enable the accelerometer. It also checks if there is nothing connected. to ensure the accelerometer still works even if the plunger is disconnected
-  if ((sensorValue < _config->plungerMid + 20 && sensorValue > _config->plungerMid - 20) || sensorValue > 990) {
+  if ((sensorValue < _config->plungerMid + 30 && sensorValue > _config->plungerMid - 30) || sensorValue > 990) {
+    // plunger is in resting state when counter is > 200. Is moving or almost done moving when counter is > 0 and <= 200
     if (_config->restingStateCounter < 200) {
       _config->restingStateCounter++;
     }
   } else {
+      //plunger is actively moving when counter is = 0
       _config->restingStateCounter = 0;
   }
   // Serial.print("sensornorm: ");
@@ -69,7 +73,7 @@ void Plunger::plungerRead() {
     adjustedValue = (sensorValue-_config->plungerMid) * plungerScaleFactor + _config->plungerMid;
   }
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
-  if (priorValue != adjustedValue) {
+  if (priorValue != adjustedValue && _config->restingStateCounter < 200) {
     _joystick->setZAxis(adjustedValue);
     priorValue = adjustedValue;
   }
