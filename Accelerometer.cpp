@@ -85,6 +85,9 @@ void Accelerometer::resetAccelerometer()
 
 void Accelerometer::accelerometerRead()
 {
+  if (_config->restingStateCounter != 200) {
+    return;
+  }
   if (_config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
   {
     if (recentered == false)
@@ -110,11 +113,11 @@ void Accelerometer::accelerometerRead()
   }
   yValue = floor((mpu.getY() - yValueOffset) * 100);
   
-  if (abs(xValue) < _config->accelerometerDeadZone || _config->restingStateCounter != 200)
+  if (abs(xValue) < _config->accelerometerDeadZone)
   {
     xValue = 0;
   }
-  if (abs(yValue) < _config->accelerometerDeadZone || _config->restingStateCounter != 200)
+  if (abs(yValue) < _config->accelerometerDeadZone)
   {
     yValue = 0;
   }
