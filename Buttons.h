@@ -1,7 +1,6 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 #include <Arduino.h>
-#include <Joystick.h>
 #include "Config.h"
 #include "Outputs.h"
 

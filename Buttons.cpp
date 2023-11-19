@@ -1,9 +1,8 @@
 #include "Buttons.h"
 #include <Arduino.h>
-#include <Joystick.h>
 #include "ButtonReader.h"
 #include "Enums.h"
-#include <Keyboard.h>
+#include "HID-Project.h"
 
 ButtonReader buttonReader;
 

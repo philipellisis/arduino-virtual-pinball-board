@@ -119,7 +119,7 @@ void Plunger::plungerRead() {
   // }
 
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
-  if (priorValue != adjustedValue && _config->restingStateCounter < 200 && (priorValue - adjustedValue < 5 || plungerMinSendCount < 50)) {
+  if (priorValue != adjustedValue && _config->restingStateCounter < 200 && (priorValue - adjustedValue < 10 || plungerMinSendCount < 50)) {
     _joystick->setZAxis(adjustedValue);
     priorValue = adjustedValue;
   }

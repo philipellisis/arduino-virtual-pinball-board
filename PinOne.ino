@@ -3,7 +3,7 @@
 #include "Accelerometer.h"
 #include "Communication.h"
 #include "Outputs.h"
-#include <Joystick.h>
+#include "HID-Project.h"
 #include "Config.h"
 #include <Wire.h>
 #include "LightShow.h"
