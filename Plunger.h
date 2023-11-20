@@ -1,21 +1,20 @@
 #ifndef PLUNGER_H
 #define PLUNGER_H
 #include <Arduino.h>
-#include <Joystick.h>
+#include "HID-Project.h"
 #include "Config.h"
 
 class Plunger {
   
   public:
     Plunger();
-    void init(Joystick_* joystick, Config* config);
+    void init(Config* config);
     void plungerRead();
     void sendPlungerState();
     void resetPlunger();
     
   private:
     bool DEBUG = false;
-    Joystick_* _joystick;
     float plungerScaleFactor;
     int adjustedValue;
     Config* _config;
@@ -24,6 +23,8 @@ class Plunger {
     int priorValue = 0;
     int globalMinValue = 1024;
     byte plungerMinSendCount = 0;
+    float localMax = 0;
+    float localMin = 0;
     // int plungerData[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     // byte incrementor = 0;
 };

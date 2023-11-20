@@ -21,7 +21,7 @@ The board is also supported in DOF so that you can set it up as a device and all
 - Ability to configure maximum output values on any of the PWM outputs
 - Ability to configure maximum "on" time for any outputs to save components that might not support 100% duty cycle
 - Ability to trigger any output from the button inputs (for example, to allow flipper solenoids to trigger automaticaly when the flipper buttons are pressed, regardless of software support)
-- Support for analog nudge data that gets sent to the x/y axis on the joystick
+- Support for analog nudge data that gets sent to the x/y axis on the Gamepad1
 
 ### How to configure and test outputs
 
@@ -31,7 +31,7 @@ You can run the configuration tool here: https://github.com/philipellisis/virtua
 
 The arduino IDE will build almost all of the application code for you, but there are a few imports you will need to make
 
-- For the joystick functionality: https://github.com/MHeironimus/ArduinoJoystickLibrary
+- For the Gamepad1 functionality: https://github.com/NicoHood/HID
 - For the communication to the MPU-6050: https://github.com/adafruit/Adafruit_MPU6050
 - for the communication to the PCA9685: https://github.com/adafruit/Adafruit-PWM-Servo-Driver-Library
 

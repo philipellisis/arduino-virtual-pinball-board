@@ -7,15 +7,10 @@
 #include "Config.h"
 #include <Wire.h>
 #include "LightShow.h"
+#include "singleGamepad1.h"
 
 
 
-Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID,JOYSTICK_TYPE_GAMEPAD,
-  28, 0,                  // Button Count, Hat Switch Count
-  true, true, true,      // X and Y, Z axis for plunger
-  false, false, false,   // No Rx, Ry, or Rz
-  false, false,          // No rudder or throttle
-  false, false, false);  // No accelerator, brake, or steering
 Plunger plunger = Plunger();
 Buttons buttons = Buttons();
 LightShow lightShow = LightShow();
@@ -32,18 +27,19 @@ void setup() {
   delay(1000);
   //if (DEBUG) {Serial.print(F("DEBUG,Starting up arduino\r\n"));}
   delay(1000);
-  // Initialize Joystick Library
+  // Initialize Gamepad1 Library
+  Gamepad1.begin();
   config.init();
   outputs.init(&config);
-  Joystick.begin();
-  buttons.init(&Joystick, &config, &outputs);
-  plunger.init(&Joystick, &config);
+
+  buttons.init(&config, &outputs);
+  plunger.init(&config);
   lightShow.init(&config, &outputs);
   if (config.accelerometer > 0) {
-    accel.init(&Joystick, &config);
+    accel.init(&config);
   }
   
-  comm.init(&plunger, &accel, &buttons, &config, &outputs, &Joystick);
+  comm.init(&plunger, &accel, &buttons, &config, &outputs);
   
 }
 
@@ -58,6 +54,7 @@ void loop() {
       accel.accelerometerRead();
     }
     lightShow.checkSetLights();
+    Gamepad1.write();
     comm.communicate();
   }
   //long int t2 = millis();

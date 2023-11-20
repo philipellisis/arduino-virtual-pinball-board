@@ -1,17 +1,18 @@
 #include "Accelerometer.h"
 #include <Arduino.h>
-#include <Joystick.h>
+#include "HID-Project.h"
 #include "MPU6050.h"
 #include "Enums.h"
+#include "singleGamepad1.h"
+
 
 MPU6050 mpu;
 Accelerometer::Accelerometer()
 {
 }
 
-void Accelerometer::init(Joystick_ *joystick, Config *config)
+void Accelerometer::init(Config *config)
 {
-  _joystick = joystick;
   _config = config;
 
   byte count = 0;
@@ -76,8 +77,6 @@ void Accelerometer::resetAccelerometer()
   } else {
     orientation = _config->orientation;
   }
-  _joystick->setXAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
-  _joystick->setYAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
 
   mpu.setAccelerometerRange(_config->accelerometerSensitivity);
   centerAccelerometer();
@@ -159,22 +158,22 @@ void Accelerometer::accelerometerRead()
   }
   if (buttonState == 0 && (abs(xValue) > _config->accelerometerTilt || abs(yValue) > _config->accelerometerTilt))
   {
-    _joystick->setButton(_config->tiltButton, 1);
+    Gamepad1.press(_config->tiltButton);
     buttonState = 1;
   }
   else if (buttonState == 1 && (abs(xValue) < _config->accelerometerTilt && abs(yValue) < _config->accelerometerTilt))
   {
-    _joystick->setButton(_config->tiltButton, 0);
+    Gamepad1.release(_config->tiltButton);
     buttonState = 0;
   }
 
   if (priorXValue != xValue) {
-    _joystick->setXAxis(xValue);
+    Gamepad1.xAxis(xValue / _config->accelerometerMax * 32767);
     priorXValue = xValue;
   }
 
   if (priorYValue != yValue) {
-    _joystick->setYAxis(yValue);
+    Gamepad1.yAxis(yValue / _config->accelerometerMax * 32767);
     priorYValue = yValue;
   }
 

@@ -1,8 +1,7 @@
 #include "Plunger.h"
 #include <Arduino.h>
-#include <Joystick.h>
-
-
+#include "HID-Project.h"
+#include "singleGamepad1.h"
 
 
 Plunger::Plunger() {
@@ -12,16 +11,16 @@ Plunger::Plunger() {
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: pins initialized\r\n"));}
 }
 
-void Plunger::init(Joystick_* joystick, Config* config) {
+void Plunger::init(Config* config) {
   _config = config;
-  _joystick = joystick;
   resetPlunger();
-  //if (DEBUG) {Serial.print(F("DEBUG,plunger: initialized joystick\r\n"));}
+  //if (DEBUG) {Serial.print(F("DEBUG,plunger: initialized Gamepad1\r\n"));}
 }
 
 void Plunger::resetPlunger() {
   plungerScaleFactor = (float)(_config->plungerMid - _config->plungerMin) / (float)(_config->plungerMax - _config->plungerMid);
-  _joystick->setZAxisRange(_config->plungerMin, (_config->plungerMax - _config->plungerMid) * plungerScaleFactor + _config->plungerMid);
+  localMax = static_cast<float>((_config->plungerMax - _config->plungerMid) * plungerScaleFactor + _config->plungerMid);
+  localMin = static_cast<float>(_config->plungerMin);
 }
 
 void Plunger::plungerRead() {
@@ -68,17 +67,17 @@ void Plunger::plungerRead() {
   // Serial.print("\r\n");
 
   if( (_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3) && buttonState == 0 && sensorValue >= _config->plungerMax - 15) {
-    _joystick->setButton(_config->plungerLaunchButton, 1);
+    Gamepad1.press(_config->plungerLaunchButton);
     buttonState = 1;
   } else if ((_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3)  && buttonState == 1 && sensorValue < _config->plungerMax - 15 ) {
-    _joystick->setButton(_config->plungerLaunchButton, 0);
+    Gamepad1.release(_config->plungerLaunchButton);
     buttonState = 0;
   }
   if( _config->plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= _config->plungerMin + 10) {
-    _joystick->setButton(_config->plungerLaunchButton, 1);
+    Gamepad1.press(_config->plungerLaunchButton);
     buttonState2 = 1;
   } else if (_config->plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > _config->plungerMin + 10 ) {
-    _joystick->setButton(_config->plungerLaunchButton, 0);
+    Gamepad1.release(_config->plungerLaunchButton);
     buttonState2 = 0;
   }
 
@@ -120,7 +119,15 @@ void Plunger::plungerRead() {
 
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
   if (priorValue != adjustedValue && _config->restingStateCounter < 200 && (priorValue - adjustedValue < 10 || plungerMinSendCount < 50)) {
-    _joystick->setZAxis(adjustedValue);
+    if (sensorValue > _config->plungerMid) {
+      Serial.print(static_cast<int8_t>(adjustedValue / localMax * 128));
+      Serial.print(F("\r\n"));
+      Gamepad1.zAxis(random(0xFF));
+    } else {
+      Serial.print(static_cast<int8_t>(-adjustedValue / localMin * 128));
+      Serial.print(F("\r\n"));
+      Gamepad1.zAxis(static_cast<int8_t>(-adjustedValue / localMin * 128));
+    }
     priorValue = adjustedValue;
   }
 }

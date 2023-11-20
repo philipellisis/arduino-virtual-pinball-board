@@ -2,6 +2,7 @@
 #define COMMUNICATION_H
 #include <Arduino.h>
 #include "Plunger.h"
+#include "HID-Project.h"
 #include "Buttons.h"
 #include "Accelerometer.h"
 #include "Config.h"
@@ -12,7 +13,7 @@ class Communication {
   
   public:
     Communication();
-    void init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs, Joystick_* joystick);
+    void init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs);
     //void init();
     void communicate();
     
@@ -32,7 +33,6 @@ class Communication {
     Buttons* _buttons;
     Config* _config;
     Outputs* _outputs;
-    Joystick_* _joystick;
     byte incomingData[10];
     int dataLocation = 0;
     void updateOutputs();

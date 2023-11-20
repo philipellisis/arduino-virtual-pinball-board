@@ -3,6 +3,8 @@
 #include "ButtonReader.h"
 #include "Enums.h"
 #include "HID-Project.h"
+#include "singleGamepad1.h"
+
 
 ButtonReader buttonReader;
 
@@ -20,13 +22,12 @@ Buttons::Buttons() {
   
 }
 
-void Buttons::init(Joystick_* joystick, Config* config, Outputs* outputs) {
-  //if (DEBUG) {Serial.print(F("DEBUG,buttons: initializing joystick\r\n"));}
-  _joystick = joystick;
+void Buttons::init(Config* config, Outputs* outputs) {
+  //if (DEBUG) {Serial.print(F("DEBUG,buttons: initializing Gamepad1\r\n"));}
   _config = config;
   _outputs = outputs;
   Keyboard.begin();
-  //if (DEBUG) {Serial.print(F("DEBUG,buttons: initialized joystick\r\n"));}
+  //if (DEBUG) {Serial.print(F("DEBUG,buttons: initialized Gamepad1\r\n"));}
 }
 
 void Buttons::readInputs() {
@@ -67,8 +68,14 @@ void Buttons::readInputs() {
           } else {
             Keyboard.release(_config->buttonKeyboard[i + buttonOffset]);
           }
+        } else {
+          if (currentButtonState == 1) {
+            Gamepad1.press(i + buttonOffset);
+          } else {
+            Gamepad1.release(i + buttonOffset);
+          }
         }
-        _joystick->setButton(i + buttonOffset, currentButtonState);
+
         
         
         lastButtonState[i] = currentButtonState;

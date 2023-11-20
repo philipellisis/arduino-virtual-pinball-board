@@ -1,9 +1,12 @@
 #include "Communication.h"
 #include <Arduino.h>
 #include "Plunger.h"
+#include "HID-Project.h"
 #include "Buttons.h"
 #include "Accelerometer.h"
 #include "Enums.h"
+#include "singleGamepad1.h"
+
 
 
 
@@ -13,14 +16,13 @@ Communication::Communication() {
 
 
 
-void Communication::init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs, Joystick_* joystick) {
+void Communication::init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs) {
   //if (DEBUG) {Serial.print(F("Communication: initializing Communication\r\n"));}
   _outputs = outputs;
   _plunger = plunger;
   _accelerometer = accel;
   _buttons = buttons;
   _config = config;
-  _joystick = joystick;
 }
 
 void Communication::communicate() {
@@ -55,27 +57,27 @@ void Communication::communicate() {
           } else if (incomingData[1] == outputButtonNumber) {
             switch(incomingData[2]) {
               case 28:
-                _joystick->setXAxis(-100000);
+                Gamepad1.xAxis(-32767);
                 break;
               case 29:
-                _joystick->setXAxis(100000);
+                Gamepad1.xAxis(32767);
                 break;
               case 30:
-                _joystick->setYAxis(-100000);
+                Gamepad1.yAxis(-32767);
                 break;
               case 31:
-                _joystick->setYAxis(100000);
+                Gamepad1.yAxis(32767);
                 break;
               case 32:
-                _joystick->setZAxis(-100000);
+                Gamepad1.zAxis(-32767);
                 break;
               case 33:
-                _joystick->setZAxis(100000);
+                Gamepad1.zAxis(32767);
                 break;
               default:
-                _joystick->setButton(incomingData[2], 1);
+                Gamepad1.press(incomingData[2]);
                 delay(500);
-                _joystick->setButton(incomingData[2], 0);
+                Gamepad1.release(incomingData[2]);
             }
             delay(500);
 
