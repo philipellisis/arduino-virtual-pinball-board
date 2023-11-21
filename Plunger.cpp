@@ -19,32 +19,16 @@ void Plunger::init(Config* config) {
 
 void Plunger::resetPlunger() {
   plungerScaleFactor = (float)(_config->plungerMid - _config->plungerMin) / (float)(_config->plungerMax - _config->plungerMid);
-  localMax = static_cast<float>((_config->plungerMax - _config->plungerMid) * plungerScaleFactor + _config->plungerMid);
-  localMin = static_cast<float>(_config->plungerMin);
 }
 
 void Plunger::plungerRead() {
+
   unsigned long sensorValue = analogRead(23);
-  int currentValue = 0;
-  int minValue = 1024;
 
   if (_config->restingStateCounter < 200) {
     for (int i = 0; i < _config->plungerAverageRead; i++) {
-      currentValue = analogRead(23);
-      if (currentValue < minValue) {
-        minValue = currentValue;
-      }
-      sensorValue += currentValue;
+      sensorValue += analogRead(23);
     }
-    if (minValue < globalMinValue) {
-      globalMinValue = minValue;
-    }
-    // Serial.print("global min: ");
-    // Serial.print(globalMinValue);
-    // Serial.print("\r\n");
-    // Serial.print("local min: ");
-    // Serial.print(minValue);
-    // Serial.print("\r\n");
     // Serial.print("sensorraw: ");
     // Serial.print(sensorValue);
     // Serial.print("\r\n");
@@ -81,31 +65,10 @@ void Plunger::plungerRead() {
     buttonState2 = 0;
   }
 
-  if (minValue <= _config->plungerMid - 40) {
-    plungerMinSendCount = 0;
-  }
-  
-  if (plungerMinSendCount < 50) {
-      plungerMinSendCount++;
-      adjustedValue = globalMinValue;
-      // Serial.print(F("plunger at min: "));
-      // Serial.print(adjustedValue);
-      // Serial.print(F("\r\n"));
-      // if (plungerMinSendCount == 62) {
-      //   Serial.print("incrementor: ");
-      //   Serial.print(incrementor);
-      //   Serial.print(F("\r\n"));
-      //   for (int i = 0; i < 63; i++) {
-      //     Serial.print(i);
-      //     Serial.print(F("-"));
-      //     Serial.print(plungerData[i]);
-      //     Serial.print(F("\r\n"));
-      //   }
-      // }
-  } else if (sensorValue <= _config->plungerMid) {
-    adjustedValue = sensorValue; 
+  if (sensorValue <= _config->plungerMid) {
+    adjustedValue = static_cast<int8_t>((1 - (float)(sensorValue - _config->plungerMin) / (_config->plungerMid - _config->plungerMin)) * -128);
   } else {
-    adjustedValue = (sensorValue-_config->plungerMid) * plungerScaleFactor + _config->plungerMid;
+    adjustedValue = static_cast<int8_t>((float)(sensorValue - _config->plungerMid) / (_config->plungerMax - _config->plungerMid) * 128);
     globalMinValue = 1024;
   }
   // if (plungerMinSendCount == 62) {
@@ -118,17 +81,12 @@ void Plunger::plungerRead() {
   // }
 
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
-  if (priorValue != adjustedValue && _config->restingStateCounter < 200 && (priorValue - adjustedValue < 10 || plungerMinSendCount < 50)) {
-    if (sensorValue > _config->plungerMid) {
-      // Serial.print(static_cast<int8_t>(adjustedValue / localMax * 128));
-      // Serial.print(F("\r\n"));
-      Gamepad1.zAxis(static_cast<int8_t>(adjustedValue / localMax * 128));
-    } else {
-      // Serial.print(static_cast<int8_t>(-adjustedValue / localMin * 128));
-      // Serial.print(F("\r\n"));
-      Gamepad1.zAxis(static_cast<int8_t>(-adjustedValue / localMin * 128));
-    }
-    priorValue = adjustedValue;
+  if (priorValue != sensorValue && _config->restingStateCounter < 200 && (priorValue - sensorValue < 10 || plungerMinSendCount < 50)) {
+    // Serial.print(adjustedValue);
+    // Serial.print(F("\r\n"));
+    _config->updateUSB = true;
+    Gamepad1.zAxis(adjustedValue);
+    priorValue = sensorValue;
   }
 }
 

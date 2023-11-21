@@ -76,9 +76,11 @@ void Communication::communicate() {
                 break;
               default:
                 Gamepad1.press(incomingData[2]);
+                Gamepad1.write();
                 delay(500);
                 Gamepad1.release(incomingData[2]);
             }
+            _config->updateUSB = true;
             delay(500);
 
           } else {

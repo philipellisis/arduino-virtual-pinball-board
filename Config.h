@@ -45,6 +45,7 @@ class Config {
 
     byte buttonKeyboard[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     byte restingStateCounter = 200;
+    bool updateUSB = false;
   private:
     bool DEBUG = false;
     byte Config::blockRead();

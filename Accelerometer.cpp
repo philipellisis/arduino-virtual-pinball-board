@@ -168,13 +168,15 @@ void Accelerometer::accelerometerRead()
   }
 
   if (priorXValue != xValue) {
-    Gamepad1.xAxis(static_cast<int8_t>(xValue / localMax * 32767));
+    Gamepad1.xAxis(static_cast<int16_t>(xValue / localMax * 32767));
     priorXValue = xValue;
+    _config->updateUSB = true;
   }
 
   if (priorYValue != yValue) {
-    Gamepad1.yAxis(static_cast<int8_t>(yValue / localMax * 32767));
+    Gamepad1.yAxis(static_cast<int16_t>(yValue / localMax * 32767));
     priorYValue = yValue;
+    _config->updateUSB = true;
   }
 
   // Serial.print(F("DEBUG,AccelX:"));

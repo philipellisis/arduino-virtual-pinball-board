@@ -26,7 +26,8 @@ void Buttons::init(Config* config, Outputs* outputs) {
   //if (DEBUG) {Serial.print(F("DEBUG,buttons: initializing Gamepad1\r\n"));}
   _config = config;
   _outputs = outputs;
-  Keyboard.begin();
+  BootKeyboard.begin();
+  SingleConsumer.begin();
   //if (DEBUG) {Serial.print(F("DEBUG,buttons: initialized Gamepad1\r\n"));}
 }
 
@@ -39,6 +40,7 @@ void Buttons::readInputs() {
       bool currentButtonState = !buttonReader.state(i);
       //if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i]) {
+        _config->updateUSB = true;
         // mod 24 so that the button number is always between 0 and 23
         if (i == _config->nightModeButton % 24) {
           
@@ -64,9 +66,25 @@ void Buttons::readInputs() {
         }
         if (_config->buttonKeyboard[i + buttonOffset] > 0) {
           if (currentButtonState == 1) {
-            Keyboard.press(_config->buttonKeyboard[i + buttonOffset]);
+            if (_config->buttonKeyboard[i + buttonOffset] == 127) {
+              SingleConsumer.press(MEDIA_VOLUME_MUTE);
+            } else if (_config->buttonKeyboard[i + buttonOffset] == 128) {
+              SingleConsumer.press(MEDIA_VOLUME_DOWN);
+            } else if (_config->buttonKeyboard[i + buttonOffset] == 129) {
+              SingleConsumer.press(MEDIA_VOLUME_UP);
+            } else {
+              BootKeyboard.press(_config->buttonKeyboard[i + buttonOffset]);
+            }
           } else {
-            Keyboard.release(_config->buttonKeyboard[i + buttonOffset]);
+            if (_config->buttonKeyboard[i + buttonOffset] == 127) {
+              SingleConsumer.release(MEDIA_VOLUME_MUTE);
+            } else if (_config->buttonKeyboard[i + buttonOffset] == 128) {
+              SingleConsumer.release(MEDIA_VOLUME_DOWN);
+            } else if (_config->buttonKeyboard[i + buttonOffset] == 129) {
+              SingleConsumer.release(MEDIA_VOLUME_UP);
+            } else {
+              BootKeyboard.release(_config->buttonKeyboard[i + buttonOffset]);
+            }
           }
         } else {
           if (currentButtonState == 1) {

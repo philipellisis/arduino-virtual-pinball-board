@@ -54,7 +54,10 @@ void loop() {
       accel.accelerometerRead();
     }
     lightShow.checkSetLights();
-    Gamepad1.write();
+    if (config.updateUSB) {
+      Gamepad1.write();
+      config.updateUSB = false;
+    }
     comm.communicate();
   }
   //long int t2 = millis();
