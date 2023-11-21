@@ -28,6 +28,7 @@ class Accelerometer {
     byte buttonState;
     bool recentered = false;
     byte orientation = 0;
+    float localMax = 0;
 };
 
 #endif

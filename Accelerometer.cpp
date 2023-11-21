@@ -3,7 +3,7 @@
 #include "HID-Project.h"
 #include "MPU6050.h"
 #include "Enums.h"
-#include "singleGamepad1.h"
+
 
 
 MPU6050 mpu;
@@ -77,7 +77,7 @@ void Accelerometer::resetAccelerometer()
   } else {
     orientation = _config->orientation;
   }
-
+  localMax = static_cast<float>(_config->accelerometerMax);
   mpu.setAccelerometerRange(_config->accelerometerSensitivity);
   centerAccelerometer();
 }
@@ -168,12 +168,12 @@ void Accelerometer::accelerometerRead()
   }
 
   if (priorXValue != xValue) {
-    Gamepad1.xAxis(xValue / _config->accelerometerMax * 32767);
+    Gamepad1.xAxis(static_cast<int8_t>(xValue / localMax * 32767));
     priorXValue = xValue;
   }
 
   if (priorYValue != yValue) {
-    Gamepad1.yAxis(yValue / _config->accelerometerMax * 32767);
+    Gamepad1.yAxis(static_cast<int8_t>(yValue / localMax * 32767));
     priorYValue = yValue;
   }
 

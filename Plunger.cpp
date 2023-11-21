@@ -1,7 +1,7 @@
 #include "Plunger.h"
 #include <Arduino.h>
 #include "HID-Project.h"
-#include "singleGamepad1.h"
+
 
 
 Plunger::Plunger() {
@@ -120,12 +120,12 @@ void Plunger::plungerRead() {
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
   if (priorValue != adjustedValue && _config->restingStateCounter < 200 && (priorValue - adjustedValue < 10 || plungerMinSendCount < 50)) {
     if (sensorValue > _config->plungerMid) {
-      Serial.print(static_cast<int8_t>(adjustedValue / localMax * 128));
-      Serial.print(F("\r\n"));
-      Gamepad1.zAxis(random(0xFF));
+      // Serial.print(static_cast<int8_t>(adjustedValue / localMax * 128));
+      // Serial.print(F("\r\n"));
+      Gamepad1.zAxis(static_cast<int8_t>(adjustedValue / localMax * 128));
     } else {
-      Serial.print(static_cast<int8_t>(-adjustedValue / localMin * 128));
-      Serial.print(F("\r\n"));
+      // Serial.print(static_cast<int8_t>(-adjustedValue / localMin * 128));
+      // Serial.print(F("\r\n"));
       Gamepad1.zAxis(static_cast<int8_t>(-adjustedValue / localMin * 128));
     }
     priorValue = adjustedValue;
