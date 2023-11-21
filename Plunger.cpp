@@ -26,20 +26,22 @@ void Plunger::resetPlunger() {
 
 void Plunger::plungerRead() {
   unsigned long sensorValue = analogRead(23);
+  byte averageReadings = _config->plungerAverageRead;
 
-  if (_config->restingStateCounter < 200) {
-    for (int i = 0; i < _config->plungerAverageRead; i++) {
-      sensorValue += analogRead(23);
-    }
-    // Serial.print("sensorraw: ");
-    // Serial.print(sensorValue);
-    // Serial.print("\r\n");
-    sensorValue = sensorValue / (_config->plungerAverageRead + 1);
+  if (_config->restingStateCounter >= 200) {
+    averageReadings = 5;
   }
 
+  for (int i = 0; i < averageReadings; i++) {
+    sensorValue += analogRead(23);
+  }
+  // Serial.print("sensorraw: ");
+  // Serial.print(sensorValue);
+  // Serial.print("\r\n");
+  sensorValue = sensorValue / (averageReadings + 1);
 
   // this checks that the plunger is sitting stationary. If so, it will enable the accelerometer. It also checks if there is nothing connected. to ensure the accelerometer still works even if the plunger is disconnected
-  if ((sensorValue < _config->plungerMid + 30 && sensorValue > _config->plungerMid - 30) || sensorValue > 990) {
+  if ((sensorValue < _config->plungerMid + 50 && sensorValue > _config->plungerMid - 50) || sensorValue > 990) {
     // plunger is in resting state when counter is > 200. Is moving or almost done moving when counter is > 0 and <= 200
     if (_config->restingStateCounter < 200) {
       _config->restingStateCounter++;
