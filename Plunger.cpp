@@ -69,6 +69,9 @@ void Plunger::plungerRead() {
     adjustedValue = static_cast<int8_t>((1 - (float)(sensorValue - _config->plungerMin) / (_config->plungerMid - _config->plungerMin)) * -128);
   } else {
     adjustedValue = static_cast<int8_t>((float)(sensorValue - _config->plungerMid) / (_config->plungerMax - _config->plungerMid) * 128);
+    if (adjustedValue > 128) {
+      adjustedValue = 128;
+    }
     globalMinValue = 1024;
   }
   // if (plungerMinSendCount == 62) {
@@ -81,11 +84,16 @@ void Plunger::plungerRead() {
   // }
 
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
-  if (priorValue != sensorValue && _config->restingStateCounter < 200 && (priorValue - sensorValue < 10 || plungerMinSendCount < 50)) {
+  if (priorValue != sensorValue && _config->restingStateCounter < 200 && (priorValue - sensorValue < 10)) {
     // Serial.print(adjustedValue);
     // Serial.print(F("\r\n"));
     _config->updateUSB = true;
     Gamepad1.zAxis(adjustedValue);
+    priorValue = sensorValue;
+    // else if sensor value is +- 50 between plungerMid then just send zero
+  } else if (_config->restingStateCounter == 200) {
+    _config->updateUSB = true;
+    Gamepad1.zAxis(0);
     priorValue = sensorValue;
   }
 }

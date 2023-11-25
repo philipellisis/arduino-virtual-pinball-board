@@ -66,31 +66,36 @@ void Buttons::readInputs() {
         }
         if (_config->buttonKeyboard[i + buttonOffset] > 0) {
           if (currentButtonState == 1) {
-            if (_config->buttonKeyboard[i + buttonOffset] == 127) {
-              SingleConsumer.press(MEDIA_VOLUME_MUTE);
-            } else if (_config->buttonKeyboard[i + buttonOffset] == 128) {
-              SingleConsumer.press(MEDIA_VOLUME_DOWN);
-            } else if (_config->buttonKeyboard[i + buttonOffset] == 129) {
-              SingleConsumer.press(MEDIA_VOLUME_UP);
+            if (_config->buttonKeyboard[i + buttonOffset] > 251) {
+              if (_config->buttonKeyboard[i + buttonOffset] == 252) {
+                SingleConsumer.press(MEDIA_VOLUME_MUTE);
+              } else if (_config->buttonKeyboard[i + buttonOffset] == 253) {
+                SingleConsumer.press(MEDIA_VOLUME_DOWN);
+              } else if (_config->buttonKeyboard[i + buttonOffset] == 254) {
+                SingleConsumer.press(MEDIA_VOLUME_UP);
+              }
             } else {
               BootKeyboard.press(_config->buttonKeyboard[i + buttonOffset]);
             }
+
           } else {
-            if (_config->buttonKeyboard[i + buttonOffset] == 127) {
-              SingleConsumer.release(MEDIA_VOLUME_MUTE);
-            } else if (_config->buttonKeyboard[i + buttonOffset] == 128) {
-              SingleConsumer.release(MEDIA_VOLUME_DOWN);
-            } else if (_config->buttonKeyboard[i + buttonOffset] == 129) {
-              SingleConsumer.release(MEDIA_VOLUME_UP);
+            if (_config->buttonKeyboard[i + buttonOffset] > 251) {
+              if (_config->buttonKeyboard[i + buttonOffset] == 252) {
+                SingleConsumer.release(MEDIA_VOLUME_MUTE);
+              } else if (_config->buttonKeyboard[i + buttonOffset] == 253) {
+                SingleConsumer.release(MEDIA_VOLUME_DOWN);
+              } else if (_config->buttonKeyboard[i + buttonOffset] == 254) {
+                SingleConsumer.release(MEDIA_VOLUME_UP);
+              }
             } else {
               BootKeyboard.release(_config->buttonKeyboard[i + buttonOffset]);
             }
           }
         } else {
           if (currentButtonState == 1) {
-            Gamepad1.press(i + buttonOffset);
+            Gamepad1.press(i + buttonOffset + 1);
           } else {
-            Gamepad1.release(i + buttonOffset);
+            Gamepad1.release(i + buttonOffset + 1);
           }
         }
 
