@@ -23,9 +23,26 @@ void Plunger::resetPlunger() {
 
 void Plunger::plungerRead() {
 
-  long sensorValue = analogRead(23);
+  long sensorValue = 0;
+  int newReading;
+
+
+  //remove any sensor value that does not agree with the prior value
+  int goodReadings = 0;
+  for (int i = 0; i < 5; i++) {
+    newReading = analogRead(23);
+    if (newReading < truePriorValue + 10 && newReading > truePriorValue - 10) {
+      goodReadings++;
+      sensorValue += newReading;
+    }
+  }
+  if (goodReadings > 0) {
+    sensorValue = sensorValue / (goodReadings);
+  } else {
+    sensorValue = newReading;
+  }
   
-  //remove any sensor value that does not agree with the others
+  
 
 
   if (_config->restingStateCounter < _config->restingStateMax || _config->disablePlungerWhenNotInUse == 0) {
@@ -113,14 +130,20 @@ void Plunger::plungerRead() {
       // Serial.print("plunger not in motion, sending 0: ");
       // Serial.print(adjustedValue);
       // Serial.print(F("\r\n"));
+      if (priorValue != 0) {
+        _config->updateUSB = true;
+      }
+      priorValue = 0;
     } else {
       // Serial.print("plunger not in motion: ");
       // Serial.print(adjustedValue);
       // Serial.print(F("\r\n"));
       Gamepad1.zAxis(adjustedValue);
+      _config->updateUSB = true;
+      priorValue = sensorValue;
     }
-    _config->updateUSB = true;
-    priorValue = sensorValue;
+    truePriorValue = sensorValue;
+    
   }
   
 }

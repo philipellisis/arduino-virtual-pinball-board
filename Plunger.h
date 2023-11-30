@@ -21,6 +21,7 @@ class Plunger {
     unsigned char buttonState;
     unsigned char buttonState2;
     long priorValue = 0;
+    long truePriorValue = 0;
     //unsigned char plungerMinSendCount = 0;
 
     // int plungerData[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
