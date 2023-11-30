@@ -39,7 +39,7 @@ void Outputs::turnOff() {
   }
 }
 
-void Outputs::updateOutput(byte outputId, byte outputValue) {
+void Outputs::updateOutput(unsigned char outputId, unsigned char outputValue) {
   if (outputValue > _config->maxOutputState[outputId]) {
     outputValue = _config->maxOutputState[outputId];
   }
@@ -82,7 +82,7 @@ void Outputs::updateOutput(byte outputId, byte outputValue) {
   }
 }
 
-void Outputs::updateOutputInternal(byte outputId, byte outputValue) {
+void Outputs::updateOutputInternal(unsigned char outputId, unsigned char outputValue) {
   //if (DEBUG) {Serial.print(F("DEBUG,output ")); Serial.print(outputId); Serial.print(F(" set to ")); Serial.print(outputValue); Serial.print("\r\n");}
   outputValues[outputId] = outputValue;
   if (outputValue != 0) {
@@ -133,7 +133,7 @@ void Outputs::checkResetOutputs() {
   }
 }
 
-void Outputs::updateOutputActual(byte outputId, int outputValueStart, int outputValueFinish) {
+void Outputs::updateOutputActual(unsigned char outputId, int outputValueStart, int outputValueFinish) {
   if (outputId < 16) {
     pwm.setPWM(outputId, outputValueStart, outputValueFinish);
   }

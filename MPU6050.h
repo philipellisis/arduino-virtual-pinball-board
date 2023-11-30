@@ -12,7 +12,7 @@ class MPU6050 {
   public:
 
     bool init(TwoWire *wire = &Wire);
-    void setAccelerometerRange(byte);
+    void setAccelerometerRange(unsigned char);
     void read();
     float getX();
     float getY();

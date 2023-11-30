@@ -18,15 +18,13 @@ class Plunger {
     float plungerScaleFactor;
     int adjustedValue;
     Config* _config;
-    byte buttonState;
-    byte buttonState2;
-    int priorValue = 0;
-    int globalMinValue = 1024;
-    byte plungerMinSendCount = 0;
-    float localMax = 0;
-    float localMin = 0;
+    unsigned char buttonState;
+    unsigned char buttonState2;
+    long priorValue = 0;
+    //unsigned char plungerMinSendCount = 0;
+
     // int plungerData[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    // byte incrementor = 0;
+    // unsigned char incrementor = 0;
 };
 
 #endif

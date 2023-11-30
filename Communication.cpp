@@ -33,7 +33,7 @@ void Communication::communicate() {
       incomingData[dataLocation] = Serial.read();
       //if (DEBUG) {Serial.print(F("DEBUG,getting serial data: ")); Serial.print(incomingData[dataLocation]); Serial.print(F("\r\n"));}
       // data sent is always [0][200 + bank offset][output value 1][output value 2][output value 3][output value 4][output value 5][output value 6][output value 7]
-      // check to make sure we are reading what's expected for the first 2 bytes of data. If not, reset and start the buffer over again
+      // check to make sure we are reading what's expected for the first 2 unsigned chars of data. If not, reset and start the buffer over again
       // sample data coming in: 0È0000000
       // sample data coming in for test: " d       "
       // sample data coming in for test all on : " d}}}}}}}"
@@ -86,6 +86,10 @@ void Communication::communicate() {
           } else {
             //normal operation
             //if (DEBUG) {Serial.print(F("DEBUG,sending output\r\n"));}
+            
+            if (_config->lightShowState != OUTPUT_RECEIVED) {
+              _outputs->turnOff();
+            }
             _config->lightShowState = OUTPUT_RECEIVED_RESET_TIMER;
             updateOutputs();
 

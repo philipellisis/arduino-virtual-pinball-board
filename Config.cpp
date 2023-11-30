@@ -10,7 +10,7 @@ Config::Config() {
 void Config::init() {
   //if (DEBUG) {Serial.print(F("DEBUG,Config: initializing\r\n"));}
 
-  byte eepromCheck;
+  unsigned char eepromCheck;
   EEPROM.get(1000, eepromCheck);
 
   if (eepromCheck == 101) {
@@ -178,7 +178,7 @@ void Config::sendConfig() {
     Serial.print(F("E\r\n"));
 }
 
-void Config::printComma(byte value) {
+void Config::printComma(unsigned char value) {
   Serial.print(value);
   Serial.print(F(","));
 }
@@ -192,7 +192,7 @@ void Config::printSuccess() {
   Serial.print(F("R,S\r\n"));
 }
 
-byte Config::blockRead() {
+unsigned char Config::blockRead() {
     if (done > 0) {
       return 0;
     }
@@ -224,14 +224,14 @@ int Config::readIntFromByte() {
   return (blockRead() << 8) + blockRead();
 }
 
-void Config::readConfigArray(byte* configArray, byte size) {
-  for (byte i = 0; i < size; i++) {
+void Config::readConfigArray(unsigned char* configArray, unsigned char size) {
+  for (unsigned char i = 0; i < size; i++) {
     configArray[i] = blockRead();
   }
 }
 
-void Config::printConfigArray(byte* configArray, byte size) {
-  for (byte i = 0; i < size; i++) {
+void Config::printConfigArray(unsigned char* configArray, unsigned char size) {
+  for (unsigned char i = 0; i < size; i++) {
     printComma(configArray[i]);
   }
 }

@@ -32,7 +32,7 @@ void Buttons::init(Config* config, Outputs* outputs) {
 }
 
 void Buttons::readInputs() {
-  byte buttonPushed = 2;
+  unsigned char buttonPushed = 2;
   // read shift register values
   if(buttonReader.update()) {
     //if (DEBUG) {Serial.print(F("DEBUG"));}

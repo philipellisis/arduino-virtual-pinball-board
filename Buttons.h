@@ -15,7 +15,7 @@ class Buttons {
     
     
   private:
-    byte buttonOffset = 0;
+    unsigned char buttonOffset = 0;
     bool DEBUG = false;
     bool lastButtonState[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     Config* _config;

@@ -9,55 +9,64 @@ class Config {
     Config();
     void saveConfig();
     void init();
-    //first byte is for noisy toy, other 7 bits can be used for other things
-    byte toySpecialOption[63] = {1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte turnOffState[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte maxOutputState[63] = {255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255};
-    byte maxOutputTime[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    //first unsigned char is for noisy toy, other 7 bits can be used for other things
+    unsigned char toySpecialOption[63] = {1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char turnOffState[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char maxOutputState[63] = {255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255};
+    unsigned char maxOutputTime[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     int plungerMax = 842;
     int plungerMin = 61;
     int plungerMid = 203;
-    byte solenoidButtonMap[4] = {0,0,0,0};
-    byte solenoidOutputMap[4] = {0,0,0,0};
-    byte orientation = 0;
-    byte accelerometerEprom = 0;
-    byte accelerometer = 1;
-    byte accelerometerSensitivity = 0;
+    unsigned char solenoidButtonMap[4] = {0,0,0,0};
+    unsigned char solenoidOutputMap[4] = {0,0,0,0};
+    unsigned char orientation = 0;
+    unsigned char accelerometerEprom = 0;
+    unsigned char accelerometer = 1;
+    unsigned char accelerometerSensitivity = 0;
     int accelerometerDeadZone = 30;
     int accelerometerTilt = 800;
     int accelerometerMax = 1000;
-    byte plungerButtonPush = 0;
+    unsigned char plungerButtonPush = 0;
 
-    byte plungerAverageRead = 10;
-    byte nightModeButton = 14;
-    byte plungerLaunchButton = 23;
-    byte tiltButton = 22;
-    byte shiftButton = 2;
+    unsigned char plungerAverageRead = 10;
+    unsigned char nightModeButton = 14;
+    unsigned char plungerLaunchButton = 23;
+    unsigned char tiltButton = 22;
+    unsigned char shiftButton = 2;
 
-    byte done = 0;
+    unsigned char done = 0;
     bool nightMode = false;
     void updateConfigFromSerial();
     void sendConfig();
     void setPlunger();
     void setAccelerometer();
 
-    byte lightShowState = 1;
+    unsigned char lightShowState = 1;
 
-    byte buttonKeyboard[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte restingStateCounter = 200;
+    unsigned char buttonKeyboard[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char restingStateCounter = 200;
     bool updateUSB = false;
+    // 0 is ignore accel option
+    // 1 is quick release option
+    // 2 ignore when not in use option
+    // 3 
+    bool disableAccelOnPlungerMove = true;
+    bool enablePlungerQuickRelease = true;
+    bool disablePlungerWhenNotInUse = true;
+
+
   private:
     bool DEBUG = false;
-    byte Config::blockRead();
+    unsigned char Config::blockRead();
     void writeIntIntoEEPROM(int address, int number);
     int readIntFromEEPROM(int address);
     void printError();
-    void printComma(byte value);
+    void printComma(unsigned char value);
     void printIntComma(int value);
     void printSuccess();
     int readIntFromByte();
-    void readConfigArray(byte* configArray, byte size);
-    void printConfigArray(byte* configArray, byte size);
+    void readConfigArray(unsigned char* configArray, unsigned char size);
+    void printConfigArray(unsigned char* configArray, unsigned char size);
     
     
 };

@@ -15,7 +15,7 @@ void Accelerometer::init(Config *config)
 {
   _config = config;
 
-  byte count = 0;
+  unsigned char count = 0;
   if (!mpu.init())
   {
     delay(1000);
@@ -51,7 +51,7 @@ void Accelerometer::centerAccelerometer()
 {
   delay(400);
 
-  byte count = 0;
+  unsigned char count = 0;
   xValueOffset = 0;
   yValueOffset = 0;
   while (count < 50)
@@ -84,7 +84,7 @@ void Accelerometer::resetAccelerometer()
 
 void Accelerometer::accelerometerRead()
 {
-  if (_config->restingStateCounter != 200) {
+  if (_config->restingStateCounter != 200 && _config->disableAccelOnPlungerMove == 1) {
     return;
   }
   if (_config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
