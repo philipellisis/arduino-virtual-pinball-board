@@ -91,7 +91,7 @@ void Buttons::readInputs() {
               BootKeyboard.release(_config->buttonKeyboard[i + buttonOffset]);
             }
           }
-        } else {
+        } else if (_config->buttonKeyboard[i + buttonOffset] == 0 || _config->disableButtonPressWhenKeyboardEnabled == 0) {
           if (currentButtonState == 1) {
             Gamepad1.press(i + buttonOffset + 1);
           } else {

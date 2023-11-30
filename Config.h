@@ -44,15 +44,17 @@ class Config {
     unsigned char lightShowState = 1;
 
     unsigned char buttonKeyboard[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    unsigned char restingStateCounter = 200;
+    unsigned char restingStateCounter = 80;
+    unsigned char restingStateMax = 80;
     bool updateUSB = false;
     // 0 is ignore accel option
     // 1 is quick release option
     // 2 ignore when not in use option
     // 3 
     bool disableAccelOnPlungerMove = true;
-    bool enablePlungerQuickRelease = true;
+    bool enablePlungerQuickRelease = false;
     bool disablePlungerWhenNotInUse = true;
+    bool disableButtonPressWhenKeyboardEnabled = true;
 
 
   private:

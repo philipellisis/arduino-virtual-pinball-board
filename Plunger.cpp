@@ -28,13 +28,10 @@ void Plunger::plungerRead() {
   //remove any sensor value that does not agree with the others
 
 
-  if (_config->restingStateCounter < 200 && _config->disablePlungerWhenNotInUse == 0) {
+  if (_config->restingStateCounter < _config->restingStateMax || _config->disablePlungerWhenNotInUse == 0) {
     for (int i = 0; i < _config->plungerAverageRead; i++) {
       sensorValue += analogRead(23);
     }
-    // Serial.print("sensorraw: ");
-    // Serial.print(sensorValue);
-    // Serial.print("\r\n");
     sensorValue = sensorValue / (_config->plungerAverageRead + 1);
   }
 
@@ -42,7 +39,7 @@ void Plunger::plungerRead() {
   // this checks that the plunger is sitting stationary. If so, it will enable the accelerometer. It also checks if there is nothing connected. to ensure the accelerometer still works even if the plunger is disconnected
   if ((sensorValue < _config->plungerMid + 50 && sensorValue > _config->plungerMid - 50) || sensorValue > 990) {
     // plunger is in resting state when counter is > 200. Is moving or almost done moving when counter is > 0 and <= 200
-    if (_config->restingStateCounter < 200) {
+    if (_config->restingStateCounter < _config->restingStateMax) {
       _config->restingStateCounter++;
     }
   } else {
@@ -70,12 +67,20 @@ void Plunger::plungerRead() {
 
   if (sensorValue <= _config->plungerMid) {
     adjustedValue = static_cast<int8_t>((1 - (float)(sensorValue - _config->plungerMin) / (_config->plungerMid - _config->plungerMin)) * -128);
+    if (adjustedValue > 100) {
+      adjustedValue = -127;
+    }
   } else {
     adjustedValue = static_cast<int8_t>((float)(sensorValue - _config->plungerMid) / (_config->plungerMax - _config->plungerMid) * 128);
-    if (adjustedValue < 0) {
-      adjustedValue = 128;
+    if (adjustedValue < -100) {
+      adjustedValue = 127;
     }
   }
+
+
+        // Serial.print("not resting: ");
+        // Serial.print(adjustedValue);
+        // Serial.print("\r\n");
   // if (plungerMinSendCount == 62) {
   //   plungerData[incrementor] = minValue;
   //   if (incrementor < 62) {
@@ -86,23 +91,38 @@ void Plunger::plungerRead() {
   // }
   
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
-  if (priorValue != sensorValue && _config->restingStateCounter < 200 ) {
+  if (priorValue != sensorValue && _config->restingStateCounter < _config->restingStateMax ) {
     // Serial.print(adjustedValue);
     // Serial.print(F("\r\n"));
-    if (priorValue - sensorValue < 10 || adjustedValue < 0 || _config->enablePlungerQuickRelease == 0) {
+    if ((priorValue - sensorValue < 20 || adjustedValue < 0 || _config->enablePlungerQuickRelease == 0) && (priorValue - sensorValue > -30 || adjustedValue < 10 || _config->enablePlungerQuickRelease == 0)) {
       _config->updateUSB = true;
       Gamepad1.zAxis(adjustedValue);
+      // Serial.print("plunger in motion: ");
+      // Serial.print(adjustedValue);
+      // Serial.print(F("\r\n"));
+      priorValue = sensorValue;
+    } else {
+      // Serial.print("plunger in motion not sending value: ");
+      // Serial.print(adjustedValue);
+      // Serial.print(F("\r\n"));
     }
 
-  } else if (priorValue != sensorValue && _config->restingStateCounter == 200  ) {
+  } else if (priorValue != sensorValue && _config->restingStateCounter == _config->restingStateMax  ) {
     if (_config->disablePlungerWhenNotInUse == 1) {
       Gamepad1.zAxis(0);
+      // Serial.print("plunger not in motion, sending 0: ");
+      // Serial.print(adjustedValue);
+      // Serial.print(F("\r\n"));
     } else {
+      // Serial.print("plunger not in motion: ");
+      // Serial.print(adjustedValue);
+      // Serial.print(F("\r\n"));
       Gamepad1.zAxis(adjustedValue);
     }
     _config->updateUSB = true;
+    priorValue = sensorValue;
   }
-  priorValue = sensorValue;
+  
 }
 
 void Plunger::sendPlungerState() {

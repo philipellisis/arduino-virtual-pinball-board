@@ -84,7 +84,7 @@ void Accelerometer::resetAccelerometer()
 
 void Accelerometer::accelerometerRead()
 {
-  if (_config->restingStateCounter != 200 && _config->disableAccelOnPlungerMove == 1) {
+  if (_config->restingStateCounter != _config->restingStateMax && _config->disableAccelOnPlungerMove == 1) {
     return;
   }
   if (_config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
