@@ -3,6 +3,7 @@
 #include "ButtonReader.h"
 #include "Enums.h"
 #include "HID-Project.h"
+#include "Globals.h"
 
 
 
@@ -22,10 +23,8 @@ Buttons::Buttons() {
   
 }
 
-void Buttons::init(Config* config, Outputs* outputs) {
+void Buttons::init() {
   //if (DEBUG) {Serial.print(F("DEBUG,buttons: initializing Gamepad1\r\n"));}
-  _config = config;
-  _outputs = outputs;
   BootKeyboard.begin();
   SingleConsumer.begin();
   //if (DEBUG) {Serial.print(F("DEBUG,buttons: initialized Gamepad1\r\n"));}
@@ -40,16 +39,16 @@ void Buttons::readInputs() {
       bool currentButtonState = !buttonReader.state(i);
       //if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i]) {
-        _config->updateUSB = true;
+        config.updateUSB = true;
         // mod 24 so that the button number is always between 0 and 23
-        if (i == _config->nightModeButton % 24) {
+        if (i == config.nightModeButton % 24) {
           
-          if (_config->nightModeButton < 24) {
-            _config->nightMode = currentButtonState;
+          if (config.nightModeButton < 24) {
+            config.nightMode = currentButtonState;
           } else {
             if (currentButtonState == 1) {
-              //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(_config->nightMode); Serial.print(F("\r\n"));}
-              _config->nightMode = !_config->nightMode;
+              //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(config.nightMode); Serial.print(F("\r\n"));}
+              config.nightMode = !config.nightMode;
             }
           }
         }
@@ -59,39 +58,39 @@ void Buttons::readInputs() {
           buttonPushed = 0;
         }
         
-        if (i > 3 && i < 8 && lastButtonState[_config->shiftButton] == 1) {
+        if (i > 3 && i < 8 && lastButtonState[config.shiftButton] == 1) {
           buttonOffset = 20;
         } else {
           buttonOffset = 0;
         }
-        if (_config->buttonKeyboard[i + buttonOffset] > 0) {
+        if (config.buttonKeyboard[i + buttonOffset] > 0) {
           if (currentButtonState == 1) {
-            if (_config->buttonKeyboard[i + buttonOffset] > 251) {
-              if (_config->buttonKeyboard[i + buttonOffset] == 252) {
+            if (config.buttonKeyboard[i + buttonOffset] > 251) {
+              if (config.buttonKeyboard[i + buttonOffset] == 252) {
                 SingleConsumer.press(MEDIA_VOLUME_MUTE);
-              } else if (_config->buttonKeyboard[i + buttonOffset] == 253) {
+              } else if (config.buttonKeyboard[i + buttonOffset] == 253) {
                 SingleConsumer.press(MEDIA_VOLUME_DOWN);
-              } else if (_config->buttonKeyboard[i + buttonOffset] == 254) {
+              } else if (config.buttonKeyboard[i + buttonOffset] == 254) {
                 SingleConsumer.press(MEDIA_VOLUME_UP);
               }
             } else {
-              BootKeyboard.press(_config->buttonKeyboard[i + buttonOffset]);
+              BootKeyboard.press(config.buttonKeyboard[i + buttonOffset]);
             }
 
           } else {
-            if (_config->buttonKeyboard[i + buttonOffset] > 251) {
-              if (_config->buttonKeyboard[i + buttonOffset] == 252) {
+            if (config.buttonKeyboard[i + buttonOffset] > 251) {
+              if (config.buttonKeyboard[i + buttonOffset] == 252) {
                 SingleConsumer.release(MEDIA_VOLUME_MUTE);
-              } else if (_config->buttonKeyboard[i + buttonOffset] == 253) {
+              } else if (config.buttonKeyboard[i + buttonOffset] == 253) {
                 SingleConsumer.release(MEDIA_VOLUME_DOWN);
-              } else if (_config->buttonKeyboard[i + buttonOffset] == 254) {
+              } else if (config.buttonKeyboard[i + buttonOffset] == 254) {
                 SingleConsumer.release(MEDIA_VOLUME_UP);
               }
             } else {
-              BootKeyboard.release(_config->buttonKeyboard[i + buttonOffset]);
+              BootKeyboard.release(config.buttonKeyboard[i + buttonOffset]);
             }
           }
-        } else if (_config->buttonKeyboard[i + buttonOffset] == 0 || _config->disableButtonPressWhenKeyboardEnabled == 0) {
+        } else if (config.buttonKeyboard[i + buttonOffset] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0) {
           if (currentButtonState == 1) {
             Gamepad1.press(i + buttonOffset + 1);
           } else {
@@ -104,13 +103,13 @@ void Buttons::readInputs() {
         lastButtonState[i] = currentButtonState;
 
         for (int j = 0; j < 4; j++) {
-          if (currentButtonState == 1 && _config->solenoidButtonMap[j] > 0 && _config->solenoidButtonMap[j] - 1  == i) {
-            if (_config->solenoidOutputMap[j] > 0) {
-              _outputs->updateOutput(_config->solenoidOutputMap[j] - 1, 255);
+          if (currentButtonState == 1 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1  == i) {
+            if (config.solenoidOutputMap[j] > 0) {
+              outputs.updateOutput(config.solenoidOutputMap[j] - 1, 255);
             }
-          } else if (currentButtonState == 0 && _config->solenoidButtonMap[j] > 0 && _config->solenoidButtonMap[j] - 1 == i) {
-            if (_config->solenoidOutputMap[j] > 0) {
-              _outputs->updateOutput(_config->solenoidOutputMap[j] - 1, 0);
+          } else if (currentButtonState == 0 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i) {
+            if (config.solenoidOutputMap[j] > 0) {
+              outputs.updateOutput(config.solenoidOutputMap[j] - 1, 0);
             }
           }
         }
@@ -119,12 +118,12 @@ void Buttons::readInputs() {
     //if (DEBUG) {Serial.print("\r\n");}
   }
   if (buttonPushed == 1) {
-    if (_config->lightShowState == WAITING_INPUT || _config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT) {
-      _config->lightShowState = INPUT_RECEIVED_SET_LIGHTS_HIGH;
+    if (config.lightShowState == WAITING_INPUT || config.lightShowState == IN_RANDOM_MODE_WAITING_INPUT) {
+      config.lightShowState = INPUT_RECEIVED_SET_LIGHTS_HIGH;
     }
   } else if (buttonPushed == 0) {
-    if (_config->lightShowState == INPUT_RECEIVED_BUTTON_STILL_PRESSED) {
-      _config->lightShowState = INPUT_RECEIVED_SET_LIGHTS_LOW;
+    if (config.lightShowState == INPUT_RECEIVED_BUTTON_STILL_PRESSED) {
+      config.lightShowState = INPUT_RECEIVED_SET_LIGHTS_LOW;
     }
   }
 }

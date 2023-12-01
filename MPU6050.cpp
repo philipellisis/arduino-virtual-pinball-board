@@ -1,6 +1,5 @@
 #include "Arduino.h"
 #include <Wire.h>
-
 #include "MPU6050.h"
 
 bool MPU6050::init(TwoWire *wire)

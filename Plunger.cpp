@@ -1,7 +1,7 @@
 #include "Plunger.h"
 #include <Arduino.h>
 #include "HID-Project.h"
-
+#include "Globals.h"
 
 
 Plunger::Plunger() {
@@ -11,14 +11,13 @@ Plunger::Plunger() {
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: pins initialized\r\n"));}
 }
 
-void Plunger::init(Config* config) {
-  _config = config;
+void Plunger::init() {
   resetPlunger();
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: initialized Gamepad1\r\n"));}
 }
 
 void Plunger::resetPlunger() {
-  plungerScaleFactor = (float)(_config->plungerMid - _config->plungerMin) / (float)(_config->plungerMax - _config->plungerMid);
+  plungerScaleFactor = (float)(config.plungerMid - config.plungerMin) / (float)(config.plungerMax - config.plungerMid);
 }
 
 void Plunger::plungerRead() {
@@ -45,50 +44,50 @@ void Plunger::plungerRead() {
   
 
 
-  if (_config->restingStateCounter < _config->restingStateMax || _config->disablePlungerWhenNotInUse == 0) {
-    for (int i = 0; i < _config->plungerAverageRead; i++) {
+  if (config.restingStateCounter < config.restingStateMax || config.disablePlungerWhenNotInUse == 0) {
+    for (int i = 0; i < config.plungerAverageRead; i++) {
       sensorValue += analogRead(23);
     }
-    sensorValue = sensorValue / (_config->plungerAverageRead + 1);
+    sensorValue = sensorValue / (config.plungerAverageRead + 1);
   }
 
 
   // this checks that the plunger is sitting stationary. If so, it will enable the accelerometer. It also checks if there is nothing connected. to ensure the accelerometer still works even if the plunger is disconnected
-  if ((sensorValue < _config->plungerMid + 50 && sensorValue > _config->plungerMid - 50) || sensorValue > 990) {
+  if ((sensorValue < config.plungerMid + 50 && sensorValue > config.plungerMid - 50) || sensorValue > 990) {
     // plunger is in resting state when counter is > 200. Is moving or almost done moving when counter is > 0 and <= 200
-    if (_config->restingStateCounter < _config->restingStateMax) {
-      _config->restingStateCounter++;
+    if (config.restingStateCounter < config.restingStateMax) {
+      config.restingStateCounter++;
     }
   } else {
       //plunger is actively moving when counter is = 0
-      _config->restingStateCounter = 0;
+      config.restingStateCounter = 0;
   }
   // Serial.print("sensornorm: ");
   // Serial.print(sensorValue);
   // Serial.print("\r\n");
 
-  if( (_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3) && buttonState == 0 && sensorValue >= _config->plungerMax - 20) {
-    Gamepad1.press(_config->plungerLaunchButton);
+  if( (config.plungerButtonPush == 1 || config.plungerButtonPush == 3) && buttonState == 0 && sensorValue >= config.plungerMax - 20) {
+    Gamepad1.press(config.plungerLaunchButton);
     buttonState = 1;
-  } else if ((_config->plungerButtonPush == 1 || _config->plungerButtonPush == 3)  && buttonState == 1 && sensorValue < _config->plungerMax - 20 ) {
-    Gamepad1.release(_config->plungerLaunchButton);
+  } else if ((config.plungerButtonPush == 1 || config.plungerButtonPush == 3)  && buttonState == 1 && sensorValue < config.plungerMax - 20 ) {
+    Gamepad1.release(config.plungerLaunchButton);
     buttonState = 0;
   }
-  if( _config->plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= _config->plungerMin + 10) {
-    Gamepad1.press(_config->plungerLaunchButton);
+  if( config.plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= config.plungerMin + 10) {
+    Gamepad1.press(config.plungerLaunchButton);
     buttonState2 = 1;
-  } else if (_config->plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > _config->plungerMin + 10 ) {
-    Gamepad1.release(_config->plungerLaunchButton);
+  } else if (config.plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > config.plungerMin + 10 ) {
+    Gamepad1.release(config.plungerLaunchButton);
     buttonState2 = 0;
   }
 
-  if (sensorValue <= _config->plungerMid) {
-    adjustedValue = static_cast<int8_t>((1 - (float)(sensorValue - _config->plungerMin) / (_config->plungerMid - _config->plungerMin)) * -128);
+  if (sensorValue <= config.plungerMid) {
+    adjustedValue = static_cast<int8_t>((1 - (float)(sensorValue - config.plungerMin) / (config.plungerMid - config.plungerMin)) * -128);
     if (adjustedValue > 100) {
       adjustedValue = -127;
     }
   } else {
-    adjustedValue = static_cast<int8_t>((float)(sensorValue - _config->plungerMid) / (_config->plungerMax - _config->plungerMid) * 128);
+    adjustedValue = static_cast<int8_t>((float)(sensorValue - config.plungerMid) / (config.plungerMax - config.plungerMid) * 128);
     if (adjustedValue < -100) {
       adjustedValue = 127;
     }
@@ -108,11 +107,11 @@ void Plunger::plungerRead() {
   // }
   
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
-  if (priorValue != sensorValue && _config->restingStateCounter < _config->restingStateMax ) {
+  if (priorValue != sensorValue && config.restingStateCounter < config.restingStateMax ) {
     // Serial.print(adjustedValue);
     // Serial.print(F("\r\n"));
-    if ((priorValue - sensorValue < 20 || adjustedValue < 0 || _config->enablePlungerQuickRelease == 0) && (priorValue - sensorValue > -30 || adjustedValue < 10 || _config->enablePlungerQuickRelease == 0)) {
-      _config->updateUSB = true;
+    if ((priorValue - sensorValue < 20 || adjustedValue < 0 || config.enablePlungerQuickRelease == 0) && (priorValue - sensorValue > -30 || adjustedValue < 10 || config.enablePlungerQuickRelease == 0)) {
+      config.updateUSB = true;
       Gamepad1.zAxis(adjustedValue);
       // Serial.print("plunger in motion: ");
       // Serial.print(adjustedValue);
@@ -124,14 +123,14 @@ void Plunger::plungerRead() {
       // Serial.print(F("\r\n"));
     }
 
-  } else if (priorValue != sensorValue && _config->restingStateCounter == _config->restingStateMax  ) {
-    if (_config->disablePlungerWhenNotInUse == 1) {
+  } else if (priorValue != sensorValue && config.restingStateCounter == config.restingStateMax  ) {
+    if (config.disablePlungerWhenNotInUse == 1) {
       Gamepad1.zAxis(0);
       // Serial.print("plunger not in motion, sending 0: ");
       // Serial.print(adjustedValue);
       // Serial.print(F("\r\n"));
       if (priorValue != 0) {
-        _config->updateUSB = true;
+        config.updateUSB = true;
       }
       priorValue = 0;
     } else {
@@ -139,7 +138,7 @@ void Plunger::plungerRead() {
       // Serial.print(adjustedValue);
       // Serial.print(F("\r\n"));
       Gamepad1.zAxis(adjustedValue);
-      _config->updateUSB = true;
+      config.updateUSB = true;
       priorValue = sensorValue;
     }
     truePriorValue = sensorValue;

@@ -1,7 +1,7 @@
 #include "Config.h"
 #include <Arduino.h>
 #include <EEPROM.h>
-
+#include "Globals.h"
 
 
 Config::Config() {

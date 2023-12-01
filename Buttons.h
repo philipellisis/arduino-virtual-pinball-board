@@ -10,7 +10,7 @@ class Buttons {
   public:
     Buttons();
     void readInputs();
-    void init(Config* config, Outputs* outputs);
+    void init();
     void sendButtonState();
     
     
@@ -18,8 +18,6 @@ class Buttons {
     unsigned char buttonOffset = 0;
     bool DEBUG = false;
     bool lastButtonState[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    Config* _config;
-    Outputs* _outputs;
 };
 
 #endif

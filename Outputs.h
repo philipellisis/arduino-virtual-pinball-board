@@ -12,14 +12,13 @@ class Outputs {
   
   public:
     Outputs();
-    void init(Config* config);
+    void init();
     void updateOutput(unsigned char outputId, unsigned char outputValue);
     void sendOutputState();
     void checkResetOutputs();
     void turnOff();
     
   private:
-    Config* _config;
     void updateOutputInternal(unsigned char outputId, unsigned char outputValue);
     bool DEBUG = false;
     unsigned char numberOutputs = 15;

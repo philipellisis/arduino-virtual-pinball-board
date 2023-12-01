@@ -13,8 +13,6 @@ class Communication {
   
   public:
     Communication();
-    void init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs);
-    //void init();
     void communicate();
     
   private:
@@ -28,11 +26,6 @@ class Communication {
     unsigned char outputButtonNumber = 253;//252 normally
     unsigned char maxNumber = 255; //255 normally
 
-    Accelerometer* _accelerometer;
-    Plunger* _plunger;
-    Buttons* _buttons;
-    Config* _config;
-    Outputs* _outputs;
     unsigned char incomingData[10];
     int dataLocation = 0;
     void updateOutputs();

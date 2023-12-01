@@ -8,7 +8,7 @@ class Plunger {
   
   public:
     Plunger();
-    void init(Config* config);
+    void init();
     void plungerRead();
     void sendPlungerState();
     void resetPlunger();
@@ -17,7 +17,6 @@ class Plunger {
     bool DEBUG = false;
     float plungerScaleFactor;
     int adjustedValue;
-    Config* _config;
     unsigned char buttonState;
     unsigned char buttonState2;
     long priorValue = 0;

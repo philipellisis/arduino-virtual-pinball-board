@@ -3,6 +3,7 @@
 #include <Adafruit_PWMServoDriver.h>
 #include <Wire.h>
 #include "Enums.h"
+#include "Globals.h"
 
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
@@ -15,8 +16,7 @@ Outputs::Outputs() {
   //if (DEBUG) {Serial.print(F("DEBUG,Communication: pins initialized\r\n"));}
 }
 
-void Outputs::init(Config* config) {
-  _config = config;
+void Outputs::init() {
   pwm.begin();
   pwm.setOscillatorFrequency(27000000);
   pwm.setPWMFreq(90);  // This is the maximum PWM frequency
@@ -40,10 +40,10 @@ void Outputs::turnOff() {
 }
 
 void Outputs::updateOutput(unsigned char outputId, unsigned char outputValue) {
-  if (outputValue > _config->maxOutputState[outputId]) {
-    outputValue = _config->maxOutputState[outputId];
+  if (outputValue > config.maxOutputState[outputId]) {
+    outputValue = config.maxOutputState[outputId];
   }
-  if (_config->nightMode == true && (_config->toySpecialOption[outputId] == NOISY || _config->toySpecialOption[outputId] == SHARED)) {
+  if (config.nightMode == true && (config.toySpecialOption[outputId] == NOISY || config.toySpecialOption[outputId] == SHARED)) {
     outputValue = 0;
   }
   // Serial.print(F("DEBUG,outputID: "));
@@ -51,9 +51,9 @@ void Outputs::updateOutput(unsigned char outputId, unsigned char outputValue) {
   // Serial.print(F(" outputValue: "));
   // Serial.print(outputValue);
   // Serial.print(F("\r\n"));
-  if (_config->toySpecialOption[outputId] == SHARED && outputValue > 0 && outputValues[outputId] > 0) {
+  if (config.toySpecialOption[outputId] == SHARED && outputValue > 0 && outputValues[outputId] > 0) {
     for (int i = 0; i < 9; i++) {
-      if(_config->toySpecialOption[i] == SHARED && outputValues[i] == 0) {
+      if(config.toySpecialOption[i] == SHARED && outputValues[i] == 0) {
         outputId = i;
         virtualOutputOn[i] = 1;
         // Serial.print(F("DEBUG,switching to port "));
@@ -63,10 +63,10 @@ void Outputs::updateOutput(unsigned char outputId, unsigned char outputValue) {
       }
     }
   }
-  if (_config->toySpecialOption[outputId] == SHARED && outputValue == 0 && outputId < 10) {
+  if (config.toySpecialOption[outputId] == SHARED && outputValue == 0 && outputId < 10) {
     if (virtualOutputOn[outputId] == 0) {
       for (int i = 0; i < 9; i++) {
-        if(_config->toySpecialOption[i] == SHARED && outputValues[i] > 0 && virtualOutputOn[i] > 0) {
+        if(config.toySpecialOption[i] == SHARED && outputValues[i] > 0 && virtualOutputOn[i] > 0) {
           // Serial.print(F("DEBUG,turning off port "));
           // Serial.print(i);
           // Serial.print(F("\r\n"));
@@ -123,11 +123,11 @@ void Outputs::checkResetOutputs() {
     } else {
       resetOutputNumber = 0;
     }
-    if (outputValues[resetOutputNumber] > _config->turnOffState[resetOutputNumber] && _config->maxOutputTime[resetOutputNumber] > 0) {
+    if (outputValues[resetOutputNumber] > config.turnOffState[resetOutputNumber] && config.maxOutputTime[resetOutputNumber] > 0) {
       //if (DEBUG) {Serial.print(F("DEBUG,Output is turned on, checking if it has been on for too long "));Serial.print(resetOutputNumber); Serial.print(F("\r\n"));}
-      if (t1 - timeTurnedOn[resetOutputNumber] >= _config->maxOutputTime[resetOutputNumber] * 100) {
+      if (t1 - timeTurnedOn[resetOutputNumber] >= config.maxOutputTime[resetOutputNumber] * 100) {
         //if (DEBUG) {Serial.print(F("DEBUG,Output has reached max time, turning off\r\n"));}
-        updateOutput(resetOutputNumber, _config->turnOffState[resetOutputNumber]);
+        updateOutput(resetOutputNumber, config.turnOffState[resetOutputNumber]);
       }
     }
   }

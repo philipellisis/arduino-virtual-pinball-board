@@ -9,7 +9,7 @@ class LightShow {
   
   public:
     LightShow();
-    void init(Config* config, Outputs* outputs);
+    void init();
     void setLightsNormal();
     void incrementRandom();
     void setLightsRandom();
@@ -17,8 +17,6 @@ class LightShow {
     void checkSetLights();
     
   private:
-    Config* _config;
-    Outputs* _outputs;
     bool DEBUG = false;
     long int timeInState;
     unsigned char outputValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};

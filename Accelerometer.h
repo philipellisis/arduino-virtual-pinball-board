@@ -10,7 +10,7 @@ class Accelerometer {
   
   public:
     Accelerometer();
-    void init(Config* config);
+    void init();
     void accelerometerRead();
     void sendAccelerometerState();
     void resetAccelerometer();
@@ -18,7 +18,6 @@ class Accelerometer {
     
   private:
     bool DEBUG = false;
-    Config* _config;
     float xValueOffset = 0;
     float yValueOffset = 0;
     int xValue;

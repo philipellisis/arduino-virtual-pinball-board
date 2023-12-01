@@ -5,6 +5,7 @@
 #include "Buttons.h"
 #include "Accelerometer.h"
 #include "Enums.h"
+#include "Globals.h"
 
 
 
@@ -15,18 +16,8 @@ Communication::Communication() {
 
 
 
-
-void Communication::init(Plunger* plunger, Accelerometer* accel, Buttons* buttons, Config* config, Outputs* outputs) {
-  //if (DEBUG) {Serial.print(F("Communication: initializing Communication\r\n"));}
-  _outputs = outputs;
-  _plunger = plunger;
-  _accelerometer = accel;
-  _buttons = buttons;
-  _config = config;
-}
-
 void Communication::communicate() {
-  _outputs->checkResetOutputs();
+  outputs.checkResetOutputs();
   //int maxSerial = Serial.available();
   for (int i = 0; i < 9; i++) {
     if (Serial.available()) {
@@ -46,14 +37,14 @@ void Communication::communicate() {
         if (dataLocation == 8) {
           //if (DEBUG) {Serial.print(F("DEBUG,9 slots filled, sending outputs\r\n"));}
           if (incomingData[1] == adminNumber) {
-            _config->lightShowState = DISABLED;
+            config.lightShowState = DISABLED;
             //if (DEBUG) {Serial.print(F("DEBUG,Turning admin on\r\n"));}
             // set admin functions{
             admin = incomingData[2];
           } else if (incomingData[1] == connectionNumber) {
             Serial.print(connectedString);
           } else if (incomingData[1] == outputSingleNumber) {
-            _outputs->updateOutput(incomingData[2], incomingData[3]);
+            outputs.updateOutput(incomingData[2], incomingData[3]);
           } else if (incomingData[1] == outputButtonNumber) {
             switch(incomingData[2]) {
               case 28:
@@ -84,7 +75,10 @@ void Communication::communicate() {
           } else {
             //normal operation
             //if (DEBUG) {Serial.print(F("DEBUG,sending output\r\n"));}
-            _config->lightShowState = OUTPUT_RECEIVED_RESET_TIMER;
+            if (config.lightShowState != OUTPUT_RECEIVED) {
+              outputs.turnOff();
+            }
+            config.lightShowState = OUTPUT_RECEIVED_RESET_TIMER;
             updateOutputs();
 
           }
@@ -110,31 +104,31 @@ void Communication::sendAdmin() {
     switch (admin)
     {
     case BUTTONS:
-      _buttons->sendButtonState();
+      buttons.sendButtonState();
       break;
     case OUTPUTS:
-      _outputs->sendOutputState();
+      outputs.sendOutputState();
       break;
     case PLUNGER:
-      _plunger->sendPlungerState();
+      plunger.sendPlungerState();
       break;
     case ACCEL:
-      _accelerometer->sendAccelerometerState();
+      accel.sendAccelerometerState();
       break;
     case SEND_CONFIG:
-      _config->sendConfig();
+      config.sendConfig();
       admin = 0;
       break;
     case GET_CONFIG:
-      _config->updateConfigFromSerial();
-      _plunger->resetPlunger();
-      _accelerometer->resetAccelerometer();
+      config.updateConfigFromSerial();
+      plunger.resetPlunger();
+      accel.resetAccelerometer();
       admin = 0;
       break;
     case OFF:
       admin = 0;
-      _config->lightShowState = OUTPUT_RECEIVED_RESET_TIMER;
-      _outputs->turnOff();
+      config.lightShowState = OUTPUT_RECEIVED_RESET_TIMER;
+      outputs.turnOff();
       break;
     case CONNECT:
       Serial.print(connectedString);
@@ -155,7 +149,7 @@ void Communication::updateOutputs() {
   tempBankOffset = incomingData[1] - bankOffset;
   for (int i = 2; i < 9; i++) {
     if (previousDOFValues[tempBankOffset*7 + i-2] != incomingData[i]) {
-      _outputs->updateOutput(tempBankOffset*7 + i-2, incomingData[i]);
+      outputs.updateOutput(tempBankOffset*7 + i-2, incomingData[i]);
       previousDOFValues[tempBankOffset*7 + i-2] = incomingData[i];
     }
   }

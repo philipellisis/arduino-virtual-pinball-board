@@ -3,6 +3,7 @@
 #include "HID-Project.h"
 #include "MPU6050.h"
 #include "Enums.h"
+#include "Globals.h"
 
 
 
@@ -11,9 +12,8 @@ Accelerometer::Accelerometer()
 {
 }
 
-void Accelerometer::init(Config *config)
+void Accelerometer::init()
 {
-  _config = config;
 
   unsigned char count = 0;
   if (!mpu.init())
@@ -26,8 +26,8 @@ void Accelerometer::init(Config *config)
     delay(100);
     if (count > 10)
     {
-      _config->accelerometer = 0;
-      _config->accelerometerEprom = 0;
+      config.accelerometer = 0;
+      config.accelerometerEprom = 0;
       break;
     }
     count++;
@@ -57,7 +57,7 @@ void Accelerometer::centerAccelerometer()
   while (count < 50)
   {
     mpu.read();
-    if (_config->orientation > 7) {
+    if (config.orientation > 7) {
       xValueOffset += mpu.getZ();
     } else {
       xValueOffset += mpu.getX();
@@ -72,22 +72,22 @@ void Accelerometer::centerAccelerometer()
 
 void Accelerometer::resetAccelerometer()
 {
-  if (_config->orientation > 7) {
-    orientation = _config->orientation - 8;
+  if (config.orientation > 7) {
+    orientation = config.orientation - 8;
   } else {
-    orientation = _config->orientation;
+    orientation = config.orientation;
   }
-  localMax = static_cast<float>(_config->accelerometerMax);
-  mpu.setAccelerometerRange(_config->accelerometerSensitivity);
+  localMax = static_cast<float>(config.accelerometerMax);
+  mpu.setAccelerometerRange(config.accelerometerSensitivity);
   centerAccelerometer();
 }
 
 void Accelerometer::accelerometerRead()
 {
-  if (_config->restingStateCounter != _config->restingStateMax && _config->disableAccelOnPlungerMove == 1) {
+  if (config.restingStateCounter != config.restingStateMax && config.disableAccelOnPlungerMove == 1) {
     return;
   }
-  if (_config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
+  if (config.lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
   {
     if (recentered == false)
     {
@@ -105,18 +105,18 @@ void Accelerometer::accelerometerRead()
   /* Get new sensor events with the readings */
   mpu.read();
 
-  if (_config->orientation > 7) {
+  if (config.orientation > 7) {
     xValue = floor((mpu.getZ() - xValueOffset) * 100);
   } else {
     xValue = floor((mpu.getX() - xValueOffset) * 100);
   }
   yValue = floor((mpu.getY() - yValueOffset) * 100);
   
-  if (abs(xValue) < _config->accelerometerDeadZone)
+  if (abs(xValue) < config.accelerometerDeadZone)
   {
     xValue = 0;
   }
-  if (abs(yValue) < _config->accelerometerDeadZone)
+  if (abs(yValue) < config.accelerometerDeadZone)
   {
     yValue = 0;
   }
@@ -156,27 +156,27 @@ void Accelerometer::accelerometerRead()
     xValue = yValue;
     yValue = temp;
   }
-  if (buttonState == 0 && (abs(xValue) > _config->accelerometerTilt || abs(yValue) > _config->accelerometerTilt))
+  if (buttonState == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTilt))
   {
-    Gamepad1.press(_config->tiltButton);
+    Gamepad1.press(config.tiltButton);
     buttonState = 1;
   }
-  else if (buttonState == 1 && (abs(xValue) < _config->accelerometerTilt && abs(yValue) < _config->accelerometerTilt))
+  else if (buttonState == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTilt))
   {
-    Gamepad1.release(_config->tiltButton);
+    Gamepad1.release(config.tiltButton);
     buttonState = 0;
   }
 
   if (priorXValue != xValue) {
     Gamepad1.xAxis(static_cast<int16_t>(xValue / localMax * 32767));
     priorXValue = xValue;
-    _config->updateUSB = true;
+    config.updateUSB = true;
   }
 
   if (priorYValue != yValue) {
     Gamepad1.yAxis(static_cast<int16_t>(yValue / localMax * 32767));
     priorYValue = yValue;
-    _config->updateUSB = true;
+    config.updateUSB = true;
   }
 
   // Serial.print(F("DEBUG,AccelX:"));
@@ -202,7 +202,7 @@ void Accelerometer::accelerometerRead()
 void Accelerometer::sendAccelerometerState()
 {
   Serial.print(F("A,"));
-  if (_config->orientation > 7) {
+  if (config.orientation > 7) {
      Serial.print((mpu.getZ() - xValueOffset));
   } else {
      Serial.print((mpu.getX() - xValueOffset));

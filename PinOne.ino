@@ -1,24 +1,16 @@
-#include "Plunger.h"
-#include "Buttons.h"
-#include "Accelerometer.h"
-#include "Communication.h"
-#include "Outputs.h"
 #include "HID-Project.h"
-#include "Config.h"
 #include <Wire.h>
-#include "LightShow.h"
+#include "Globals.h"
 
 
+Plunger plunger;
+Buttons buttons;
+LightShow lightShow;
 
-
-Plunger plunger = Plunger();
-Buttons buttons = Buttons();
-LightShow lightShow = LightShow();
-
-Accelerometer accel = Accelerometer();
-Communication comm = Communication();
-Outputs outputs = Outputs();
-Config config = Config();
+Accelerometer accel;
+Communication comm;
+Outputs outputs;
+Config config;
 bool DEBUG = false;
 
 void setup() {
@@ -30,16 +22,15 @@ void setup() {
   // Initialize Gamepad1 Library
   Gamepad1.begin();
   config.init();
-  outputs.init(&config);
+  outputs.init();
 
-  buttons.init(&config, &outputs);
-  plunger.init(&config);
-  lightShow.init(&config, &outputs);
+  buttons.init();
+  plunger.init();
+  lightShow.init();
   if (config.accelerometer > 0) {
-    accel.init(&config);
+    accel.init();
   }
-  
-  comm.init(&plunger, &accel, &buttons, &config, &outputs);
+
   
 }
 
