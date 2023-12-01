@@ -66,9 +66,9 @@ void Communication::communicate() {
                 Gamepad1.zAxis(32767);
                 break;
               default:
-                Gamepad1.press(incomingData[2]);
+                buttons.sendButtonPush(incomingData[2], 1);
                 delay(500);
-                Gamepad1.release(incomingData[2]);
+                buttons.sendButtonPush(incomingData[2], 0);
             }
             delay(500);
 

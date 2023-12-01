@@ -158,13 +158,13 @@ void Accelerometer::accelerometerRead()
   }
   if (buttonState == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTilt))
   {
-    Gamepad1.press(config.tiltButton);
     buttonState = 1;
+    buttons.sendButtonPush(config.tiltButton, buttonState);
   }
   else if (buttonState == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTilt))
   {
-    Gamepad1.release(config.tiltButton);
     buttonState = 0;
+    buttons.sendButtonPush(config.tiltButton, buttonState);
   }
 
   if (priorXValue != xValue) {
