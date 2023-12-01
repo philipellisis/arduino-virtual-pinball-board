@@ -31,88 +31,28 @@ void Buttons::init() {
 }
 
 void Buttons::readInputs() {
-  unsigned char buttonPushed = 2;
+  unsigned char buttonPushed = 2; //this is set to notify light show that a button press has happened
   // read shift register values
   if(buttonReader.update()) {
     //if (DEBUG) {Serial.print(F("DEBUG"));}
-    for(int i = 0; i < 24; i++) {
+    for(unsigned char i = 0; i < 24; i++) {
       bool currentButtonState = !buttonReader.state(i);
       //if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i]) {
-        config.updateUSB = true;
-        // mod 24 so that the button number is always between 0 and 23
-        if (i == config.nightModeButton % 24) {
-          
-          if (config.nightModeButton < 24) {
-            config.nightMode = currentButtonState;
-          } else {
-            if (currentButtonState == 1) {
-              //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(config.nightMode); Serial.print(F("\r\n"));}
-              config.nightMode = !config.nightMode;
-            }
-          }
-        }
+        
+
         if (currentButtonState == 1) {
           buttonPushed = 1;
         } else if (currentButtonState == 0 && buttonPushed == 2) {
           buttonPushed = 0;
         }
         
-        if (i > 3 && i < 8 && lastButtonState[config.shiftButton] == 1) {
-          buttonOffset = 20;
-        } else {
-          buttonOffset = 0;
-        }
-        if (config.buttonKeyboard[i + buttonOffset] > 0) {
-          if (currentButtonState == 1) {
-            if (config.buttonKeyboard[i + buttonOffset] > 251) {
-              if (config.buttonKeyboard[i + buttonOffset] == 252) {
-                SingleConsumer.press(MEDIA_VOLUME_MUTE);
-              } else if (config.buttonKeyboard[i + buttonOffset] == 253) {
-                SingleConsumer.press(MEDIA_VOLUME_DOWN);
-              } else if (config.buttonKeyboard[i + buttonOffset] == 254) {
-                SingleConsumer.press(MEDIA_VOLUME_UP);
-              }
-            } else {
-              BootKeyboard.press(config.buttonKeyboard[i + buttonOffset]);
-            }
-
-          } else {
-            if (config.buttonKeyboard[i + buttonOffset] > 251) {
-              if (config.buttonKeyboard[i + buttonOffset] == 252) {
-                SingleConsumer.release(MEDIA_VOLUME_MUTE);
-              } else if (config.buttonKeyboard[i + buttonOffset] == 253) {
-                SingleConsumer.release(MEDIA_VOLUME_DOWN);
-              } else if (config.buttonKeyboard[i + buttonOffset] == 254) {
-                SingleConsumer.release(MEDIA_VOLUME_UP);
-              }
-            } else {
-              BootKeyboard.release(config.buttonKeyboard[i + buttonOffset]);
-            }
-          }
-        } else if (config.buttonKeyboard[i + buttonOffset] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0) {
-          if (currentButtonState == 1) {
-            Gamepad1.press(i + buttonOffset + 1);
-          } else {
-            Gamepad1.release(i + buttonOffset + 1);
-          }
-        }
-
+        sendButtonPush(i, currentButtonState);
         
         
         lastButtonState[i] = currentButtonState;
 
-        for (int j = 0; j < 4; j++) {
-          if (currentButtonState == 1 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1  == i) {
-            if (config.solenoidOutputMap[j] > 0) {
-              outputs.updateOutput(config.solenoidOutputMap[j] - 1, 255);
-            }
-          } else if (currentButtonState == 0 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i) {
-            if (config.solenoidOutputMap[j] > 0) {
-              outputs.updateOutput(config.solenoidOutputMap[j] - 1, 0);
-            }
-          }
-        }
+
       }
     }
     //if (DEBUG) {Serial.print("\r\n");}
@@ -128,9 +68,81 @@ void Buttons::readInputs() {
   }
 }
 
+void Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
+
+  config.updateUSB = true;
+  // mod 24 so that the button number is always between 0 and 23
+  if (i == config.nightModeButton % 24) {
+    
+    if (config.nightModeButton < 24) {
+      config.nightMode = currentButtonState;
+    } else {
+      if (currentButtonState == 1) {
+        //if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(config.nightMode); Serial.print(F("\r\n"));}
+        config.nightMode = !config.nightMode;
+      }
+    }
+  }
+
+
+  if (i > 3 && i < 12 && lastButtonState[config.shiftButton] == 1) {
+    buttonOffset = 20;
+  } else {
+    buttonOffset = 0;
+  }
+  if (config.buttonKeyboard[i + buttonOffset] > 0) {
+    if (currentButtonState == 1) {
+      if (config.buttonKeyboard[i + buttonOffset] > 251) {
+        if (config.buttonKeyboard[i + buttonOffset] == 252) {
+          SingleConsumer.press(MEDIA_VOLUME_MUTE);
+        } else if (config.buttonKeyboard[i + buttonOffset] == 253) {
+          SingleConsumer.press(MEDIA_VOLUME_DOWN);
+        } else if (config.buttonKeyboard[i + buttonOffset] == 254) {
+          SingleConsumer.press(MEDIA_VOLUME_UP);
+        }
+      } else {
+        BootKeyboard.press(config.buttonKeyboard[i + buttonOffset]);
+      }
+
+    } else {
+      if (config.buttonKeyboard[i + buttonOffset] > 251) {
+        if (config.buttonKeyboard[i + buttonOffset] == 252) {
+          SingleConsumer.release(MEDIA_VOLUME_MUTE);
+        } else if (config.buttonKeyboard[i + buttonOffset] == 253) {
+          SingleConsumer.release(MEDIA_VOLUME_DOWN);
+        } else if (config.buttonKeyboard[i + buttonOffset] == 254) {
+          SingleConsumer.release(MEDIA_VOLUME_UP);
+        }
+      } else {
+        BootKeyboard.release(config.buttonKeyboard[i + buttonOffset]);
+      }
+    }
+  } else if (config.buttonKeyboard[i + buttonOffset] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0) {
+    if (currentButtonState == 1) {
+      Gamepad1.press(i + buttonOffset + 1);
+    } else {
+      Gamepad1.release(i + buttonOffset + 1);
+    }
+  }
+
+  // trigger solenoid if needed
+  for (int j = 0; j < 4; j++) {
+    if (currentButtonState == 1 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1  == i) {
+      if (config.solenoidOutputMap[j] > 0) {
+        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 255);
+      }
+    } else if (currentButtonState == 0 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i) {
+      if (config.solenoidOutputMap[j] > 0) {
+        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 0);
+      }
+    }
+  }
+
+}
+
 void Buttons::sendButtonState() {
   Serial.print(F("B,"));
-  for (int i = 0; i < 23; i++) {
+  for (int i = 0; i < 31; i++) {
     Serial.print(lastButtonState[i]);
     Serial.print(F(","));
   }

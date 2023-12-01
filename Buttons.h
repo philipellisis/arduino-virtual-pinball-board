@@ -12,12 +12,13 @@ class Buttons {
     void readInputs();
     void init();
     void sendButtonState();
+    void sendButtonPush(unsigned char i, bool currentButtonState);
     
     
   private:
     unsigned char buttonOffset = 0;
     bool DEBUG = false;
-    bool lastButtonState[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    bool lastButtonState[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 };
 
 #endif
