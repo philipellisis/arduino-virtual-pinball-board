@@ -43,7 +43,7 @@ class Config {
 
     unsigned char lightShowState = 1;
 
-    unsigned char buttonKeyboard[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char buttonKeyboard[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     unsigned char restingStateCounter = 80;
     unsigned char restingStateMax = 80;
     bool updateUSB = false;

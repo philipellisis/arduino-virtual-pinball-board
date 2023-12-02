@@ -49,7 +49,14 @@ void Config::init() {
     EEPROM.get(461, plungerLaunchButton);
     EEPROM.get(462, tiltButton);
     EEPROM.get(463, shiftButton);
-    for (int i = 0; i < 27; i++) {
+
+    EEPROM.get(464, disableAccelOnPlungerMove);
+    EEPROM.get(465, enablePlungerQuickRelease);
+    EEPROM.get(466, disablePlungerWhenNotInUse);
+    EEPROM.get(467, disableButtonPressWhenKeyboardEnabled);
+
+
+    for (int i = 0; i < 31; i++) {
       EEPROM.get(i + 500, buttonKeyboard[i]);
     }
 
@@ -97,7 +104,13 @@ void Config::saveConfig() {
     EEPROM.write(461, plungerLaunchButton);
     EEPROM.write(462, tiltButton);
     EEPROM.write(463, shiftButton);
-    for (int i = 0; i < 27; i++) {
+
+    EEPROM.write(464, disableAccelOnPlungerMove);
+    EEPROM.write(465, enablePlungerQuickRelease);
+    EEPROM.write(466, disablePlungerWhenNotInUse);
+    EEPROM.write(467, disableButtonPressWhenKeyboardEnabled);
+
+    for (int i = 0; i < 31; i++) {
       EEPROM.write(i + 500, buttonKeyboard[i]);
     }
     EEPROM.write(1000, 101);
@@ -132,7 +145,13 @@ void Config::updateConfigFromSerial() {
     plungerLaunchButton = blockRead();
     tiltButton = blockRead();
     shiftButton = blockRead();
-    readConfigArray(buttonKeyboard, 28);
+
+    readConfigArray(buttonKeyboard, 32);
+
+    disableAccelOnPlungerMove = blockRead();
+    enablePlungerQuickRelease = blockRead();
+    disablePlungerWhenNotInUse = blockRead();
+    disableButtonPressWhenKeyboardEnabled = blockRead();
 
     if (done > 0) {
       printError();
@@ -174,7 +193,13 @@ void Config::sendConfig() {
     printComma(plungerLaunchButton);
     printComma(tiltButton);
     printComma(shiftButton);
-    printConfigArray(buttonKeyboard, 28);
+    printConfigArray(buttonKeyboard, 32);
+
+    printComma(disableAccelOnPlungerMove);
+    printComma(enablePlungerQuickRelease);
+    printComma(disablePlungerWhenNotInUse);
+    printComma(disableButtonPressWhenKeyboardEnabled);
+    
     Serial.print(F("E\r\n"));
 }
 
