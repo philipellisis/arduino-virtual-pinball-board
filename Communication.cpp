@@ -75,9 +75,9 @@ void Communication::communicate() {
           } else {
             //normal operation
             //if (DEBUG) {Serial.print(F("DEBUG,sending output\r\n"));}
-            // if (config.lightShowState != OUTPUT_RECEIVED) {
-            //   outputs.turnOff();
-            // }
+            if (config.lightShowState != OUTPUT_RECEIVED) {
+              lightShow.setLightsOff();
+            }
             config.lightShowState = OUTPUT_RECEIVED_RESET_TIMER;
             updateOutputs();
 

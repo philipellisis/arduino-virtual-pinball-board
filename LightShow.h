@@ -15,6 +15,7 @@ class LightShow {
     void setLightsRandom();
     void setLightsHigh();
     void checkSetLights();
+    void setLightsOff();
     
   private:
     bool DEBUG = false;

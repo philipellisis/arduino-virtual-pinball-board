@@ -101,7 +101,7 @@ void Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
           SingleConsumer.press(MEDIA_VOLUME_UP);
         }
       } else {
-        BootKeyboard.press(config.buttonKeyboard[i + buttonOffset]);
+        BootKeyboard.press(KeyboardKeycode(config.buttonKeyboard[i + buttonOffset]));
       }
 
     } else {
@@ -114,10 +114,11 @@ void Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
           SingleConsumer.release(MEDIA_VOLUME_UP);
         }
       } else {
-        BootKeyboard.release(config.buttonKeyboard[i + buttonOffset]);
+        BootKeyboard.release(KeyboardKeycode(config.buttonKeyboard[i + buttonOffset]));
       }
     }
-  } else if (config.buttonKeyboard[i + buttonOffset] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0) {
+  }
+  if (config.buttonKeyboard[i + buttonOffset] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0) {
     if (currentButtonState == 1) {
       Gamepad1.press(i + buttonOffset + 1);
     } else {

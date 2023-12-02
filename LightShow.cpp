@@ -120,6 +120,15 @@ void LightShow::setLightsHigh() {
   }
 }
 
+void LightShow::setLightsOff() {
+
+  for (int i = startLight; i < finishLight; i++) {
+    if (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM || config.toySpecialOption[i] == LIGHT_SHOW_HIGH ) {
+      outputs.updateOutput(i, 0);
+    }
+  }
+}
+
 void LightShow::setLightsRandom() {
 
   setStartFinishLoops();
