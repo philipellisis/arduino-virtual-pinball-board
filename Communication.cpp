@@ -75,9 +75,9 @@ void Communication::communicate() {
           } else {
             //normal operation
             //if (DEBUG) {Serial.print(F("DEBUG,sending output\r\n"));}
-            if (config.lightShowState != OUTPUT_RECEIVED) {
-              outputs.turnOff();
-            }
+            // if (config.lightShowState != OUTPUT_RECEIVED) {
+            //   outputs.turnOff();
+            // }
             config.lightShowState = OUTPUT_RECEIVED_RESET_TIMER;
             updateOutputs();
 
@@ -135,7 +135,7 @@ void Communication::sendAdmin() {
       admin = 0;
       break;
     case VERSION:
-      Serial.print(F("V,1.11.0\r\n"));
+      Serial.print(F("V,1.12.0\r\n"));
       admin = 0;
       break;
     }

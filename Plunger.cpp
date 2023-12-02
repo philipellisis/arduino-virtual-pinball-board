@@ -111,7 +111,7 @@ void Plunger::plungerRead() {
   if (priorValue != sensorValue && config.restingStateCounter < config.restingStateMax ) {
     // Serial.print(adjustedValue);
     // Serial.print(F("\r\n"));
-    if ((priorValue - sensorValue < 20 || adjustedValue < 0 || config.enablePlungerQuickRelease == 0) && (priorValue - sensorValue > -30 || adjustedValue < 10 || config.enablePlungerQuickRelease == 0)) {
+    if ((priorValue - sensorValue < 20 || adjustedValue < 0 || config.enablePlungerQuickRelease == 0) && (priorValue - sensorValue > -40 || adjustedValue < 10 || config.enablePlungerQuickRelease == 0)) {
       config.updateUSB = true;
       Gamepad1.zAxis(adjustedValue);
       // Serial.print("plunger in motion: ");
@@ -130,10 +130,7 @@ void Plunger::plungerRead() {
       // Serial.print("plunger not in motion, sending 0: ");
       // Serial.print(adjustedValue);
       // Serial.print(F("\r\n"));
-      if (priorValue != 0) {
-        config.updateUSB = true;
-      }
-      priorValue = 0;
+      priorValue = sensorValue;
     } else {
       // Serial.print("plunger not in motion: ");
       // Serial.print(adjustedValue);
