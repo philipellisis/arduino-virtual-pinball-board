@@ -73,12 +73,10 @@ void Plunger::plungerRead() {
   if( (config.plungerButtonPush == 1 || config.plungerButtonPush == 3) && buttonState == 0 && sensorValue >= config.plungerMax - 20) {
     buttonState = buttons.sendButtonPush(config.plungerLaunchButton, 1);
   } else if ((config.plungerButtonPush == 1 || config.plungerButtonPush == 3)  && buttonState == 1 && sensorValue < config.plungerMax - 20 ) {
-    Gamepad1.release(config.plungerLaunchButton);
     buttonState = buttons.sendButtonPush(config.plungerLaunchButton, 0);
   }
   if( config.plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= config.plungerMin + 10) {
     buttonState2 = buttons.sendButtonPush(config.plungerLaunchButton, 1);
-    
   } else if (config.plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > config.plungerMin + 10 ) {
     buttonState2 = buttons.sendButtonPush(config.plungerLaunchButton, 0);
   }

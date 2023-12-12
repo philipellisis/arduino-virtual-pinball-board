@@ -51,9 +51,9 @@ void loop() {
     }
     comm.communicate();
   }
-  //long int t2 = millis();
-  //Serial.print(F("DEBUG,Time taken by the task: ")); Serial.print((t2-t1)); Serial.print(F(" milliseconds\r\n"));
-  //delay(100);
+  // long int t2 = millis();
+  // Serial.print(F("DEBUG,Time taken by the task: ")); Serial.print((t2-t1)); Serial.print(F(" milliseconds\r\n"));
+  // delay(100);
   //Serial.println("arduino is running");
   
 }
