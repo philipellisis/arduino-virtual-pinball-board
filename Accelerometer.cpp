@@ -158,13 +158,11 @@ void Accelerometer::accelerometerRead()
   }
   if (buttonState == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTilt))
   {
-    buttonState = 1;
-    buttons.sendButtonPush(config.tiltButton, buttonState);
+    buttonState = buttons.sendButtonPush(config.tiltButton, 1);
   }
   else if (buttonState == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTilt))
   {
-    buttonState = 0;
-    buttons.sendButtonPush(config.tiltButton, buttonState);
+    buttonState = buttons.sendButtonPush(config.tiltButton, 0);
   }
 
   if (priorXValue != xValue) {

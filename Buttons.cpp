@@ -33,7 +33,7 @@ void Buttons::init() {
 void Buttons::readInputs() {
   unsigned char buttonPushed = 2; //this is set to notify light show that a button press has happened
   // read shift register values
-  if(buttonReader.update()) {
+  if(buttonReader.update() || numberButtonsPressed > 0) {
     //if (DEBUG) {Serial.print(F("DEBUG"));}
     for(unsigned char i = 0; i < 24; i++) {
       bool currentButtonState = !buttonReader.state(i);
@@ -47,10 +47,7 @@ void Buttons::readInputs() {
           buttonPushed = 0;
         }
         
-        sendButtonPush(i, currentButtonState);
-        
-        
-        lastButtonState[i] = currentButtonState;
+        lastButtonState[i] = sendButtonPush(i, currentButtonState);
 
 
       }
@@ -68,7 +65,7 @@ void Buttons::readInputs() {
   }
 }
 
-void Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
+bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
 
   config.updateUSB = true;
   // mod 24 so that the button number is always between 0 and 23
@@ -84,45 +81,65 @@ void Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
     }
   }
 
+  if (config.buttonKeyDebounce[i] > 0 && currentButtonState == 0) {
+    if (config.buttonKeyDebounce[i] < config.buttonDebounceCounter) {
+      config.buttonKeyDebounce[i]++;
+      return 1;
+    } else {
+      config.buttonKeyDebounce[i] = 1;
+      numberButtonsPressed--;
+      // Serial.print(F("decrementing"));
+      // Serial.print(numberButtonsPressed);
+      // Serial.print(F("\r\n"));
+    }
+  } else if (config.buttonKeyDebounce[i] > 0 && currentButtonState == 1) {
+    numberButtonsPressed++;
+    // Serial.print(F("incrementing"));
+    // Serial.print(numberButtonsPressed);
+    // Serial.print(F("\r\n"));
+  }
+
 
   if (i > 3 && i < 12 && lastButtonState[config.shiftButton] == 1) {
-    buttonOffset = 20;
+    buttonOffset = i + 20;
   } else {
-    buttonOffset = 0;
+    buttonOffset = i;
   }
-  if (config.buttonKeyboard[i + buttonOffset] > 0) {
+
+
+  if (config.buttonKeyboard[buttonOffset] > 0) {
     if (currentButtonState == 1) {
-      if (config.buttonKeyboard[i + buttonOffset] > 251) {
-        if (config.buttonKeyboard[i + buttonOffset] == 252) {
+      if (config.buttonKeyboard[buttonOffset] > 251) {
+        if (config.buttonKeyboard[buttonOffset] == 252) {
           SingleConsumer.press(MEDIA_VOLUME_MUTE);
-        } else if (config.buttonKeyboard[i + buttonOffset] == 253) {
+        } else if (config.buttonKeyboard[buttonOffset] == 253) {
           SingleConsumer.press(MEDIA_VOLUME_DOWN);
-        } else if (config.buttonKeyboard[i + buttonOffset] == 254) {
+        } else if (config.buttonKeyboard[buttonOffset] == 254) {
           SingleConsumer.press(MEDIA_VOLUME_UP);
         }
       } else {
-        BootKeyboard.press(KeyboardKeycode(config.buttonKeyboard[i + buttonOffset]));
+        BootKeyboard.press(KeyboardKeycode(config.buttonKeyboard[buttonOffset]));
       }
 
     } else {
-      if (config.buttonKeyboard[i + buttonOffset] > 251) {
-        if (config.buttonKeyboard[i + buttonOffset] == 252) {
+      if (config.buttonKeyboard[buttonOffset] > 251) {
+        if (config.buttonKeyboard[buttonOffset] == 252) {
           SingleConsumer.release(MEDIA_VOLUME_MUTE);
-        } else if (config.buttonKeyboard[i + buttonOffset] == 253) {
+        } else if (config.buttonKeyboard[buttonOffset] == 253) {
           SingleConsumer.release(MEDIA_VOLUME_DOWN);
-        } else if (config.buttonKeyboard[i + buttonOffset] == 254) {
+        } else if (config.buttonKeyboard[buttonOffset] == 254) {
           SingleConsumer.release(MEDIA_VOLUME_UP);
         }
       } else {
-        BootKeyboard.release(KeyboardKeycode(config.buttonKeyboard[i + buttonOffset]));
+        BootKeyboard.release(KeyboardKeycode(config.buttonKeyboard[buttonOffset]));
       }
     }
   }
-  if (config.buttonKeyboard[i + buttonOffset] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0) {
+  if (config.buttonKeyboard[buttonOffset] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0) {
     if (currentButtonState == 1) {
-      Gamepad1.press(i + buttonOffset + 1);
+      Gamepad1.press(buttonOffset + 1);
     } else {
-      Gamepad1.release(i + buttonOffset + 1);
+      Gamepad1.release(buttonOffset + 1);
     }
   }
 
@@ -138,7 +155,7 @@ void Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
       }
     }
   }
-
+  return currentButtonState;
 }
 
 void Buttons::sendButtonState() {

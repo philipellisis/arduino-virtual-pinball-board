@@ -56,10 +56,15 @@ void Config::init() {
     EEPROM.get(467, disableButtonPressWhenKeyboardEnabled);
 
 
-    for (int i = 0; i < 31; i++) {
+    for (int i = 0; i < 32; i++) {
       EEPROM.get(i + 500, buttonKeyboard[i]);
     }
 
+    for (int i = 0; i < 24; i++) {
+      EEPROM.get(i + 532, buttonKeyDebounce[i]);
+    }
+    EEPROM.get(564, buttonDebounceCounter);
+    EEPROM.get(565, enablePlunger);
 
   } else {
     //save default config in case it's never been done before
@@ -110,9 +115,17 @@ void Config::saveConfig() {
     EEPROM.write(466, disablePlungerWhenNotInUse);
     EEPROM.write(467, disableButtonPressWhenKeyboardEnabled);
 
-    for (int i = 0; i < 31; i++) {
+    for (int i = 0; i < 32; i++) {
       EEPROM.write(i + 500, buttonKeyboard[i]);
     }
+
+    for (int i = 0; i < 24; i++) {
+      EEPROM.write(i + 532, buttonKeyDebounce[i]);
+    }
+
+    EEPROM.write(564, buttonDebounceCounter);
+    EEPROM.write(565, enablePlunger);
+
     EEPROM.write(1000, 101);
 }
 
@@ -152,6 +165,10 @@ void Config::updateConfigFromSerial() {
     enablePlungerQuickRelease = blockRead();
     disablePlungerWhenNotInUse = blockRead();
     disableButtonPressWhenKeyboardEnabled = blockRead();
+
+    readConfigArray(buttonKeyDebounce, 24);
+    buttonDebounceCounter = blockRead();
+    enablePlunger = blockRead();
 
     if (done > 0) {
       printError();
@@ -199,6 +216,10 @@ void Config::sendConfig() {
     printComma(enablePlungerQuickRelease);
     printComma(disablePlungerWhenNotInUse);
     printComma(disableButtonPressWhenKeyboardEnabled);
+
+    printConfigArray(buttonKeyDebounce, 24);
+    printComma(buttonDebounceCounter);
+    printComma(enablePlunger);
     
     Serial.print(F("E\r\n"));
 }

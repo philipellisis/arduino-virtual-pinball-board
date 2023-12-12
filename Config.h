@@ -44,6 +44,8 @@ class Config {
     unsigned char lightShowState = 1;
 
     unsigned char buttonKeyboard[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char buttonKeyDebounce[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char buttonDebounceCounter = 0;
     unsigned char restingStateCounter = 80;
     unsigned char restingStateMax = 80;
     bool updateUSB = false;
@@ -55,6 +57,7 @@ class Config {
     bool enablePlungerQuickRelease = false;
     bool disablePlungerWhenNotInUse = true;
     bool disableButtonPressWhenKeyboardEnabled = true;
+    bool enablePlunger = true;
 
 
   private:
