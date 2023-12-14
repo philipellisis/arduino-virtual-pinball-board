@@ -170,6 +170,10 @@ void Config::updateConfigFromSerial() {
     buttonDebounceCounter = blockRead();
     enablePlunger = blockRead();
 
+    if(blockRead() != 42) {
+      done = 1;
+    }
+
     if (done > 0) {
       printError();
     } else {
