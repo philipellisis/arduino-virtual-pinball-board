@@ -66,6 +66,9 @@ void Config::init() {
     EEPROM.get(564, buttonDebounceCounter);
     EEPROM.get(565, enablePlunger);
 
+    EEPROM.get(566, tiltSuppress);
+    EEPROM.get(567, lightShowAttractEnabled);
+
   } else {
     //save default config in case it's never been done before
     saveConfig();
@@ -126,6 +129,9 @@ void Config::saveConfig() {
     EEPROM.write(564, buttonDebounceCounter);
     EEPROM.write(565, enablePlunger);
 
+    EEPROM.write(566, tiltSuppress);
+    EEPROM.write(567, lightShowAttractEnabled);
+
     EEPROM.write(1000, 101);
 }
 
@@ -169,6 +175,9 @@ void Config::updateConfigFromSerial() {
     readConfigArray(buttonKeyDebounce, 24);
     buttonDebounceCounter = blockRead();
     enablePlunger = blockRead();
+
+    tiltSuppress = blockRead();
+    lightShowAttractEnabled = blockRead();
 
     if(blockRead() != 42) {
       done = 1;
@@ -224,6 +233,9 @@ void Config::sendConfig() {
     printConfigArray(buttonKeyDebounce, 24);
     printComma(buttonDebounceCounter);
     printComma(enablePlunger);
+
+    printComma(tiltSuppress);
+    printComma(lightShowAttractEnabled);
     
     Serial.print(F("E\r\n"));
 }

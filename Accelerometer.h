@@ -28,6 +28,7 @@ class Accelerometer {
     bool recentered = false;
     unsigned char orientation = 0;
     float localMax = 0;
+    unsigned char tiltSuppressTime = 0;
 };
 
 #endif

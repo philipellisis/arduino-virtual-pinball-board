@@ -156,14 +156,21 @@ void Accelerometer::accelerometerRead()
     xValue = yValue;
     yValue = temp;
   }
-  if (buttonState == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTilt))
-  {
-    buttonState = buttons.sendButtonPush(config.tiltButton, 1);
+
+  if (tiltSuppressTime > 0) {
+    tiltSuppressTime--;
+  } else {
+    if (buttonState == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTilt))
+    {
+      buttonState = buttons.sendButtonPush(config.tiltButton, 1);
+    }
+    else if (buttonState == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTilt))
+    {
+      buttonState = buttons.sendButtonPush(config.tiltButton, 0);
+      tiltSuppressTime = config.tiltSuppress;
+    }
   }
-  else if (buttonState == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTilt))
-  {
-    buttonState = buttons.sendButtonPush(config.tiltButton, 0);
-  }
+
 
   if (priorXValue != xValue) {
     Gamepad1.xAxis(static_cast<int16_t>(xValue / localMax * 32767));

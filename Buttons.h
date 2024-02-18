@@ -20,6 +20,7 @@ class Buttons {
     bool DEBUG = false;
     bool lastButtonState[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     unsigned char numberButtonsPressed = 0;
+    void sendActualButtonPress(unsigned char buttonOffset, bool currentButtonState);
 };
 
 #endif

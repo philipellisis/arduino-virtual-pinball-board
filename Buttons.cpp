@@ -99,14 +99,35 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
     // Serial.print(F("\r\n"));
   }
 
+  if (i > 3 && i < 12 && currentButtonState == 0 && lastButtonState[i + 20] == 1 && lastButtonState[config.shiftButton] == 0) {
+    sendActualButtonPress(i + 20, currentButtonState);
+  }
 
   if (i > 3 && i < 12 && lastButtonState[config.shiftButton] == 1) {
     buttonOffset = i + 20;
   } else {
     buttonOffset = i;
   }
+  sendActualButtonPress(buttonOffset, currentButtonState);
 
 
+  // trigger solenoid if needed
+  for (int j = 0; j < 4; j++) {
+    if (currentButtonState == 1 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1  == i) {
+      if (config.solenoidOutputMap[j] > 0) {
+        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 255);
+      }
+    } else if (currentButtonState == 0 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i) {
+      if (config.solenoidOutputMap[j] > 0) {
+        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 0);
+      }
+    }
+  }
+  return currentButtonState;
+}
+
+void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButtonState) {
+  
   if (config.buttonKeyboard[buttonOffset] > 0) {
     if (currentButtonState == 1) {
       if (config.buttonKeyboard[buttonOffset] > 251) {
@@ -142,20 +163,6 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
       Gamepad1.release(buttonOffset + 1);
     }
   }
-
-  // trigger solenoid if needed
-  for (int j = 0; j < 4; j++) {
-    if (currentButtonState == 1 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1  == i) {
-      if (config.solenoidOutputMap[j] > 0) {
-        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 255);
-      }
-    } else if (currentButtonState == 0 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i) {
-      if (config.solenoidOutputMap[j] > 0) {
-        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 0);
-      }
-    }
-  }
-  return currentButtonState;
 }
 
 void Buttons::sendButtonState() {

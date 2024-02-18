@@ -38,7 +38,7 @@ void LightShow::checkSetLights() {
     break;
   case WAITING_INPUT:
     //here an output has not been received in 10 seconds, and now waiting for button input
-    if (currentTime - timeInState > 20000) {
+    if (currentTime - timeInState > 20000 && config.lightShowAttractEnabled == true) {
       setLightsRandom();
       if (doneSettingLights == true) {
         config.lightShowState = IN_RANDOM_MODE_WAITING_INPUT;

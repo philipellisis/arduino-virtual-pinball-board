@@ -59,6 +59,9 @@ class Config {
     bool disableButtonPressWhenKeyboardEnabled = true;
     bool enablePlunger = true;
 
+    unsigned char tiltSuppress = 0;
+    bool lightShowAttractEnabled = true;
+
 
   private:
     bool DEBUG = false;
