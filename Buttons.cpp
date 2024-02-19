@@ -101,14 +101,25 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
 
   if (i > 3 && i < 12 && currentButtonState == 0 && lastButtonState[i + 20] == 1 && lastButtonState[config.shiftButton] == 0) {
     sendActualButtonPress(i + 20, currentButtonState);
+    lastButtonState[i + 20] = currentButtonState;
   }
 
   if (i > 3 && i < 12 && lastButtonState[config.shiftButton] == 1) {
     buttonOffset = i + 20;
+    if (lastButtonState[config.shiftButton] == 1) {
+      lastButtonState[buttonOffset] = currentButtonState;
+      sendActualButtonPress(buttonOffset, currentButtonState);
+    }
+    if (currentButtonState == 0) {
+      sendActualButtonPress(i, currentButtonState);
+      sendActualButtonPress(buttonOffset, currentButtonState);
+    }
+    
   } else {
     buttonOffset = i;
+    sendActualButtonPress(buttonOffset, currentButtonState);
   }
-  sendActualButtonPress(buttonOffset, currentButtonState);
+  
 
 
   // trigger solenoid if needed
