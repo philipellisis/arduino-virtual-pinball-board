@@ -142,7 +142,7 @@ void Communication::sendAdmin() {
       admin = 0;
       break;
     case VERSION:
-      Serial.print(F("V,1.13.0\r\n"));
+      Serial.print(F("V,1.15.0\r\n"));
       admin = 0;
       break;
     }
