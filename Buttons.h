@@ -1,26 +1,26 @@
 #ifndef BUTTON_H
 #define BUTTON_H
 #include <Arduino.h>
-#include <Joystick.h>
 #include "Config.h"
 #include "Outputs.h"
+
 
 class Buttons {
   
   public:
     Buttons();
     void readInputs();
-    void init(Joystick_* joystick, Config* config, Outputs* outputs);
+    void init();
     void sendButtonState();
+    bool sendButtonPush(unsigned char i, bool currentButtonState);
     
     
   private:
-    byte buttonOffset = 0;
+    unsigned char buttonOffset = 0;
     bool DEBUG = false;
-    bool lastButtonState[28] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    Joystick_* _joystick;
-    Config* _config;
-    Outputs* _outputs;
+    bool lastButtonState[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char numberButtonsPressed = 0;
+    void sendActualButtonPress(unsigned char buttonOffset, bool currentButtonState);
 };
 
 #endif

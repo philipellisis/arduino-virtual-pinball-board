@@ -1,20 +1,21 @@
 #include "Accelerometer.h"
 #include <Arduino.h>
-#include <Joystick.h>
+#include "HID-Project.h"
 #include "MPU6050.h"
 #include "Enums.h"
+#include "Globals.h"
+
+
 
 MPU6050 mpu;
 Accelerometer::Accelerometer()
 {
 }
 
-void Accelerometer::init(Joystick_ *joystick, Config *config)
+void Accelerometer::init()
 {
-  _joystick = joystick;
-  _config = config;
 
-  byte count = 0;
+  unsigned char count = 0;
   if (!mpu.init())
   {
     delay(1000);
@@ -25,8 +26,8 @@ void Accelerometer::init(Joystick_ *joystick, Config *config)
     delay(100);
     if (count > 10)
     {
-      _config->accelerometer = 0;
-      _config->accelerometerEprom = 0;
+      config.accelerometer = 0;
+      config.accelerometerEprom = 0;
       break;
     }
     count++;
@@ -50,13 +51,13 @@ void Accelerometer::centerAccelerometer()
 {
   delay(400);
 
-  byte count = 0;
+  unsigned char count = 0;
   xValueOffset = 0;
   yValueOffset = 0;
   while (count < 50)
   {
     mpu.read();
-    if (_config->orientation > 7) {
+    if (config.orientation > 7) {
       xValueOffset += mpu.getZ();
     } else {
       xValueOffset += mpu.getX();
@@ -71,21 +72,22 @@ void Accelerometer::centerAccelerometer()
 
 void Accelerometer::resetAccelerometer()
 {
-  if (_config->orientation > 7) {
-    orientation = _config->orientation - 8;
+  if (config.orientation > 7) {
+    orientation = config.orientation - 8;
   } else {
-    orientation = _config->orientation;
+    orientation = config.orientation;
   }
-  _joystick->setXAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
-  _joystick->setYAxisRange(-_config->accelerometerMax, _config->accelerometerMax);
-
-  mpu.setAccelerometerRange(_config->accelerometerSensitivity);
+  localMax = static_cast<float>(config.accelerometerMax);
+  mpu.setAccelerometerRange(config.accelerometerSensitivity);
   centerAccelerometer();
 }
 
 void Accelerometer::accelerometerRead()
 {
-  if (_config->lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
+  if (config.restingStateCounter != config.restingStateMax && config.disableAccelOnPlungerMove == 1) {
+    return;
+  }
+  if (config.lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
   {
     if (recentered == false)
     {
@@ -103,18 +105,18 @@ void Accelerometer::accelerometerRead()
   /* Get new sensor events with the readings */
   mpu.read();
 
-  if (_config->orientation > 7) {
+  if (config.orientation > 7) {
     xValue = floor((mpu.getZ() - xValueOffset) * 100);
   } else {
     xValue = floor((mpu.getX() - xValueOffset) * 100);
   }
   yValue = floor((mpu.getY() - yValueOffset) * 100);
   
-  if (abs(xValue) < _config->accelerometerDeadZone || _config->restingStateCounter != 200)
+  if (abs(xValue) < config.accelerometerDeadZone)
   {
     xValue = 0;
   }
-  if (abs(yValue) < _config->accelerometerDeadZone || _config->restingStateCounter != 200)
+  if (abs(yValue) < config.accelerometerDeadZone)
   {
     yValue = 0;
   }
@@ -154,25 +156,32 @@ void Accelerometer::accelerometerRead()
     xValue = yValue;
     yValue = temp;
   }
-  if (buttonState == 0 && (abs(xValue) > _config->accelerometerTilt || abs(yValue) > _config->accelerometerTilt))
-  {
-    _joystick->setButton(_config->tiltButton, 1);
-    buttonState = 1;
-  }
-  else if (buttonState == 1 && (abs(xValue) < _config->accelerometerTilt && abs(yValue) < _config->accelerometerTilt))
-  {
-    _joystick->setButton(_config->tiltButton, 0);
-    buttonState = 0;
+
+  if (tiltSuppressTime > 0) {
+    tiltSuppressTime--;
+  } else {
+    if (buttonState == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTilt))
+    {
+      buttonState = buttons.sendButtonPush(config.tiltButton, 1);
+    }
+    else if (buttonState == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTilt))
+    {
+      buttonState = buttons.sendButtonPush(config.tiltButton, 0);
+      tiltSuppressTime = config.tiltSuppress;
+    }
   }
 
+
   if (priorXValue != xValue) {
-    _joystick->setXAxis(xValue);
+    Gamepad1.xAxis(static_cast<int16_t>(xValue / localMax * 32767));
     priorXValue = xValue;
+    config.updateUSB = true;
   }
 
   if (priorYValue != yValue) {
-    _joystick->setYAxis(yValue);
+    Gamepad1.yAxis(static_cast<int16_t>(yValue / localMax * 32767));
     priorYValue = yValue;
+    config.updateUSB = true;
   }
 
   // Serial.print(F("DEBUG,AccelX:"));
@@ -198,7 +207,7 @@ void Accelerometer::accelerometerRead()
 void Accelerometer::sendAccelerometerState()
 {
   Serial.print(F("A,"));
-  if (_config->orientation > 7) {
+  if (config.orientation > 7) {
      Serial.print((mpu.getZ() - xValueOffset));
   } else {
      Serial.print((mpu.getX() - xValueOffset));

@@ -1,6 +1,5 @@
 #include "Arduino.h"
 #include <Wire.h>
-
 #include "MPU6050.h"
 
 bool MPU6050::init(TwoWire *wire)
@@ -51,7 +50,7 @@ bool MPU6050::init(TwoWire *wire)
     return true;
 }
 
-void MPU6050::setAccelerometerRange(byte new_range)
+void MPU6050::setAccelerometerRange(unsigned char new_range)
 {
     Adafruit_BusIO_Register accel_config = Adafruit_BusIO_Register(i2c_dev, 0x1C, 1);
     Adafruit_BusIO_RegisterBits accel_range = Adafruit_BusIO_RegisterBits(&accel_config, 2, 3);

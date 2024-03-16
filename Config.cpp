@@ -1,6 +1,7 @@
 #include "Config.h"
 #include <Arduino.h>
 #include <EEPROM.h>
+#include "Globals.h"
 
 
 Config::Config() {
@@ -9,7 +10,7 @@ Config::Config() {
 void Config::init() {
   //if (DEBUG) {Serial.print(F("DEBUG,Config: initializing\r\n"));}
 
-  byte eepromCheck;
+  unsigned char eepromCheck;
   EEPROM.get(1000, eepromCheck);
 
   if (eepromCheck == 101) {
@@ -48,10 +49,25 @@ void Config::init() {
     EEPROM.get(461, plungerLaunchButton);
     EEPROM.get(462, tiltButton);
     EEPROM.get(463, shiftButton);
-    for (int i = 0; i < 27; i++) {
+
+    EEPROM.get(464, disableAccelOnPlungerMove);
+    EEPROM.get(465, enablePlungerQuickRelease);
+    EEPROM.get(466, disablePlungerWhenNotInUse);
+    EEPROM.get(467, disableButtonPressWhenKeyboardEnabled);
+
+
+    for (int i = 0; i < 32; i++) {
       EEPROM.get(i + 500, buttonKeyboard[i]);
     }
 
+    for (int i = 0; i < 24; i++) {
+      EEPROM.get(i + 532, buttonKeyDebounce[i]);
+    }
+    EEPROM.get(564, buttonDebounceCounter);
+    EEPROM.get(565, enablePlunger);
+
+    EEPROM.get(566, tiltSuppress);
+    EEPROM.get(567, lightShowAttractEnabled);
 
   } else {
     //save default config in case it's never been done before
@@ -96,9 +112,26 @@ void Config::saveConfig() {
     EEPROM.write(461, plungerLaunchButton);
     EEPROM.write(462, tiltButton);
     EEPROM.write(463, shiftButton);
-    for (int i = 0; i < 27; i++) {
+
+    EEPROM.write(464, disableAccelOnPlungerMove);
+    EEPROM.write(465, enablePlungerQuickRelease);
+    EEPROM.write(466, disablePlungerWhenNotInUse);
+    EEPROM.write(467, disableButtonPressWhenKeyboardEnabled);
+
+    for (int i = 0; i < 32; i++) {
       EEPROM.write(i + 500, buttonKeyboard[i]);
     }
+
+    for (int i = 0; i < 24; i++) {
+      EEPROM.write(i + 532, buttonKeyDebounce[i]);
+    }
+
+    EEPROM.write(564, buttonDebounceCounter);
+    EEPROM.write(565, enablePlunger);
+
+    EEPROM.write(566, tiltSuppress);
+    EEPROM.write(567, lightShowAttractEnabled);
+
     EEPROM.write(1000, 101);
 }
 
@@ -131,7 +164,24 @@ void Config::updateConfigFromSerial() {
     plungerLaunchButton = blockRead();
     tiltButton = blockRead();
     shiftButton = blockRead();
-    readConfigArray(buttonKeyboard, 28);
+
+    readConfigArray(buttonKeyboard, 32);
+
+    disableAccelOnPlungerMove = blockRead();
+    enablePlungerQuickRelease = blockRead();
+    disablePlungerWhenNotInUse = blockRead();
+    disableButtonPressWhenKeyboardEnabled = blockRead();
+
+    readConfigArray(buttonKeyDebounce, 24);
+    buttonDebounceCounter = blockRead();
+    enablePlunger = blockRead();
+
+    tiltSuppress = blockRead();
+    lightShowAttractEnabled = blockRead();
+
+    if(blockRead() != 42) {
+      done = 1;
+    }
 
     if (done > 0) {
       printError();
@@ -173,11 +223,24 @@ void Config::sendConfig() {
     printComma(plungerLaunchButton);
     printComma(tiltButton);
     printComma(shiftButton);
-    printConfigArray(buttonKeyboard, 28);
+    printConfigArray(buttonKeyboard, 32);
+
+    printComma(disableAccelOnPlungerMove);
+    printComma(enablePlungerQuickRelease);
+    printComma(disablePlungerWhenNotInUse);
+    printComma(disableButtonPressWhenKeyboardEnabled);
+
+    printConfigArray(buttonKeyDebounce, 24);
+    printComma(buttonDebounceCounter);
+    printComma(enablePlunger);
+
+    printComma(tiltSuppress);
+    printComma(lightShowAttractEnabled);
+    
     Serial.print(F("E\r\n"));
 }
 
-void Config::printComma(byte value) {
+void Config::printComma(unsigned char value) {
   Serial.print(value);
   Serial.print(F(","));
 }
@@ -191,7 +254,7 @@ void Config::printSuccess() {
   Serial.print(F("R,S\r\n"));
 }
 
-byte Config::blockRead() {
+unsigned char Config::blockRead() {
     if (done > 0) {
       return 0;
     }
@@ -223,14 +286,14 @@ int Config::readIntFromByte() {
   return (blockRead() << 8) + blockRead();
 }
 
-void Config::readConfigArray(byte* configArray, byte size) {
-  for (byte i = 0; i < size; i++) {
+void Config::readConfigArray(unsigned char* configArray, unsigned char size) {
+  for (unsigned char i = 0; i < size; i++) {
     configArray[i] = blockRead();
   }
 }
 
-void Config::printConfigArray(byte* configArray, byte size) {
-  for (byte i = 0; i < size; i++) {
+void Config::printConfigArray(unsigned char* configArray, unsigned char size) {
+  for (unsigned char i = 0; i < size; i++) {
     printComma(configArray[i]);
   }
 }

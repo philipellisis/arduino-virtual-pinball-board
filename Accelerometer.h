@@ -1,15 +1,16 @@
 #ifndef ACCEL_H
 #define ACCEL_H
 #include <Arduino.h>
-#include <Joystick.h>
+#include "HID-Project.h"
 #include "Config.h"
+
 
 
 class Accelerometer {
   
   public:
     Accelerometer();
-    void init(Joystick_* joystick, Config* config);
+    void init();
     void accelerometerRead();
     void sendAccelerometerState();
     void resetAccelerometer();
@@ -17,17 +18,17 @@ class Accelerometer {
     
   private:
     bool DEBUG = false;
-    Config* _config;
     float xValueOffset = 0;
     float yValueOffset = 0;
-    Joystick_* _joystick;
     int xValue;
     int yValue;
     int priorXValue = 0;
     int priorYValue = 0;
-    byte buttonState;
+    unsigned char buttonState;
     bool recentered = false;
-    byte orientation = 0;
+    unsigned char orientation = 0;
+    float localMax = 0;
+    unsigned char tiltSuppressTime = 0;
 };
 
 #endif

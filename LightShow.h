@@ -9,26 +9,25 @@ class LightShow {
   
   public:
     LightShow();
-    void init(Config* config, Outputs* outputs);
+    void init();
     void setLightsNormal();
     void incrementRandom();
     void setLightsRandom();
     void setLightsHigh();
     void checkSetLights();
+    void setLightsOff();
     
   private:
-    Config* _config;
-    Outputs* _outputs;
     bool DEBUG = false;
     long int timeInState;
-    byte outputValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte outputDirection[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    byte startLight = 0;
-    byte finishLight = 0;
-    byte incrementor = 5;
+    unsigned char outputValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char outputDirection[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char startLight = 0;
+    unsigned char finishLight = 0;
+    unsigned char incrementor = 5;
 
-    byte currentStartLight = 0;
-    byte currentFinishLight = 0;
+    unsigned char currentStartLight = 0;
+    unsigned char currentFinishLight = 0;
     bool doneSettingLights = true;
     void setStartFinishLoops();
 };
