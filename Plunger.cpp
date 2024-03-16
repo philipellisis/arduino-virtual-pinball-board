@@ -55,13 +55,6 @@ void Plunger::plungerRead() {
     sensorValue = sensorValue / (config.plungerAverageRead + 1);
   }
 
-  for (int i = 0; i < averageReadings; i++) {
-    sensorValue += analogRead(23);
-  }
-  // Serial.print("sensorraw: ");
-  // Serial.print(sensorValue);
-  // Serial.print("\r\n");
-  sensorValue = sensorValue / (averageReadings + 1);
 
   // this checks that the plunger is sitting stationary. If so, it will enable the accelerometer. It also checks if there is nothing connected. to ensure the accelerometer still works even if the plunger is disconnected
   if ((sensorValue < config.plungerMid + 50 && sensorValue > config.plungerMid - 50) || sensorValue > 990) {
