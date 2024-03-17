@@ -116,9 +116,9 @@ void Plunger::plungerRead() {
     // Serial.print(F("\r\n"));
     config.updateUSB = true;
     Gamepad1.zAxis(currentDelayedValue);
-    Serial.print("plunger in motion: ");
-    Serial.print(currentDelayedValue);
-    Serial.print(F("\r\n"));
+    // Serial.print("plunger in motion: ");
+    // Serial.print(currentDelayedValue);
+    // Serial.print(F("\r\n"));
     priorValue = currentDelayedValue;
 
   //is not moving
@@ -132,9 +132,9 @@ void Plunger::plungerRead() {
       // Serial.print(F("\r\n"));
       priorValue = currentDelayedValue;
     } else {
-      Serial.print("plunger not in motion: ");
-      Serial.print(currentDelayedValue);
-      Serial.print(F("\r\n"));
+      // Serial.print("plunger not in motion: ");
+      // Serial.print(currentDelayedValue);
+      // Serial.print(F("\r\n"));
       Gamepad1.zAxis(currentDelayedValue);
       config.updateUSB = true;
       priorValue = currentDelayedValue;
@@ -151,16 +151,23 @@ void Plunger::plungerRead() {
 }
 
 signed char Plunger::getDelayedPlungerValue(signed char sensorValue) {
+
+  if (config.enablePlungerQuickRelease == 0) {
+    return sensorValue;
+  }
   if (config.restingStateCounter == config.restingStateMax && plungerReleased == true) {
     plungerReleased = false; 
-    if (config.disablePlungerWhenNotInUse == 1) {
-      config.updateUSB = true;
-      return 0;
-    }
+    config.updateUSB = true;
+    return 0;
   }
   if ((sensorValue < 0 && config.restingStateCounter < config.restingStateMax && currentPlungerMax > 0 && truePriorValue > 50) || plungerReleased == true) {
+    if (plungerReleased == false) {
+      buttons.sendButtonPush(config.plungerLaunchButton, 1);
+    } else {
+      buttons.sendButtonPush(config.plungerLaunchButton, 0);
+    }
     plungerReleased = true;
-    return -currentPlungerMax;
+    return 0;
   }
   if (plungerDataCounter == 49) {
     return plungerData[0];

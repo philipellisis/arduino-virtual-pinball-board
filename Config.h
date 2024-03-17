@@ -54,7 +54,7 @@ class Config {
     // 2 ignore when not in use option
     // 3 
     bool disableAccelOnPlungerMove = true;
-    bool enablePlungerQuickRelease = false;
+    bool enablePlungerQuickRelease = true;
     bool disablePlungerWhenNotInUse = true;
     bool disableButtonPressWhenKeyboardEnabled = true;
     bool enablePlunger = true;
