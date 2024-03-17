@@ -14,6 +14,7 @@ class Plunger {
     void resetPlunger();
     
   private:
+    bool plungerReleased = false;
     bool DEBUG = false;
     float plungerScaleFactor;
     int adjustedValue;
@@ -23,8 +24,12 @@ class Plunger {
     long truePriorValue = 0;
     //unsigned char plungerMinSendCount = 0;
 
-    // int plungerData[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    int plungerData[50] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     // unsigned char incrementor = 0;
+    signed char plungerDataCounter = 0;
+    signed char getDelayedPlungerValue(signed char sensorValue);
+    signed char currentPlungerMax = 0;
+
 };
 
 #endif
