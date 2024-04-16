@@ -6,10 +6,7 @@
 #include "Accelerometer.h"
 #include "Enums.h"
 #include "Globals.h"
-
-
-
-
+#include <avr/wdt.h>
 
 Communication::Communication() {
 }
@@ -142,9 +139,12 @@ void Communication::sendAdmin() {
       admin = 0;
       break;
     case VERSION:
-      Serial.print(F("V,1.16.0\r\n"));
+      Serial.print(F("V,1.17.0\r\n"));
       admin = 0;
       break;
+    case RESET:
+      wdt_enable(WDTO_15MS);
+      admin = 0;
     }
     
   }

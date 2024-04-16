@@ -78,6 +78,7 @@ void Accelerometer::resetAccelerometer()
     orientation = config.orientation;
   }
   localMax = static_cast<float>(config.accelerometerMax);
+  localMaxY = static_cast<float>(config.accelerometerMaxY);
   mpu.setAccelerometerRange(config.accelerometerSensitivity);
   centerAccelerometer();
 }
@@ -160,11 +161,11 @@ void Accelerometer::accelerometerRead()
   if (tiltSuppressTime > 0) {
     tiltSuppressTime--;
   } else {
-    if (buttonState == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTilt))
+    if (buttonState == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTiltY))
     {
       buttonState = buttons.sendButtonPush(config.tiltButton, 1);
     }
-    else if (buttonState == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTilt))
+    else if (buttonState == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTiltY))
     {
       buttonState = buttons.sendButtonPush(config.tiltButton, 0);
       tiltSuppressTime = config.tiltSuppress;
@@ -179,7 +180,7 @@ void Accelerometer::accelerometerRead()
   }
 
   if (priorYValue != yValue) {
-    Gamepad1.yAxis(static_cast<int16_t>(yValue / localMax * 32767));
+    Gamepad1.yAxis(static_cast<int16_t>(yValue / localMaxY * 32767));
     priorYValue = yValue;
     config.updateUSB = true;
   }

@@ -55,6 +55,8 @@ void Config::init() {
     EEPROM.get(466, disablePlungerWhenNotInUse);
     EEPROM.get(467, disableButtonPressWhenKeyboardEnabled);
 
+    accelerometerTiltY = readIntFromEEPROM(468);
+    accelerometerMaxY = readIntFromEEPROM(470);
 
     for (int i = 0; i < 32; i++) {
       EEPROM.get(i + 500, buttonKeyboard[i]);
@@ -118,6 +120,9 @@ void Config::saveConfig() {
     EEPROM.write(466, disablePlungerWhenNotInUse);
     EEPROM.write(467, disableButtonPressWhenKeyboardEnabled);
 
+    writeIntIntoEEPROM(468, accelerometerTiltY);
+    writeIntIntoEEPROM(470, accelerometerMaxY);
+
     for (int i = 0; i < 32; i++) {
       EEPROM.write(i + 500, buttonKeyboard[i]);
     }
@@ -171,6 +176,9 @@ void Config::updateConfigFromSerial() {
     enablePlungerQuickRelease = blockRead();
     disablePlungerWhenNotInUse = blockRead();
     disableButtonPressWhenKeyboardEnabled = blockRead();
+    accelerometerTiltY = readIntFromByte();
+    accelerometerMaxY = readIntFromByte();
+
 
     readConfigArray(buttonKeyDebounce, 24);
     buttonDebounceCounter = blockRead();
@@ -229,6 +237,8 @@ void Config::sendConfig() {
     printComma(enablePlungerQuickRelease);
     printComma(disablePlungerWhenNotInUse);
     printComma(disableButtonPressWhenKeyboardEnabled);
+    printIntComma(accelerometerTiltY);
+    printIntComma(accelerometerMaxY);
 
     printConfigArray(buttonKeyDebounce, 24);
     printComma(buttonDebounceCounter);

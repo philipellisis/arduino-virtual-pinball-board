@@ -13,6 +13,7 @@ enum admin_type {
     SAVE_CONFIG = 9,
     SET_ACCEL = 10,
     VERSION = 11,
+    RESET = 12,
 };
 
   // 1 means an output has been received and waiting to reset timer

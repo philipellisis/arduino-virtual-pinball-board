@@ -24,8 +24,10 @@ class Config {
     unsigned char accelerometer = 1;
     unsigned char accelerometerSensitivity = 0;
     int accelerometerDeadZone = 30;
-    int accelerometerTilt = 800;
-    int accelerometerMax = 1000;
+    int accelerometerTilt = 250;
+    int accelerometerTiltY = 250;
+    int accelerometerMax = 280;
+    int accelerometerMaxY = 280;
     unsigned char plungerButtonPush = 0;
 
     unsigned char plungerAverageRead = 10;
