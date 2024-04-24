@@ -1,6 +1,6 @@
 #include "Plunger.h"
 #include <Arduino.h>
-#include "HID-Project.h"
+#include <XInput.h>
 #include "Globals.h"
 
 
@@ -22,7 +22,7 @@ void Plunger::resetPlunger() {
 
 void Plunger::plungerRead() {
   if (config.enablePlunger == false) {
-    Gamepad1.zAxis(0);
+    XInput.setJoystickY(JOY_RIGHT, 0);
     return;
   }
 
@@ -115,7 +115,7 @@ void Plunger::plungerRead() {
     // Serial.print(adjustedValue);
     // Serial.print(F("\r\n"));
     config.updateUSB = true;
-    Gamepad1.zAxis(currentDelayedValue);
+    XInput.setJoystickY(JOY_RIGHT, currentDelayedValue, true);
     // Serial.print("plunger in motion: ");
     // Serial.print(currentDelayedValue);
     // Serial.print(F("\r\n"));
@@ -126,7 +126,7 @@ void Plunger::plungerRead() {
     currentPlungerMax = 0;
     plungerReleased = false;
     if (config.disablePlungerWhenNotInUse == 1) {
-      Gamepad1.zAxis(0);
+      XInput.setJoystickY(JOY_RIGHT, 0);
       // Serial.print("plunger not in motion, sending 0: ");
       // Serial.print(adjustedValue);
       // Serial.print(F("\r\n"));
@@ -135,7 +135,7 @@ void Plunger::plungerRead() {
       // Serial.print("plunger not in motion: ");
       // Serial.print(currentDelayedValue);
       // Serial.print(F("\r\n"));
-      Gamepad1.zAxis(currentDelayedValue);
+      XInput.setJoystickY(JOY_RIGHT, currentDelayedValue, true);
       config.updateUSB = true;
       priorValue = currentDelayedValue;
     }

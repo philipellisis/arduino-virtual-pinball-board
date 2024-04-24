@@ -1,6 +1,6 @@
 #include "Accelerometer.h"
 #include <Arduino.h>
-#include "HID-Project.h"
+#include <XInput.h>
 #include "MPU6050.h"
 #include "Enums.h"
 #include "Globals.h"
@@ -174,13 +174,13 @@ void Accelerometer::accelerometerRead()
 
 
   if (priorXValue != xValue) {
-    Gamepad1.xAxis(static_cast<int16_t>(xValue / localMax * 32767));
+    XInput.setJoystickX(JOY_LEFT, static_cast<int16_t>(xValue / localMax * 32767), true);
     priorXValue = xValue;
     config.updateUSB = true;
   }
 
   if (priorYValue != yValue) {
-    Gamepad1.yAxis(static_cast<int16_t>(yValue / localMaxY * 32767));
+    XInput.setJoystickY(JOY_LEFT, static_cast<int16_t>(yValue / localMaxY * 32767), true);
     priorYValue = yValue;
     config.updateUSB = true;
   }

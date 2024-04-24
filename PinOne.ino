@@ -1,6 +1,6 @@
-#include "HID-Project.h"
 #include <Wire.h>
 #include "Globals.h"
+#include <XInput.h>
 
 
 Plunger plunger;
@@ -20,7 +20,10 @@ void setup() {
   //if (DEBUG) {Serial.print(F("DEBUG,Starting up arduino\r\n"));}
   delay(1000);
   // Initialize Gamepad1 Library
-  Gamepad1.begin();
+  XInput.setAutoSend(false);
+  XInput.begin();
+  XInput.setRange(JOY_RIGHT, -127, 127);
+  XInput.setRange(JOY_LEFT, -32767, 32767);
   config.init();
   outputs.init();
 
@@ -46,7 +49,7 @@ void loop() {
     }
     lightShow.checkSetLights();
     if (config.updateUSB) {
-      Gamepad1.write();
+      XInput.send();
       config.updateUSB = false;
     }
     comm.communicate();

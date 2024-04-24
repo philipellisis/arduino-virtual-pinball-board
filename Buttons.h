@@ -21,6 +21,7 @@ class Buttons {
     bool lastButtonState[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     unsigned char numberButtonsPressed = 0;
     void sendActualButtonPress(unsigned char buttonOffset, bool currentButtonState);
+    unsigned char buttonMapper(unsigned char buttonNumber);
 };
 
 #endif

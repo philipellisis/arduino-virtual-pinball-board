@@ -1,7 +1,6 @@
 #ifndef ACCEL_H
 #define ACCEL_H
 #include <Arduino.h>
-#include "HID-Project.h"
 #include "Config.h"
 
 
