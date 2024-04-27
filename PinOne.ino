@@ -12,6 +12,8 @@ Communication comm;
 Outputs outputs;
 Config config;
 bool DEBUG = false;
+long int leftOn = 0;
+long int rightOn = 0;
 
 void setup() {
 
@@ -41,8 +43,30 @@ void setup() {
 
 void loop() {
   //long int t1 = millis();
+
+  long int currentTime = millis();
   buttons.readInputs();
   if (!USBDevice.isSuspended()) {
+
+    uint8_t bigRumble = XInput.getRumbleLeft();
+    uint8_t smallRumble = XInput.getRumbleRight();
+    if (bigRumble > 1 && leftOn == 0) {
+      outputs.updateOutput(0, 255);
+      leftOn = currentTime;
+    } else if (bigRumble == 0 && leftOn > 0 && currentTime - leftOn > 100) {
+      outputs.updateOutput(0, 0);
+      leftOn = 0;
+    }
+
+    if (smallRumble > 1 && rightOn == 0) {
+      outputs.updateOutput(1, 255);
+      rightOn = currentTime;
+    } else if (smallRumble == 0 && rightOn > 0 && currentTime - rightOn > 100) {
+      outputs.updateOutput(1, 0);
+      rightOn = 0;
+    }
+
+
     plunger.plungerRead();
     if (config.accelerometerEprom > 0) {
       accel.accelerometerRead();
