@@ -14,6 +14,7 @@ void LightShow::init() {
       finishLight = i + 1;
     }
   }
+  lightShowStartTime = config.lightShowTime * 1000L;
 }
 
 void LightShow::checkSetLights() {
@@ -38,7 +39,7 @@ void LightShow::checkSetLights() {
     break;
   case WAITING_INPUT:
     //here an output has not been received in 10 seconds, and now waiting for button input
-    if (currentTime - timeInState > 20000 && config.lightShowAttractEnabled == true) {
+    if (currentTime - timeInState > (lightShowStartTime * 2) && config.lightShowAttractEnabled == true) {
       setLightsRandom();
       if (doneSettingLights == true) {
         config.lightShowState = IN_RANDOM_MODE_WAITING_INPUT;
@@ -60,7 +61,7 @@ void LightShow::checkSetLights() {
     break;
   case OUTPUT_RECEIVED:
     //an output has been received in the last 10 seconds
-    if (currentTime - timeInState > 10000) {
+    if (currentTime - timeInState > lightShowStartTime) {
       setLightsNormal();
       //if (DEBUG) {Serial.print(F("DEBUG,output received, setting to normal\r\n"));}
       if (doneSettingLights == true) {

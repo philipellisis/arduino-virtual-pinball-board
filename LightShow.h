@@ -30,6 +30,7 @@ class LightShow {
     unsigned char currentFinishLight = 0;
     bool doneSettingLights = true;
     void setStartFinishLoops();
+    long lightShowStartTime = 10000;
 };
 
 #endif

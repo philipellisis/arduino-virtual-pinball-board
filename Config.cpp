@@ -71,6 +71,9 @@ void Config::init() {
     EEPROM.get(566, tiltSuppress);
     EEPROM.get(567, lightShowAttractEnabled);
 
+    EEPROM.get(568, lightShowTime);
+    EEPROM.get(569, reverseButtonOutputPolarity);
+
   } else {
     //save default config in case it's never been done before
     saveConfig();
@@ -137,6 +140,9 @@ void Config::saveConfig() {
     EEPROM.write(566, tiltSuppress);
     EEPROM.write(567, lightShowAttractEnabled);
 
+    EEPROM.write(568, lightShowTime);
+    EEPROM.write(569, reverseButtonOutputPolarity);
+
     EEPROM.write(1000, 101);
 }
 
@@ -186,6 +192,8 @@ void Config::updateConfigFromSerial() {
 
     tiltSuppress = blockRead();
     lightShowAttractEnabled = blockRead();
+    lightShowTime = blockRead();
+    reverseButtonOutputPolarity = blockRead();
 
     if(blockRead() != 42) {
       done = 1;
@@ -246,6 +254,8 @@ void Config::sendConfig() {
 
     printComma(tiltSuppress);
     printComma(lightShowAttractEnabled);
+    printComma(lightShowTime);
+    printComma(reverseButtonOutputPolarity);
     
     Serial.print(F("E\r\n"));
 }

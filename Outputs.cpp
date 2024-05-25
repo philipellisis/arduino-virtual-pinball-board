@@ -12,6 +12,7 @@ Outputs::Outputs() {
    for (int index = 0; index < numberOutputs; index++) {
     pinMode(outputList[index], OUTPUT);
    }
+   
   
   //if (DEBUG) {Serial.print(F("DEBUG,Communication: pins initialized\r\n"));}
 }
@@ -100,7 +101,7 @@ void Outputs::updateOutputInternal(unsigned char outputId, unsigned char outputV
     }
   } else {
     // if the output is the button board output, then invert the value
-    if (outputId < 31) {
+    if (outputId < 31 && config.reverseButtonOutputPolarity == true) {
       outputValue = 255 - outputValue;
     }
     if (outputValue == 255) {
