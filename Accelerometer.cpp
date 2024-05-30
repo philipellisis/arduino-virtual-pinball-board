@@ -161,13 +161,13 @@ void Accelerometer::accelerometerRead()
   if (tiltSuppressTime > 0) {
     tiltSuppressTime--;
   } else {
-    if (buttonState == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTiltY))
+    if (config.lastButtonState[config.tiltButton] == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTiltY))
     {
-      buttonState = buttons.sendButtonPush(config.tiltButton, 1);
+      config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 1);
     }
-    else if (buttonState == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTiltY))
+    else if (config.lastButtonState[config.tiltButton] == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTiltY))
     {
-      buttonState = buttons.sendButtonPush(config.tiltButton, 0);
+      config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 0);
       tiltSuppressTime = config.tiltSuppress;
     }
   }

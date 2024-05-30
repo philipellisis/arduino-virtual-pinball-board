@@ -24,7 +24,6 @@ class Accelerometer {
     int yValue;
     int priorXValue = 0;
     int priorYValue = 0;
-    unsigned char buttonState;
     bool recentered = false;
     unsigned char orientation = 0;
     float localMax = 0;

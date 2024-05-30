@@ -72,13 +72,17 @@ void Plunger::plungerRead() {
 
   if( (config.plungerButtonPush == 1 || config.plungerButtonPush == 3) && buttonState == 0 && sensorValue >= config.plungerMax - 20) {
     buttonState = buttons.sendButtonPush(config.plungerLaunchButton, 1);
+    config.lastButtonState[config.plungerLaunchButton] = buttonState;
   } else if ((config.plungerButtonPush == 1 || config.plungerButtonPush == 3)  && buttonState == 1 && sensorValue < config.plungerMax - 20 ) {
     buttonState = buttons.sendButtonPush(config.plungerLaunchButton, 0);
+    config.lastButtonState[config.plungerLaunchButton] = buttonState;
   }
   if( config.plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= config.plungerMin + 10) {
     buttonState2 = buttons.sendButtonPush(config.plungerLaunchButton, 1);
+    config.lastButtonState[config.plungerLaunchButton] = buttonState2;
   } else if (config.plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > config.plungerMin + 10 ) {
     buttonState2 = buttons.sendButtonPush(config.plungerLaunchButton, 0);
+    config.lastButtonState[config.plungerLaunchButton] = buttonState2;
   }
 
   if (sensorValue <= config.plungerMid) {
@@ -162,9 +166,9 @@ signed char Plunger::getDelayedPlungerValue(signed char sensorValue) {
   }
   if ((sensorValue < 0 && config.restingStateCounter < config.restingStateMax && currentPlungerMax > 0 && truePriorValue > 50) || plungerReleased == true) {
     if (plungerReleased == false) {
-      buttons.sendButtonPush(config.plungerLaunchButton, 1);
+      config.lastButtonState[config.plungerLaunchButton] = buttons.sendButtonPush(config.plungerLaunchButton, 1);
     } else {
-      buttons.sendButtonPush(config.plungerLaunchButton, 0);
+      config.lastButtonState[config.plungerLaunchButton] = buttons.sendButtonPush(config.plungerLaunchButton, 0);
     }
     plungerReleased = true;
     return 0;

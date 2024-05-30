@@ -38,7 +38,7 @@ void Buttons::readInputs() {
     for(unsigned char i = 0; i < 24; i++) {
       bool currentButtonState = !buttonReader.state(i);
       //if (DEBUG) {Serial.print(currentButtonState);}
-      if (currentButtonState != lastButtonState[i]) {
+      if (currentButtonState != config.lastButtonState[i]) {
         
 
         if (currentButtonState == 1) {
@@ -47,7 +47,7 @@ void Buttons::readInputs() {
           buttonPushed = 0;
         }
         
-        lastButtonState[i] = sendButtonPush(i, currentButtonState);
+        config.lastButtonState[i] = sendButtonPush(i, currentButtonState);
 
 
       }
@@ -99,15 +99,15 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
     // Serial.print(F("\r\n"));
   }
 
-  if (i > 3 && i < 12 && currentButtonState == 0 && lastButtonState[i + 20] == 1 && lastButtonState[config.shiftButton] == 0) {
+  if (i > 3 && i < 12 && currentButtonState == 0 && config.lastButtonState[i + 20] == 1 && config.lastButtonState[config.shiftButton] == 0) {
     sendActualButtonPress(i + 20, currentButtonState);
-    lastButtonState[i + 20] = currentButtonState;
+    config.lastButtonState[i + 20] = currentButtonState;
   }
 
-  if (i > 3 && i < 12 && lastButtonState[config.shiftButton] == 1) {
+  if (i > 3 && i < 12 && config.lastButtonState[config.shiftButton] == 1) {
     buttonOffset = i + 20;
-    if (lastButtonState[config.shiftButton] == 1) {
-      lastButtonState[buttonOffset] = currentButtonState;
+    if (config.lastButtonState[config.shiftButton] == 1) {
+      config.lastButtonState[buttonOffset] = currentButtonState;
       sendActualButtonPress(buttonOffset, currentButtonState);
     }
     if (currentButtonState == 0) {
@@ -179,10 +179,10 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
 void Buttons::sendButtonState() {
   Serial.print(F("B,"));
   for (int i = 0; i < 31; i++) {
-    Serial.print(lastButtonState[i]);
+    Serial.print(config.lastButtonState[i]);
     Serial.print(F(","));
   }
-  Serial.print(lastButtonState[23]);
+  Serial.print(config.lastButtonState[31]);
   Serial.print(F("\r\n"));
   
 }

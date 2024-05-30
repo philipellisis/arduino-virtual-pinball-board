@@ -25,12 +25,14 @@ class Communication {
     unsigned char outputSingleNumber = 252;//252 normally
     unsigned char outputButtonNumber = 253;//252 normally
     unsigned char maxNumber = 255; //255 normally
+    unsigned char delayIncrementor = 0;
 
     unsigned char incomingData[10];
     int dataLocation = 0;
     void updateOutputs();
     int admin = 0;
     void sendAdmin();
+    bool shouldDelay();
 
     unsigned char previousDOFValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 };

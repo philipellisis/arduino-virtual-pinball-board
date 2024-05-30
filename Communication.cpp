@@ -104,20 +104,28 @@ void Communication::sendAdmin() {
     
 
   if (admin > 0) {
-    delay(50);
+
     switch (admin)
     {
     case BUTTONS:
-      buttons.sendButtonState();
+      if (!shouldDelay()) {
+        buttons.sendButtonState();
+      }
       break;
     case OUTPUTS:
-      outputs.sendOutputState();
+      if (!shouldDelay()) {
+        outputs.sendOutputState();
+      }
       break;
     case PLUNGER:
-      plunger.sendPlungerState();
+      if (!shouldDelay()) { 
+        plunger.sendPlungerState();
+      }
       break;
     case ACCEL:
-      accel.sendAccelerometerState();
+      if (!shouldDelay()) {
+        accel.sendAccelerometerState();
+      }
       break;
     case SEND_CONFIG:
       config.sendConfig();
@@ -149,6 +157,16 @@ void Communication::sendAdmin() {
       admin = 0;
     }
     
+  }
+}
+
+bool Communication::shouldDelay() {
+  if (delayIncrementor < 20) {
+    delayIncrementor++;
+    return true;
+  } else {
+    delayIncrementor = 0;
+    return false;
   }
 }
 
