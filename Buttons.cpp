@@ -30,8 +30,9 @@ void Buttons::init() {
   //if (DEBUG) {Serial.print(F("DEBUG,buttons: initialized Gamepad1\r\n"));}
 }
 
-void Buttons::readInputs() {
+bool Buttons::readInputs() {
   unsigned char buttonPushed = 2; //this is set to notify light show that a button press has happened
+  bool buttonChangedState = false;
   // read shift register values
   if(buttonReader.update() || numberButtonsPressed > 0) {
     //if (DEBUG) {Serial.print(F("DEBUG"));}
@@ -39,7 +40,7 @@ void Buttons::readInputs() {
       bool currentButtonState = !buttonReader.state(i);
       //if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != config.lastButtonState[i]) {
-        
+        buttonChangedState = true;
 
         if (currentButtonState == 1) {
           buttonPushed = 1;
@@ -63,6 +64,7 @@ void Buttons::readInputs() {
       config.lightShowState = INPUT_RECEIVED_SET_LIGHTS_LOW;
     }
   }
+  return buttonChangedState;
 }
 
 bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState) {
