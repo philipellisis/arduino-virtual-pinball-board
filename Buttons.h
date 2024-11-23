@@ -9,7 +9,7 @@ class Buttons {
   
   public:
     Buttons();
-    void readInputs();
+    bool readInputs();
     void init();
     void sendButtonState();
     bool sendButtonPush(unsigned char i, bool currentButtonState);

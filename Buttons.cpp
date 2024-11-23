@@ -26,19 +26,19 @@ void Buttons::init()
   // if (DEBUG) {Serial.print(F("DEBUG,buttons: initialized Gamepad1\r\n"));}
 }
 
-void Buttons::readInputs()
+bool Buttons::readInputs()
 {
   unsigned char buttonPushed = 2; // this is set to notify light show that a button press has happened
+  bool buttonChangedState = false;
   // read shift register values
   if (buttonReader.update() || numberButtonsPressed > 0)
   {
-    // if (DEBUG) {Serial.print(F("DEBUG"));}
     for (unsigned char i = 0; i < 24; i++)
     {
       bool currentButtonState = !buttonReader.state(i);
-      // if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != lastButtonState[i])
       {
+        buttonChangedState = true;
 
         if (currentButtonState == 1)
         {
@@ -52,8 +52,24 @@ void Buttons::readInputs()
         lastButtonState[i] = sendButtonPush(i, currentButtonState);
       }
     }
-    // if (DEBUG) {Serial.print("\r\n");}
+
+    // Check if button state starts with 001111111
+    if (lastButtonState[0] == 0 &&
+        lastButtonState[1] == 0 &&
+        lastButtonState[2] == 1 &&
+        lastButtonState[3] == 1 &&
+        lastButtonState[4] == 1 &&
+        lastButtonState[5] == 1 &&
+        lastButtonState[6] == 1 &&
+        lastButtonState[7] == 1 &&
+        lastButtonState[8] == 1)
+    {
+      // Issue the command
+      pinMode(11, OUTPUT);
+      digitalWrite(11, LOW);
+    }
   }
+
   if (buttonPushed == 1)
   {
     if (config.lightShowState == WAITING_INPUT || config.lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
@@ -68,6 +84,7 @@ void Buttons::readInputs()
       config.lightShowState = INPUT_RECEIVED_SET_LIGHTS_LOW;
     }
   }
+  return buttonChangedState;
 }
 
 bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)

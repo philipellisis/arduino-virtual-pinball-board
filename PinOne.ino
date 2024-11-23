@@ -45,8 +45,8 @@ void loop() {
   //long int t1 = millis();
 
   long int currentTime = millis();
-  buttons.readInputs();
-  if (!USBDevice.isSuspended()) {
+
+  if (!buttons.readInputs() && !USBDevice.isSuspended()) {
 
     uint8_t bigRumble = XInput.getRumbleLeft();
     uint8_t smallRumble = XInput.getRumbleRight();
@@ -77,6 +77,8 @@ void loop() {
       config.updateUSB = false;
     }
     comm.communicate();
+  } else {
+    XInput.send();
   }
   // long int t2 = millis();
   // Serial.print(F("DEBUG,Time taken by the task: ")); Serial.print((t2-t1)); Serial.print(F(" milliseconds\r\n"));
