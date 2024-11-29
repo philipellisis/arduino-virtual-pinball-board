@@ -52,6 +52,7 @@ class Config {
     unsigned char restingStateCounter = 80;
     unsigned char restingStateMax = 80;
     bool updateUSB = false;
+    bool buttonPressed = false;
     // 0 is ignore accel option
     // 1 is quick release option
     // 2 ignore when not in use option

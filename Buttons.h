@@ -9,7 +9,9 @@ class Buttons {
   
   public:
     Buttons();
-    bool readInputs();
+    void readInputs();
+    bool checkChanged();
+    unsigned char numberButtonsPressed = 0;
     void init();
     void sendButtonState();
     bool sendButtonPush(unsigned char i, bool currentButtonState);
@@ -18,7 +20,6 @@ class Buttons {
   private:
     unsigned char buttonOffset = 0;
     bool DEBUG = false;
-    unsigned char numberButtonsPressed = 0;
     void sendActualButtonPress(unsigned char buttonOffset, bool currentButtonState);
 };
 

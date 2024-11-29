@@ -37,27 +37,35 @@ void setup() {
 
 
 void loop() {
-  // unsigned long t1 = micros();
-  if (!buttons.readInputs() && !USBDevice.isSuspended()) {
-    plunger.plungerRead();
-    if (config.accelerometerEprom > 0) {
-      accel.accelerometerRead();
+  unsigned long t1 = micros();
+  if (!USBDevice.isSuspended()) {
+    if (!buttons.checkChanged()) {
+      plunger.plungerRead();
     }
-    lightShow.checkSetLights();
-    if (config.updateUSB) {
-      Gamepad1.write();
-      config.updateUSB = false;
+    
+    if (config.accelerometerEprom > 0 && !buttons.checkChanged()) {
+      //accel.accelerometerRead();
     }
-    comm.communicate();
-  } else {
+    if (!buttons.checkChanged()) {
+      lightShow.checkSetLights();
+    }
+    if (!buttons.checkChanged()) {
+      comm.communicate();
+    }
+
+  }
+  if (config.updateUSB || buttons.numberButtonsPressed > 0) {
+    buttons.readInputs();
     Gamepad1.write();
-    //unsigned long t2 = micros();
-    // Serial.print(F("DEBUG,Time taken by the task: "));
-    // Serial.print(t2 - t1);
-    // Serial.println(F(" microseconds"));
-    // delay(100);
+    config.updateUSB = false;
+    config.buttonPressed = false;
+    unsigned long t2 = micros();
+    Serial.print(F("DEBUG,Time taken by the task: "));
+    Serial.print(t2 - t1);
+    Serial.println(F(" microseconds"));
   }
 
+  //delay(100);
   //Serial.println("arduino is running");
   
 }
