@@ -14,14 +14,13 @@ class MPU6050 {
     bool init(TwoWire *wire = &Wire);
     void setAccelerometerRange(unsigned char);
     void read();
-    float getX();
-    float getY();
-    float getZ();
+    int getX();
+    int getY();
+    int getZ();
     void config();
 
   private:
-    float accX,accY, accZ;
-    int16_t rawAccX, rawAccY, rawAccZ;
+    int rawAccX, rawAccY, rawAccZ;
     int accelRange = 0;
     Adafruit_I2CDevice *i2c_dev = NULL; ///< Pointer to I2C bus interface
     

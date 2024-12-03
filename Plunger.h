@@ -22,12 +22,15 @@ class Plunger {
     unsigned char buttonState2;
     long priorValue = 0;
     long truePriorValue = 0;
+    long restingStartTime;
     //unsigned char plungerMinSendCount = 0;
 
-    int plungerData[50] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    int plungerData[30] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned long plungerDataTime[30] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     // unsigned char incrementor = 0;
     signed char plungerDataCounter = 0;
-    signed char getDelayedPlungerValue(signed char sensorValue);
+    signed char plungerDelayedDataCounter = 0;
+    signed char getDelayedPlungerValue(signed char sensorValue, unsigned long currentTime);
     signed char currentPlungerMax = 0;
 
 };

@@ -51,7 +51,7 @@ void Buttons::readInputs()
   unsigned char buttonPushed = 2; // this is set to notify light show that a button press has happened
   // read shift register values
   // if (DEBUG) {Serial.print(F("DEBUG"));}
-  if (config.buttonPressed)
+  if (config.buttonPressed || buttons.numberButtonsPressed > 0)
   {
     for (unsigned char i = 0; i < 24; i++)
     {

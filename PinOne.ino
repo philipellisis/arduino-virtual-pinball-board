@@ -12,6 +12,7 @@ Communication comm;
 Outputs outputs;
 Config config;
 bool DEBUG = false;
+unsigned char toggle = 0;
 
 void setup() {
 
@@ -37,32 +38,33 @@ void setup() {
 
 
 void loop() {
-  unsigned long t1 = micros();
+  //unsigned long t1 = micros();
   if (!USBDevice.isSuspended()) {
-    if (!buttons.checkChanged()) {
-      plunger.plungerRead();
-    }
-    
-    if (config.accelerometerEprom > 0 && !buttons.checkChanged()) {
-      //accel.accelerometerRead();
-    }
-    if (!buttons.checkChanged()) {
-      lightShow.checkSetLights();
-    }
-    if (!buttons.checkChanged()) {
-      comm.communicate();
-    }
 
+      if (toggle == 0) {
+        plunger.plungerRead();
+      } else if (toggle == 1 && config.accelerometerEprom > 0) {
+        accel.accelerometerRead();
+      } else if (toggle == 2) {
+        lightShow.checkSetLights();
+      } else if (toggle == 3) {
+        comm.communicate();
+      }
+      toggle++;
+      if (toggle > 3) {
+        toggle = 0;
+      }
   }
+  buttons.checkChanged();
   if (config.updateUSB || buttons.numberButtonsPressed > 0) {
     buttons.readInputs();
     Gamepad1.write();
     config.updateUSB = false;
     config.buttonPressed = false;
-    unsigned long t2 = micros();
-    Serial.print(F("DEBUG,Time taken by the task: "));
-    Serial.print(t2 - t1);
-    Serial.println(F(" microseconds"));
+    // unsigned long t2 = micros();
+    // Serial.print(F("DEBUG,Time taken by the task: "));
+    // Serial.print(t2 - t1);
+    // Serial.println(F(" microseconds"));
   }
 
   //delay(100);
