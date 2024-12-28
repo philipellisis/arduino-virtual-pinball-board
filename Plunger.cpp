@@ -13,6 +13,7 @@ Plunger::Plunger() {
 
 void Plunger::init() {
   resetPlunger();
+  priorTime = millis();
   // if (DEBUG) {Serial.print(F("DEBUG,plunger: initialized Gamepad1\r\n"));}
 }
 
@@ -141,13 +142,13 @@ void Plunger::plungerRead() {
   }
   
   plungerData[plungerDataCounter] = adjustedValue;
-  plungerDataTime[plungerDataCounter] = currentTime;
-  if (plungerDataCounter < 29) {
+  plungerDataTime[plungerDataCounter] = (unsigned char)(currentTime - priorTime);
+  if (plungerDataCounter < 34) {
     plungerDataCounter++;
   } else {
     plungerDataCounter = 0;
   }
-  
+  priorTime = currentTime;
 }
 
 signed char Plunger::getDelayedPlungerValue(signed char sensorValue, unsigned long currentTime) {
@@ -171,14 +172,21 @@ signed char Plunger::getDelayedPlungerValue(signed char sensorValue, unsigned lo
   }
 
   // 100ms delay
-  while (plungerDataTime[plungerDelayedDataCounter] < currentTime - 100 && plungerDataCounter != plungerDelayedDataCounter) {
-    if (plungerDelayedDataCounter < 29) {
-      plungerDelayedDataCounter++;
-    } else {
-      plungerDelayedDataCounter = 0;
-    }
+  unsigned short accumulatedTime = 0;
+  int index = plungerDataCounter == 0 ? 34 : plungerDataCounter - 1;
+
+  while (accumulatedTime < config.plungerDelayTime && index != plungerDataCounter) {
+      accumulatedTime += plungerDataTime[index];
+      index = (index - 1 + 35) % 35;
   }
-  return plungerData[plungerDelayedDataCounter];
+
+
+  // Serial.print("plunger delay timer: ");
+  // Serial.print(index);
+  // Serial.print(", ");
+  // Serial.print(plungerDataCounter);
+  // Serial.print(F("\r\n"));
+  return plungerData[index];
   // if (plungerDataCounter == 25) {
   //   return plungerData[0];
   // } else {

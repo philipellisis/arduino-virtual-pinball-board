@@ -67,7 +67,7 @@ class Config {
     bool lightShowAttractEnabled = true;
     unsigned char lightShowTime = 10;
     bool reverseButtonOutputPolarity = true;
-    
+    unsigned char plungerDelayTime = 100;
     
 
 
