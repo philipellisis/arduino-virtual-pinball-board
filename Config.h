@@ -58,7 +58,7 @@ class Config {
     // 2 ignore when not in use option
     // 3 
     bool disableAccelOnPlungerMove = true;
-    bool enablePlungerQuickRelease = true;
+    unsigned char  enablePlungerQuickRelease = true;
     bool disablePlungerWhenNotInUse = true;
     bool disableButtonPressWhenKeyboardEnabled = true;
     bool enablePlunger = true;
@@ -67,7 +67,6 @@ class Config {
     bool lightShowAttractEnabled = true;
     unsigned char lightShowTime = 10;
     bool reverseButtonOutputPolarity = true;
-    unsigned char plungerDelayTime = 100;
     
 
 

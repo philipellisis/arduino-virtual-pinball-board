@@ -76,9 +76,13 @@ void Plunger::plungerRead() {
     config.lastButtonState[config.plungerLaunchButton] = buttonState;
   }
   if (config.plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= config.plungerMin + 10) {
+    // Serial.print('sending button push');
+    // Serial.print(F("\r\n"));
     buttonState2 = buttons.sendButtonPush(config.plungerLaunchButton, 1);
     config.lastButtonState[config.plungerLaunchButton] = buttonState2;
   } else if (config.plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > config.plungerMin + 10) {
+    // Serial.print('unsending button push');
+    // Serial.print(F("\r\n"));
     buttonState2 = buttons.sendButtonPush(config.plungerLaunchButton, 0);
     config.lastButtonState[config.plungerLaunchButton] = buttonState2;
   }
@@ -175,7 +179,7 @@ signed char Plunger::getDelayedPlungerValue(signed char sensorValue, unsigned lo
   unsigned short accumulatedTime = 0;
   int index = plungerDataCounter == 0 ? 34 : plungerDataCounter - 1;
 
-  while (accumulatedTime < config.plungerDelayTime && index != plungerDataCounter) {
+  while (accumulatedTime < config.enablePlungerQuickRelease && index != plungerDataCounter) {
       accumulatedTime += plungerDataTime[index];
       index = (index - 1 + 35) % 35;
   }
