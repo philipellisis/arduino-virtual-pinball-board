@@ -54,7 +54,7 @@ void Accelerometer::centerAccelerometer()
   unsigned char count = 0;
   xValueOffset = 0;
   yValueOffset = 0;
-  while (count < 50)
+  while (count < 10)
   {
     mpu.read();
     if (config.orientation > 7) {
@@ -66,8 +66,8 @@ void Accelerometer::centerAccelerometer()
 
     count++;
   }
-  xValueOffset = xValueOffset / 50;
-  yValueOffset = yValueOffset / 50;
+  xValueOffset = xValueOffset / 10;
+  yValueOffset = yValueOffset / 10;
 }
 
 void Accelerometer::resetAccelerometer()
@@ -77,15 +77,15 @@ void Accelerometer::resetAccelerometer()
   } else {
     orientation = config.orientation;
   }
-  localMax = static_cast<float>(config.accelerometerMax);
-  localMaxY = static_cast<float>(config.accelerometerMaxY);
+  localMax = config.accelerometerMax;
+  localMaxY = config.accelerometerMaxY;
   mpu.setAccelerometerRange(config.accelerometerSensitivity);
   centerAccelerometer();
 }
 
 void Accelerometer::accelerometerRead()
 {
-  if (config.restingStateCounter != config.restingStateMax && config.disableAccelOnPlungerMove == 1) {
+  if (config.plungerMoving == true && config.disableAccelOnPlungerMove == 1) {
     return;
   }
   if (config.lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
@@ -107,11 +107,16 @@ void Accelerometer::accelerometerRead()
   mpu.read();
 
   if (config.orientation > 7) {
-    xValue = floor((mpu.getZ() - xValueOffset) * 100);
+    xValue = floor((mpu.getZ() - xValueOffset));
   } else {
-    xValue = floor((mpu.getX() - xValueOffset) * 100);
+    xValue = floor((mpu.getX() - xValueOffset));
   }
-  yValue = floor((mpu.getY() - yValueOffset) * 100);
+  yValue = floor((mpu.getY() - yValueOffset));
+
+  // Serial.print(F("DEBUG,AccelX:"));
+  // Serial.print(xValue);
+  // Serial.print(F("DEBUG,AccelXOffset:"));
+  // Serial.print(xValueOffset);
   
   if (abs(xValue) < config.accelerometerDeadZone)
   {

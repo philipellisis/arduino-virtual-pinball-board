@@ -49,15 +49,16 @@ class Config {
     unsigned char buttonKeyDebounce[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     bool lastButtonState[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     unsigned char buttonDebounceCounter = 0;
-    unsigned char restingStateCounter = 80;
-    unsigned char restingStateMax = 80;
+    bool plungerMoving = false; 
+    long restingStateMax = 160;
     bool updateUSB = false;
+    bool buttonPressed = false;
     // 0 is ignore accel option
     // 1 is quick release option
     // 2 ignore when not in use option
     // 3 
     bool disableAccelOnPlungerMove = true;
-    bool enablePlungerQuickRelease = true;
+    unsigned char  enablePlungerQuickRelease = true;
     bool disablePlungerWhenNotInUse = true;
     bool disableButtonPressWhenKeyboardEnabled = true;
     bool enablePlunger = true;
@@ -66,7 +67,6 @@ class Config {
     bool lightShowAttractEnabled = true;
     unsigned char lightShowTime = 10;
     bool reverseButtonOutputPolarity = true;
-    
     
 
 

@@ -18,16 +18,16 @@ class Accelerometer {
     
   private:
     bool DEBUG = false;
-    float xValueOffset = 0;
-    float yValueOffset = 0;
+    int xValueOffset = 0;
+    int yValueOffset = 0;
     int xValue;
     int yValue;
     int priorXValue = 0;
     int priorYValue = 0;
     bool recentered = false;
     unsigned char orientation = 0;
-    float localMax = 0;
-    float localMaxY = 0;
+    int localMax = 0;
+    int localMaxY = 0;
     unsigned char tiltSuppressTime = 0;
 };
 

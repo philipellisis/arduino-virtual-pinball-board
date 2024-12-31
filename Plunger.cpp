@@ -5,19 +5,21 @@
 
 
 Plunger::Plunger() {
-  
+  pinMode(23, INPUT_PULLUP); // plunger
+  // if (DEBUG) {Serial.print(F("DEBUG,plunger: pins initialized\r\n"));}
 
-  pinMode(23, INPUT_PULLUP); //plunger
-  //if (DEBUG) {Serial.print(F("DEBUG,plunger: pins initialized\r\n"));}
+  restingStartTime = millis(); // Initialize the timestamp
 }
 
 void Plunger::init() {
   resetPlunger();
-  //if (DEBUG) {Serial.print(F("DEBUG,plunger: initialized Gamepad1\r\n"));}
+  priorTime = millis();
+  // if (DEBUG) {Serial.print(F("DEBUG,plunger: initialized Gamepad1\r\n"));}
 }
 
 void Plunger::resetPlunger() {
   plungerScaleFactor = (float)(config.plungerMid - config.plungerMin) / (float)(config.plungerMax - config.plungerMid);
+  restingStartTime = millis(); // Reset the resting start time
 }
 
 void Plunger::plungerRead() {
@@ -29,8 +31,7 @@ void Plunger::plungerRead() {
   long sensorValue = 0;
   int newReading;
 
-
-  //remove any sensor value that does not agree with the prior value
+  // Remove any sensor value that does not agree with the prior value
   int goodReadings = 0;
   for (int i = 0; i < 5; i++) {
     newReading = analogRead(23);
@@ -44,11 +45,8 @@ void Plunger::plungerRead() {
   } else {
     sensorValue = newReading;
   }
-  
-  
 
-
-  if (config.restingStateCounter < config.restingStateMax || config.disablePlungerWhenNotInUse == 0) {
+  if (config.plungerMoving == true || config.disablePlungerWhenNotInUse == 0) {
     for (int i = 0; i < config.plungerAverageRead; i++) {
       sensorValue += analogRead(23);
     }
@@ -57,30 +55,34 @@ void Plunger::plungerRead() {
   truePriorValue = sensorValue;
 
   // this checks that the plunger is sitting stationary. If so, it will enable the accelerometer. It also checks if there is nothing connected. to ensure the accelerometer still works even if the plunger is disconnected
+  unsigned long currentTime = millis();
+
   if ((sensorValue < config.plungerMid + 50 && sensorValue > config.plungerMid - 50) || sensorValue > 990) {
-    // plunger is in resting state when counter is > 200. Is moving or almost done moving when counter is > 0 and <= 200
-    if (config.restingStateCounter < config.restingStateMax) {
-      config.restingStateCounter++;
+    if (currentTime - restingStartTime >= config.restingStateMax) {
+      // Plunger is in the resting state when the timer exceeds restingStateMax
+      config.plungerMoving = false;
     }
   } else {
-      //plunger is actively moving when counter is = 0
-      config.restingStateCounter = 0;
+    // Reset the timer if the plunger is moving
+    restingStartTime = currentTime;
+    config.plungerMoving = true;
   }
-  // Serial.print("sensornorm: ");
-  // Serial.print(sensorValue);
-  // Serial.print("\r\n");
 
-  if( (config.plungerButtonPush == 1 || config.plungerButtonPush == 3) && buttonState == 0 && sensorValue >= config.plungerMax - 20) {
+  if ((config.plungerButtonPush == 1 || config.plungerButtonPush == 3) && buttonState == 0 && sensorValue >= config.plungerMax - 20) {
     buttonState = buttons.sendButtonPush(config.plungerLaunchButton, 1);
     config.lastButtonState[config.plungerLaunchButton] = buttonState;
-  } else if ((config.plungerButtonPush == 1 || config.plungerButtonPush == 3)  && buttonState == 1 && sensorValue < config.plungerMax - 20 ) {
+  } else if ((config.plungerButtonPush == 1 || config.plungerButtonPush == 3) && buttonState == 1 && sensorValue < config.plungerMax - 20) {
     buttonState = buttons.sendButtonPush(config.plungerLaunchButton, 0);
     config.lastButtonState[config.plungerLaunchButton] = buttonState;
   }
-  if( config.plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= config.plungerMin + 10) {
+  if (config.plungerButtonPush >= 2 && buttonState2 == 0 && sensorValue <= config.plungerMin + 10) {
+    // Serial.print('sending button push');
+    // Serial.print(F("\r\n"));
     buttonState2 = buttons.sendButtonPush(config.plungerLaunchButton, 1);
     config.lastButtonState[config.plungerLaunchButton] = buttonState2;
-  } else if (config.plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > config.plungerMin + 10 ) {
+  } else if (config.plungerButtonPush >= 2 && buttonState2 == 1 && sensorValue > config.plungerMin + 10) {
+    // Serial.print('unsending button push');
+    // Serial.print(F("\r\n"));
     buttonState2 = buttons.sendButtonPush(config.plungerLaunchButton, 0);
     config.lastButtonState[config.plungerLaunchButton] = buttonState2;
   }
@@ -109,10 +111,10 @@ void Plunger::plungerRead() {
   //     incrementor = 0;
   //   }
   // }
-  signed char currentDelayedValue = getDelayedPlungerValue(adjustedValue);
+  signed char currentDelayedValue = getDelayedPlungerValue(adjustedValue, currentTime);
 
   //if (DEBUG) {Serial.print(F("DEBUG,plunger: scale factor ")); Serial.print(plungerScaleFactor); Serial.print(F("DEBUG,plunger: value ")); Serial.print(adjustedValue); Serial.print("\r\n");}
-  if (priorValue != currentDelayedValue && config.restingStateCounter < config.restingStateMax ) {
+  if (priorValue != currentDelayedValue && config.plungerMoving == true ) {
     if (adjustedValue > 0 && plungerReleased == false) {
       currentPlungerMax = currentDelayedValue;
     }
@@ -124,9 +126,7 @@ void Plunger::plungerRead() {
     // Serial.print(currentDelayedValue);
     // Serial.print(F("\r\n"));
     priorValue = currentDelayedValue;
-
-  //is not moving
-  } else if (priorValue != currentDelayedValue && config.restingStateCounter == config.restingStateMax  ) {
+  } else if (priorValue != currentDelayedValue && config.plungerMoving == false) {
     currentPlungerMax = 0;
     plungerReleased = false;
     if (config.disablePlungerWhenNotInUse == 1) {
@@ -146,25 +146,26 @@ void Plunger::plungerRead() {
   }
   
   plungerData[plungerDataCounter] = adjustedValue;
-  if (plungerDataCounter < 49) {
+  plungerDataTime[plungerDataCounter] = (unsigned char)(currentTime - priorTime);
+  if (plungerDataCounter < 34) {
     plungerDataCounter++;
   } else {
     plungerDataCounter = 0;
   }
-  
+  priorTime = currentTime;
 }
 
-signed char Plunger::getDelayedPlungerValue(signed char sensorValue) {
+signed char Plunger::getDelayedPlungerValue(signed char sensorValue, unsigned long currentTime) {
 
   if (config.enablePlungerQuickRelease == 0) {
     return sensorValue;
   }
-  if (config.restingStateCounter == config.restingStateMax && plungerReleased == true) {
-    plungerReleased = false; 
+  if (config.plungerMoving == false && plungerReleased == true) {
+    plungerReleased = false;
     config.updateUSB = true;
     return 0;
   }
-  if ((sensorValue < 0 && config.restingStateCounter < config.restingStateMax && currentPlungerMax > 0 && truePriorValue > 50) || plungerReleased == true) {
+  if ((sensorValue < 0 && config.plungerMoving == true && currentPlungerMax > 0 && truePriorValue > 50) || plungerReleased == true) {
     if (plungerReleased == false) {
       config.lastButtonState[config.plungerLaunchButton] = buttons.sendButtonPush(config.plungerLaunchButton, 1);
     } else {
@@ -173,11 +174,28 @@ signed char Plunger::getDelayedPlungerValue(signed char sensorValue) {
     plungerReleased = true;
     return 0;
   }
-  if (plungerDataCounter == 49) {
-    return plungerData[0];
-  } else {
-    return plungerData[plungerDataCounter + 1];
+
+  // 100ms delay
+  unsigned short accumulatedTime = 0;
+  int index = plungerDataCounter == 0 ? 34 : plungerDataCounter - 1;
+
+  while (accumulatedTime < config.enablePlungerQuickRelease && index != plungerDataCounter) {
+      accumulatedTime += plungerDataTime[index];
+      index = (index - 1 + 35) % 35;
   }
+
+
+  // Serial.print("plunger delay timer: ");
+  // Serial.print(index);
+  // Serial.print(", ");
+  // Serial.print(plungerDataCounter);
+  // Serial.print(F("\r\n"));
+  return plungerData[index];
+  // if (plungerDataCounter == 25) {
+  //   return plungerData[0];
+  // } else {
+  //   return plungerData[plungerDataCounter + 1];
+  // }
 }
 
 void Plunger::sendPlungerState() {
