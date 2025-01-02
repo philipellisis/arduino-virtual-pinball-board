@@ -72,35 +72,21 @@ void MPU6050::read(void)
     rawAccY = buffer[2] << 8 | buffer[3];
     rawAccZ = buffer[4] << 8 | buffer[5];
 
-
-    float accel_scale = 1;
-    if (accelRange == 3)
-        accel_scale = 2048;
-    if (accelRange == 2)
-        accel_scale = 4096;
-    if (accelRange == 1)
-        accel_scale = 8192;
-    if (accelRange == 0)
-        accel_scale = 16384;
-
-    accX = (((float)rawAccX) / accel_scale) * 9.80665F;
-    accY = (((float)rawAccY) / accel_scale) * 9.80665F;
-    accZ = (((float)rawAccZ) / accel_scale) * 9.80665F;
 }
 
-float MPU6050::getX()
+int MPU6050::getX()
 {
-    return accX;
+    return rawAccX;
 }
 
-float MPU6050::getY()
+int MPU6050::getY()
 {
-    return accY;
+    return rawAccY;
 }
 
-float MPU6050::getZ()
+int MPU6050::getZ()
 {
-    return accZ;
+    return rawAccZ;
 }
 
 void MPU6050::config()
