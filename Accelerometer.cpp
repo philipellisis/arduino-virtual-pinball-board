@@ -52,22 +52,25 @@ void Accelerometer::centerAccelerometer()
   delay(400);
 
   unsigned char count = 0;
+  long offsetxCounter = 0;
+  long offsetycounter = 0;
+
   xValueOffset = 0;
   yValueOffset = 0;
   while (count < 10)
   {
     mpu.read();
     if (config.orientation > 7) {
-      xValueOffset += mpu.getZ();
+      offsetxCounter += mpu.getZ();
     } else {
-      xValueOffset += mpu.getX();
+      offsetxCounter += mpu.getX();
     }
-    yValueOffset += mpu.getY();
+    offsetycounter += mpu.getY();
 
     count++;
   }
-  xValueOffset = xValueOffset / 10;
-  yValueOffset = yValueOffset / 10;
+  xValueOffset = offsetxCounter / 10;
+  yValueOffset = offsetycounter / 10;
 }
 
 void Accelerometer::resetAccelerometer()
