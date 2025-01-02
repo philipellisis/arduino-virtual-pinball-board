@@ -180,13 +180,13 @@ void Accelerometer::accelerometerRead()
 
 
   if (priorXValue != xValue) {
-    XInput.setJoystickX(JOY_LEFT, static_cast<int16_t>(xValue / localMax * 32767), true);
+    XInput.setJoystickX(JOY_LEFT, static_cast<int16_t>(static_cast<float>(xValue) / localMax * 32767), true);
     priorXValue = xValue;
     config.updateUSB = true;
   }
 
   if (priorYValue != yValue) {
-    XInput.setJoystickY(JOY_LEFT, static_cast<int16_t>(yValue / localMaxY * 32767), true);
+    XInput.setJoystickY(JOY_LEFT, static_cast<int16_t>(static_cast<float>(yValue) / localMaxY * 32767), true);
     priorYValue = yValue;
     config.updateUSB = true;
   }
