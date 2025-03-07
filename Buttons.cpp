@@ -121,13 +121,15 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
     // Serial.print(F("\r\n"));
   }
 
-  if (i > 3 && i < 12 && currentButtonState == 0 && config.lastButtonState[i + 20] == 1 && config.lastButtonState[config.shiftButton] == 0)
+  //logic for turning the shifted button off if the shift button is released
+  if (config.shiftButton < 24 && i > 3 && i < 12 && currentButtonState == 0 && config.lastButtonState[i + 20] == 1 && config.lastButtonState[config.shiftButton] == 0)
   {
     sendActualButtonPress(i + 20, currentButtonState);
     config.lastButtonState[i + 20] = currentButtonState;
   }
 
-  if (i > 3 && i < 12 && config.lastButtonState[config.shiftButton] == 1)
+  // logic for turning the shifted button on if the shift button is depressed
+  if (config.shiftButton < 24 &&  i > 3 && i < 12 && config.lastButtonState[config.shiftButton] == 1)
   {
     buttonOffset = i + 20;
     if (config.lastButtonState[config.shiftButton] == 1)
