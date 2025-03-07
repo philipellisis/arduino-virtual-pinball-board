@@ -39,7 +39,7 @@ void setup() {
 
 void loop() {
   //unsigned long t1 = micros();
-  if (!USBDevice.isSuspended()) {
+  if (!USBDevice.isSuspended() || config.disableUSBSuspend) {
 
       if (toggle == 0) {
         plunger.plungerRead();
@@ -54,6 +54,8 @@ void loop() {
       if (toggle > 3) {
         toggle = 0;
       }
+  } else {
+    lightShow.setLightsOff();
   }
   buttons.checkChanged();
   if (config.updateUSB || buttons.numberButtonsPressed > 0) {

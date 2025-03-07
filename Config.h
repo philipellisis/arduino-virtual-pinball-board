@@ -52,6 +52,7 @@ class Config {
     bool plungerMoving = false; 
     long restingStateMax = 160;
     bool updateUSB = false;
+    bool disableUSBSuspend = true;
     bool buttonPressed = false;
     // 0 is ignore accel option
     // 1 is quick release option
