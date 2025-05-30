@@ -15,6 +15,8 @@ class Accelerometer {
     void sendAccelerometerState();
     void resetAccelerometer();
     void centerAccelerometer();
+    int getXValue() const { return xValue; }
+    int getYValue() const { return yValue; }
     
   private:
     bool DEBUG = false;

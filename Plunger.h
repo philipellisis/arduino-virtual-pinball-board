@@ -12,6 +12,7 @@ class Plunger {
     void plungerRead();
     void sendPlungerState();
     void resetPlunger();
+    int getAdjustedValue() const { return adjustedValue; }
     
   private:
     bool plungerReleased = false;
