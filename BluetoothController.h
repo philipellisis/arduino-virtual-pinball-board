@@ -3,7 +3,6 @@
 
 #include <Arduino.h>
 #include <SPI.h>
-#include "Adafruit_BLE.h"
 #include "Adafruit_BluefruitLE_SPI.h"
 // Hardware SPI pin definitions
 #define BLUEFRUIT_SPI_CS     8
