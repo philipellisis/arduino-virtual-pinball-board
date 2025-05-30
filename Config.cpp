@@ -142,6 +142,7 @@ void Config::saveConfig() {
 
     EEPROM.write(568, lightShowTime);
     EEPROM.write(569, reverseButtonOutputPolarity);
+    EEPROM.write(570, disableUSBSuspend);
 
     EEPROM.write(1000, 101);
 }
@@ -194,6 +195,8 @@ void Config::updateConfigFromSerial() {
     lightShowAttractEnabled = blockRead();
     lightShowTime = blockRead();
     reverseButtonOutputPolarity = blockRead();
+    disableUSBSuspend = blockRead();
+    
 
     if(blockRead() != 42) {
       done = 1;
@@ -256,6 +259,8 @@ void Config::sendConfig() {
     printComma(lightShowAttractEnabled);
     printComma(lightShowTime);
     printComma(reverseButtonOutputPolarity);
+    printComma(disableUSBSuspend);
+    
     
     Serial.print(F("E\r\n"));
 }
