@@ -42,40 +42,6 @@ void Communication::communicate() {
             Serial.print(connectedString);
           } else if (incomingData[1] == outputSingleNumber) {
             outputs.updateOutput(incomingData[2], incomingData[3]);
-          } else if (incomingData[1] == outputButtonNumber) {
-            switch(incomingData[2]) {
-              delay(1000);
-              case 28:
-                Gamepad1.xAxis(-32767);
-                break;
-              case 29:
-                Gamepad1.xAxis(32767);
-                break;
-              case 30:
-                Gamepad1.yAxis(-32767);
-                break;
-              case 31:
-                Gamepad1.yAxis(32767);
-                break;
-              case 32:
-                Gamepad1.zAxis(-127);
-                break;
-              case 33:
-                Gamepad1.zAxis(127);
-                break;
-              default:
-                buttons.sendButtonPush(incomingData[2], 1);
-                Gamepad1.write();
-                delay(500);
-                buttons.sendButtonPush(incomingData[2], 0);
-            }
-            Gamepad1.write();
-            delay(500);
-            Gamepad1.xAxis(0);
-            Gamepad1.yAxis(0);
-            Gamepad1.zAxis(0);
-            Gamepad1.write();
-
           } else {
             //normal operation
             //if (DEBUG) {Serial.print(F("DEBUG,sending output\r\n"));}
@@ -147,7 +113,7 @@ void Communication::sendAdmin() {
       admin = 0;
       break;
     case VERSION:
-      Serial.print(F("V,1.19.1\r\n"));
+      Serial.print(F("V,1.20.0\r\n"));
       admin = 0;
       break;
     case RESET:

@@ -165,20 +165,22 @@ void Accelerometer::accelerometerRead()
     xValue = yValue;
     yValue = temp;
   }
-
-  if (tiltSuppressTime > 0) {
-    tiltSuppressTime--;
-  } else {
-    if (config.lastButtonState[config.tiltButton] == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTiltY))
-    {
-      config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 1);
-    }
-    else if (config.lastButtonState[config.tiltButton] == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTiltY))
-    {
-      config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 0);
-      tiltSuppressTime = config.tiltSuppress;
+  if (config.tiltButton < 24) {
+    if (tiltSuppressTime > 0) {
+      tiltSuppressTime--;
+    } else {
+      if (config.lastButtonState[config.tiltButton] == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTiltY))
+      {
+        config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 1);
+      }
+      else if (config.lastButtonState[config.tiltButton] == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTiltY))
+      {
+        config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 0);
+        tiltSuppressTime = config.tiltSuppress;
+      }
     }
   }
+
 
 
 if (priorXValue != xValue) {

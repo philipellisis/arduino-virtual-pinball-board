@@ -95,23 +95,7 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
 {
 
   config.updateUSB = true;
-  // mod 24 so that the button number is always between 0 and 23
-  if (i == config.nightModeButton % 24)
-  {
 
-    if (config.nightModeButton < 24)
-    {
-      config.nightMode = currentButtonState;
-    }
-    else
-    {
-      if (currentButtonState == 1)
-      {
-        // if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(config.nightMode); Serial.print(F("\r\n"));}
-        config.nightMode = !config.nightMode;
-      }
-    }
-  }
 
   if (config.buttonKeyDebounce[i] > 0 && currentButtonState == 0)
   {
@@ -137,13 +121,15 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
     // Serial.print(F("\r\n"));
   }
 
-  if (i > 3 && i < 12 && currentButtonState == 0 && config.lastButtonState[i + 20] == 1 && config.lastButtonState[config.shiftButton] == 0)
+  //logic for turning the shifted button off if the shift button is released
+  if (config.shiftButton < 24 && i > 3 && i < 12 && currentButtonState == 0 && config.lastButtonState[i + 20] == 1 && config.lastButtonState[config.shiftButton] == 0)
   {
     sendActualButtonPress(i + 20, currentButtonState);
     config.lastButtonState[i + 20] = currentButtonState;
   }
 
-  if (i > 3 && i < 12 && config.lastButtonState[config.shiftButton] == 1)
+  // logic for turning the shifted button on if the shift button is depressed
+  if (config.shiftButton < 24 &&  i > 3 && i < 12 && config.lastButtonState[config.shiftButton] == 1)
   {
     buttonOffset = i + 20;
     if (config.lastButtonState[config.shiftButton] == 1)
@@ -186,6 +172,24 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
 
 void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButtonState)
 {
+  // night mode
+  // mod 32 so that the button number is always between 0 and 31
+  if (config.nightModeButton < 64 && buttonOffset == config.nightModeButton % 32)
+  {
+
+    if (config.nightModeButton < 32)
+    {
+      config.nightMode = currentButtonState;
+    }
+    else
+    {
+      if (currentButtonState == 1)
+      {
+        // if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(config.nightMode); Serial.print(F("\r\n"));}
+        config.nightMode = !config.nightMode;
+      }
+    }
+  }
 
   if (config.buttonKeyboard[buttonOffset] > 0)
   {
