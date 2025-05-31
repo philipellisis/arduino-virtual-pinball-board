@@ -17,8 +17,8 @@ class Config {
     int plungerMax = 842;
     int plungerMin = 61;
     int plungerMid = 203;
-    unsigned char solenoidButtonMap[4] = {0,0,0,0};
-    unsigned char solenoidOutputMap[4] = {0,0,0,0};
+    unsigned char solenoidButtonMap[4] = {0};
+    unsigned char solenoidOutputMap[4] = {0};
     unsigned char orientation = 0;
     unsigned char accelerometerEprom = 0;
     unsigned char accelerometer = 1;
@@ -72,7 +72,6 @@ class Config {
 
 
   private:
-    bool DEBUG = false;
     unsigned char Config::blockRead();
     void writeIntIntoEEPROM(int address, int number);
     int readIntFromEEPROM(int address);

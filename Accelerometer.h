@@ -19,7 +19,6 @@ class Accelerometer {
     int getYValue() const { return yValue; }
     
   private:
-    bool DEBUG = false;
     int xValueOffset = 0;
     int yValueOffset = 0;
     int xValue;

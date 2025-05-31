@@ -16,7 +16,6 @@ class Communication {
     void communicate();
     
   private:
-    bool DEBUG = false;
     char* connectedString = "DEBUG,CSD Board Connected\r\n";
     unsigned char firstNumber = 0; //0 normally
     unsigned char bankOffset = 200; //200 normally

@@ -16,7 +16,6 @@ class Plunger {
     
   private:
     bool plungerReleased = false;
-    bool DEBUG = false;
     float plungerScaleFactor;
     int adjustedValue;
     unsigned char buttonState;

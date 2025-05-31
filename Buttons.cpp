@@ -15,17 +15,13 @@ ButtonReader buttonReader;
 Buttons::Buttons()
 {
   // Initialize Button Pins
-  // if (DEBUG) {Serial.print(F("DEBUG,buttons: About to initialize pins\r\n"));}
   buttonReader.init();
-  // if (DEBUG) {Serial.print(F("DEBUG,buttons: pins initialized\r\n"));}
 }
 
 void Buttons::init()
 {
-  // if (DEBUG) {Serial.print(F("DEBUG,buttons: initializing Gamepad1\r\n"));}
   BootKeyboard.begin();
   SingleConsumer.begin();
-  // if (DEBUG) {Serial.print(F("DEBUG,buttons: initialized Gamepad1\r\n"));}
 }
 
 bool Buttons::checkChanged()
@@ -50,13 +46,11 @@ void Buttons::readInputs()
 {
   unsigned char buttonPushed = 2; // this is set to notify light show that a button press has happened
   // read shift register values
-  // if (DEBUG) {Serial.print(F("DEBUG"));}
   if (config.buttonPressed || buttons.numberButtonsPressed > 0)
   {
     for (unsigned char i = 0; i < 24; i++)
     {
       bool currentButtonState = !buttonReader.state(i);
-      // if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != config.lastButtonState[i])
       {
 
@@ -72,7 +66,6 @@ void Buttons::readInputs()
         config.lastButtonState[i] = sendButtonPush(i, currentButtonState);
       }
 
-      // if (DEBUG) {Serial.print("\r\n");}
     }
   }
   if (buttonPushed == 1)
@@ -108,17 +101,11 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
     {
       config.buttonKeyDebounce[i] = 1;
       numberButtonsPressed--;
-      // Serial.print(F("decrementing"));
-      // Serial.print(numberButtonsPressed);
-      // Serial.print(F("\r\n"));
     }
   }
   else if (config.buttonKeyDebounce[i] > 0 && currentButtonState == 1)
   {
     numberButtonsPressed++;
-    // Serial.print(F("incrementing"));
-    // Serial.print(numberButtonsPressed);
-    // Serial.print(F("\r\n"));
   }
 
   //logic for turning the shifted button off if the shift button is released
@@ -152,19 +139,9 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
   // trigger solenoid if needed
   for (int j = 0; j < 4; j++)
   {
-    if (currentButtonState == 1 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i)
+    if (config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i && config.solenoidOutputMap[j] > 0)
     {
-      if (config.solenoidOutputMap[j] > 0)
-      {
-        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 255);
-      }
-    }
-    else if (currentButtonState == 0 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i)
-    {
-      if (config.solenoidOutputMap[j] > 0)
-      {
-        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 0);
-      }
+      outputs.updateOutput(config.solenoidOutputMap[j] - 1, currentButtonState ? 255 : 0);
     }
   }
   return currentButtonState;
@@ -185,7 +162,6 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
     {
       if (currentButtonState == 1)
       {
-        // if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(config.nightMode); Serial.print(F("\r\n"));}
         config.nightMode = !config.nightMode;
       }
     }
@@ -197,18 +173,7 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
     {
       if (config.buttonKeyboard[buttonOffset] > 251)
       {
-        if (config.buttonKeyboard[buttonOffset] == 252)
-        {
-          SingleConsumer.press(MEDIA_VOLUME_MUTE);
-        }
-        else if (config.buttonKeyboard[buttonOffset] == 253)
-        {
-          SingleConsumer.press(MEDIA_VOLUME_DOWN);
-        }
-        else if (config.buttonKeyboard[buttonOffset] == 254)
-        {
-          SingleConsumer.press(MEDIA_VOLUME_UP);
-        }
+        handleMediaKey(config.buttonKeyboard[buttonOffset], true);
       }
       else
       {
@@ -219,18 +184,7 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
     {
       if (config.buttonKeyboard[buttonOffset] > 251)
       {
-        if (config.buttonKeyboard[buttonOffset] == 252)
-        {
-          SingleConsumer.release(MEDIA_VOLUME_MUTE);
-        }
-        else if (config.buttonKeyboard[buttonOffset] == 253)
-        {
-          SingleConsumer.release(MEDIA_VOLUME_DOWN);
-        }
-        else if (config.buttonKeyboard[buttonOffset] == 254)
-        {
-          SingleConsumer.release(MEDIA_VOLUME_UP);
-        }
+        handleMediaKey(config.buttonKeyboard[buttonOffset], false);
       }
       else
       {
@@ -261,4 +215,16 @@ void Buttons::sendButtonState()
   }
   Serial.print(config.lastButtonState[31]);
   Serial.print(F("\r\n"));
+}
+void Buttons::handleMediaKey(unsigned char keyCode, bool pressed) {
+  if (keyCode == 252) {
+    if (pressed) SingleConsumer.press(MEDIA_VOLUME_MUTE);
+    else SingleConsumer.release(MEDIA_VOLUME_MUTE);
+  } else if (keyCode == 253) {
+    if (pressed) SingleConsumer.press(MEDIA_VOLUME_DOWN);
+    else SingleConsumer.release(MEDIA_VOLUME_DOWN);
+  } else if (keyCode == 254) {
+    if (pressed) SingleConsumer.press(MEDIA_VOLUME_UP);
+    else SingleConsumer.release(MEDIA_VOLUME_UP);
+  }
 }

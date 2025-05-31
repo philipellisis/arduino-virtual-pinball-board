@@ -19,8 +19,8 @@ class Buttons {
     
   private:
     unsigned char buttonOffset = 0;
-    bool DEBUG = false;
     void sendActualButtonPress(unsigned char buttonOffset, bool currentButtonState);
+    void handleMediaKey(unsigned char keyCode, bool pressed);
 };
 
 #endif
