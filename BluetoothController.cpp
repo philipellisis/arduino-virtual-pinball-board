@@ -38,22 +38,22 @@ void BluetoothController::setupBLE() {
     ble.echo(false);
 
     // 4) Set a friendly name
-    ble.sendCommandCheckOK(F("AT+GAPDEVNAME=Pinball Controller"));
+    ble.sendCommandCheckOK("AT+GAPDEVNAME=Pinball Controller");
 
     // 5) Query & enable BLE HID service if needed
     int32_t hidEnabled = 0;
-    ble.sendCommandWithIntReply(F("AT+BLEHIDEN?"), &hidEnabled);
+    ble.sendCommandWithIntReply("AT+BLEHIDEN?", &hidEnabled);
     if (!hidEnabled) {
         Serial.println(F("Enabling BLE HID service..."));
-        ble.sendCommandCheckOK(F("AT+BLEHIDEN=1"));
+        ble.sendCommandCheckOK("AT+BLEHIDEN=1");
     }
 
     // 6) Query & enable BLE HID Gamepad profile if needed
     int32_t gpEnabled = 0;
-    ble.sendCommandWithIntReply(F("AT+BLEHIDGAMEPADEN?"), &gpEnabled);
+    ble.sendCommandWithIntReply("AT+BLEHIDGAMEPADEN?", &gpEnabled);
     if (!gpEnabled) {
         Serial.println(F("Enabling BLE HID Gamepad profile..."));
-        ble.sendCommandCheckOK(F("AT+BLEHIDGAMEPADEN=1"));
+        ble.sendCommandCheckOK("AT+BLEHIDGAMEPADEN=1");
     }
 
     // 7) Reset module to apply any service changes
@@ -68,7 +68,7 @@ void BluetoothController::setupBLE() {
     }
 
     Serial.println(F("\nBLE Connected! Switching to DATA mode..."));
-    ble.setMode(BLUEFRUIT_MODE_DATA);
+    ble.setMode(1); // DATA mode
 }
 
 bool BluetoothController::isConnected() {
