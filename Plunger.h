@@ -25,11 +25,9 @@ class Plunger {
     long truePriorValue = 0;
     long restingStartTime;
     unsigned long priorTime = 0;
-    //unsigned char plungerMinSendCount = 0;
 
-    int plungerData[35] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    char plungerDataTime[35] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    // unsigned char incrementor = 0;
+    int plungerData[35] = {0};
+    char plungerDataTime[35] = {0};
     signed char plungerDataCounter = 0;
     signed char getDelayedPlungerValue(signed char sensorValue, unsigned long currentTime);
     signed char currentPlungerMax = 0;

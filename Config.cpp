@@ -8,13 +8,11 @@ Config::Config() {
 }
 
 void Config::init() {
-  //if (DEBUG) {Serial.print(F("DEBUG,Config: initializing\r\n"));}
 
   unsigned char eepromCheck;
   EEPROM.get(1000, eepromCheck);
 
   if (eepromCheck == 101) {
-    //if (DEBUG) {Serial.print(F("DEBUG,eeprom check indicates values are all saved, reading from eeprom\r\n"));}
     // get first 62 bank maximum values
     for (int i = 0; i < 63; i++) {
       EEPROM.get(i, toySpecialOption[i]);
@@ -97,8 +95,6 @@ void Config::saveConfig() {
     
     for (int i = 0; i < 4; i++) {
       EEPROM.write(i + 407, solenoidButtonMap[i]);
-    }
-    for (int i = 0; i < 4; i++) {
       EEPROM.write(i + 417, solenoidOutputMap[i]);
     }
     
