@@ -6,7 +6,6 @@
 #include "Accelerometer.h"
 #include "Enums.h"
 #include "Globals.h"
-#include <avr/wdt.h>
 
 Communication::Communication() {
 }
@@ -105,7 +104,6 @@ void Communication::sendAdmin() {
     case RESET:
       pinMode(11, OUTPUT);
       digitalWrite(11, LOW);
-      wdt_enable(WDTO_15MS);
       admin = 0;
     }
     

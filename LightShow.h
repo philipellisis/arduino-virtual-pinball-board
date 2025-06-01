@@ -18,21 +18,22 @@ class LightShow {
     void setLightsOff();
     
   private:
-    long int timeInState;
-    unsigned char outputValues[63] = {0};
-    unsigned char outputDirection[63] = {0};
-    unsigned char startLight = 0;
-    unsigned char finishLight = 0;
-    unsigned char incrementor = 5;
+    uint32_t timeInState;
+    uint8_t outputValues[63] = {0};
+    uint8_t outputDirection[63] = {0};
+    uint8_t startLight = 0;
+    uint8_t finishLight = 0;
+    uint8_t incrementor = 5;
 
-    unsigned char currentStartLight = 0;
-    unsigned char currentFinishLight = 0;
+    uint8_t currentStartLight = 0;
+    uint8_t currentFinishLight = 0;
     bool doneSettingLights = true;
     void setStartFinishLoops();
     bool isLightShowOutput(int i);
     bool isMediumLight(int i);
-    void transitionToState(unsigned char newState, long currentTime);
-    long lightShowStartTime = 10000;
+    void transitionToState(uint8_t newState, uint32_t currentTime);
+    void updateLightValue(uint8_t i, uint8_t value);
+    uint32_t lightShowStartTime = 10000;
 };
 
 #endif

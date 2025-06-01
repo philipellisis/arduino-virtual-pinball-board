@@ -6,7 +6,7 @@ LightShow::LightShow() {
 }
 
 void LightShow::init() {
-  for (int i = 0; i < 62; i++) {
+  for (uint8_t i = 0; i < 62; i++) {
     if ((config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM || config.toySpecialOption[i] == LIGHT_SHOW_HIGH) && startLight == 0) {
       startLight = i;
     }
@@ -19,7 +19,7 @@ void LightShow::init() {
 
 void LightShow::checkSetLights() {
  //starts in OUTPUT_RECEIVED_RESET_TIMER, but effectively starts in OUTPUT_RECEIVED, then to WAITING_INPUT after 10 seconds
-  long int currentTime = millis();
+  uint32_t currentTime = millis();
 
   switch (config.lightShowState)
   {
@@ -85,47 +85,40 @@ void LightShow::setStartFinishLoops() {
 }
 
 void LightShow::setLightsNormal() {
-
   setStartFinishLoops();
-
-  for (int i = currentStartLight; i < currentFinishLight; i++) {
-    if (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM) {
-      outputs.updateOutput(i, 60);
+  for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
+    if (isMediumLight(i)) {
+      updateLightValue(i, 60);
     } else if (config.toySpecialOption[i] == LIGHT_SHOW_HIGH) {
-        outputs.updateOutput(i, 255);
+      updateLightValue(i, 255);
     }
   }
 }
 
 void LightShow::setLightsHigh() {
-
   setStartFinishLoops();
-
-  for (int i = currentStartLight; i < currentFinishLight; i++) {
-    if (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM) {
-      outputs.updateOutput(i, 255);
+  for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
+    if (isMediumLight(i)) {
+      updateLightValue(i, 255);
     }
   }
 }
 
 void LightShow::setLightsOff() {
-
-  for (int i = startLight; i < finishLight; i++) {
+  for (uint8_t i = startLight; i < finishLight; i++) {
     if (isLightShowOutput(i)) {
-      outputs.updateOutput(i, 0);
+      updateLightValue(i, 0);
     }
   }
 }
 
 void LightShow::setLightsRandom() {
-
   setStartFinishLoops();
-
-  for (int i = currentStartLight; i < currentFinishLight; i++) {
+  for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
     if (isLightShowOutput(i)) {
-      unsigned char rnd = rand() % 256;
-      outputs.updateOutput(i, rnd);
-      outputDirection[i] = rnd % 2;
+      uint8_t rnd = rand();
+      updateLightValue(i, rnd);
+      outputDirection[i] = rnd & 1; // More efficient than modulo
       outputValues[i] = rnd;
     }
   }
@@ -133,27 +126,27 @@ void LightShow::setLightsRandom() {
 
 void LightShow::incrementRandom() {
   setStartFinishLoops();
-  for (int i = currentStartLight; i < currentFinishLight; i++) {
+  for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
     if (isLightShowOutput(i)) {
-      if (outputDirection[i] == 1) {
-        if (outputValues[i] >= 255 - incrementor) {
-          outputDirection[i] = 0;
-        } else {
-          outputValues[i] += incrementor;
-        }
-      } else {
-        if (outputValues[i] <= incrementor) {
-          outputDirection[i] = 1;
-        } else {
-          outputValues[i] -= incrementor;
-        }
+      // Simplified bouncing logic
+      int16_t newValue = outputValues[i] + (outputDirection[i] ? incrementor : -incrementor);
+      
+      // Bounce off limits and reverse direction
+      if (newValue >= 255) {
+        newValue = 255;
+        outputDirection[i] = 0;
+      } else if (newValue <= 0) {
+        newValue = 0;
+        outputDirection[i] = 1;
       }
-      outputs.updateOutput(i, outputValues[i]);
+      
+      outputValues[i] = newValue;
+      updateLightValue(i, outputValues[i]);
     }
   }
 }
 
-void LightShow::transitionToState(unsigned char newState, long currentTime) {
+void LightShow::transitionToState(uint8_t newState, uint32_t currentTime) {
   if (doneSettingLights) {
     timeInState = currentTime;
     config.lightShowState = newState;
@@ -162,6 +155,10 @@ void LightShow::transitionToState(unsigned char newState, long currentTime) {
 
 bool LightShow::isLightShowOutput(int i) {
   return (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM || config.toySpecialOption[i] == LIGHT_SHOW_HIGH);
+}
+
+void LightShow::updateLightValue(uint8_t i, uint8_t value) {
+  outputs.updateOutput(i, value);
 }
 
 bool LightShow::isMediumLight(int i) {
