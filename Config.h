@@ -73,15 +73,17 @@ class Config {
 
   private:
     unsigned char Config::blockRead();
-    void writeIntIntoEEPROM(int address, int number);
-    int readIntFromEEPROM(int address);
+    void writeIntIntoEEPROM(uint16_t address, int16_t number);
+    int16_t readIntFromEEPROM(uint16_t address);
     void printError();
     void printComma(unsigned char value);
     void printIntComma(int value);
     void printSuccess();
-    int readIntFromByte();
+    int16_t readIntFromByte();
     void readConfigArray(unsigned char* configArray, unsigned char size);
     void printConfigArray(unsigned char* configArray, unsigned char size);
+    void loadEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size);
+    void saveEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size);
     
     
 };

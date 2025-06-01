@@ -9,26 +9,22 @@ Config::Config() {
 
 void Config::init() {
 
-  unsigned char eepromCheck;
+  uint8_t eepromCheck;
   EEPROM.get(1000, eepromCheck);
 
   if (eepromCheck == 101) {
     // get first 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      EEPROM.get(i, toySpecialOption[i]);
-      EEPROM.get(i + 100, turnOffState[i]);
-      EEPROM.get(i + 200, maxOutputState[i]);
-      EEPROM.get(i + 300, maxOutputTime[i]);
-    }
+    loadEEPROMArray(toySpecialOption, 0, 63);
+    loadEEPROMArray(turnOffState, 100, 63);
+    loadEEPROMArray(maxOutputState, 200, 63);
+    loadEEPROMArray(maxOutputTime, 300, 63);
 
     plungerMax = readIntFromEEPROM(401);
     plungerMin = readIntFromEEPROM(403);
     plungerMid = readIntFromEEPROM(405);
     
-    for (int i = 0; i < 4; i++) {
-      EEPROM.get(i + 407, solenoidButtonMap[i]);
-      EEPROM.get(i + 417, solenoidOutputMap[i]);
-    }
+    loadEEPROMArray(solenoidButtonMap, 407, 4);
+    loadEEPROMArray(solenoidOutputMap, 417, 4);
 
     EEPROM.get(426, orientation);
     EEPROM.get(427, accelerometer);
@@ -56,13 +52,9 @@ void Config::init() {
     accelerometerTiltY = readIntFromEEPROM(468);
     accelerometerMaxY = readIntFromEEPROM(470);
 
-    for (int i = 0; i < 32; i++) {
-      EEPROM.get(i + 500, buttonKeyboard[i]);
-    }
+    loadEEPROMArray(buttonKeyboard, 500, 32);
 
-    for (int i = 0; i < 24; i++) {
-      EEPROM.get(i + 532, buttonKeyDebounce[i]);
-    }
+    loadEEPROMArray(buttonKeyDebounce, 532, 24);
     EEPROM.get(564, buttonDebounceCounter);
     EEPROM.get(565, enablePlunger);
 
@@ -82,21 +74,17 @@ void Config::init() {
 
 void Config::saveConfig() {
     // get first 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      EEPROM.write(i, toySpecialOption[i]);
-      EEPROM.write(i + 100, turnOffState[i]);
-      EEPROM.write(i + 200, maxOutputState[i]);
-      EEPROM.write(i + 300, maxOutputTime[i]);
-    }
+    saveEEPROMArray(toySpecialOption, 0, 63);
+    saveEEPROMArray(turnOffState, 100, 63);
+    saveEEPROMArray(maxOutputState, 200, 63);
+    saveEEPROMArray(maxOutputTime, 300, 63);
   
     writeIntIntoEEPROM(401, plungerMax);
     writeIntIntoEEPROM(403, plungerMin);
     writeIntIntoEEPROM(405, plungerMid);
     
-    for (int i = 0; i < 4; i++) {
-      EEPROM.write(i + 407, solenoidButtonMap[i]);
-      EEPROM.write(i + 417, solenoidOutputMap[i]);
-    }
+    saveEEPROMArray(solenoidButtonMap, 407, 4);
+    saveEEPROMArray(solenoidOutputMap, 417, 4);
     
     EEPROM.write(426, orientation);
     EEPROM.write(427, accelerometer);
@@ -122,13 +110,9 @@ void Config::saveConfig() {
     writeIntIntoEEPROM(468, accelerometerTiltY);
     writeIntIntoEEPROM(470, accelerometerMaxY);
 
-    for (int i = 0; i < 32; i++) {
-      EEPROM.write(i + 500, buttonKeyboard[i]);
-    }
+    saveEEPROMArray(buttonKeyboard, 500, 32);
 
-    for (int i = 0; i < 24; i++) {
-      EEPROM.write(i + 532, buttonKeyDebounce[i]);
-    }
+    saveEEPROMArray(buttonKeyDebounce, 532, 24);
 
     EEPROM.write(564, buttonDebounceCounter);
     EEPROM.write(565, enablePlunger);
@@ -279,8 +263,8 @@ unsigned char Config::blockRead() {
     if (done > 0) {
       return 0;
     }
-    long int t1 = millis();
-    long int t2 = millis();
+    uint32_t t1 = millis();
+    uint32_t t2 = millis();
     while ((t2 - t1) < 5000) {
       if (Serial.available() > 0) {
         return Serial.read();
@@ -292,29 +276,41 @@ unsigned char Config::blockRead() {
     return 0;
 }
 
-void Config::writeIntIntoEEPROM(int address, int number)
+void Config::writeIntIntoEEPROM(uint16_t address, int16_t number)
 { 
   EEPROM.write(address, number >> 8);
   EEPROM.write(address + 1, number & 0xFF);
 }
 
-int Config::readIntFromEEPROM(int address)
+int16_t Config::readIntFromEEPROM(uint16_t address)
 {
   return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
 }
 
-int Config::readIntFromByte() {
+int16_t Config::readIntFromByte() {
   return (blockRead() << 8) + blockRead();
 }
 
 void Config::readConfigArray(unsigned char* configArray, unsigned char size) {
-  for (unsigned char i = 0; i < size; i++) {
+  for (uint8_t i = 0; i < size; i++) {
     configArray[i] = blockRead();
   }
 }
 
+void Config::loadEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size) {
+  for (uint8_t i = 0; i < size; i++) {
+    EEPROM.get(address + i, configArray[i]);
+  }
+}
+
+void Config::saveEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size) {
+  for (uint8_t i = 0; i < size; i++) {
+    EEPROM.write(address + i, configArray[i]);
+  }
+}
+
 void Config::printConfigArray(unsigned char* configArray, unsigned char size) {
-  for (unsigned char i = 0; i < size; i++) {
+  for (uint8_t i = 0; i < size; i++) {
     printComma(configArray[i]);
   }
 }

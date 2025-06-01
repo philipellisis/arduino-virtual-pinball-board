@@ -21,6 +21,7 @@ class Buttons {
     unsigned char buttonOffset = 0;
     void sendActualButtonPress(unsigned char buttonOffset, bool currentButtonState);
     void handleMediaKey(unsigned char keyCode, bool pressed);
+    void processKeyboardAction(unsigned char keyCode, bool pressed);
 };
 
 #endif

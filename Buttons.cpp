@@ -44,11 +44,11 @@ bool Buttons::checkChanged()
 
 void Buttons::readInputs()
 {
-  unsigned char buttonPushed = 2; // this is set to notify light show that a button press has happened
+  uint8_t buttonPushed = 2; // this is set to notify light show that a button press has happened
   // read shift register values
   if (config.buttonPressed || buttons.numberButtonsPressed > 0)
   {
-    for (unsigned char i = 0; i < 24; i++)
+    for (uint8_t i = 0; i < 24; i++)
     {
       bool currentButtonState = !buttonReader.state(i);
       if (currentButtonState != config.lastButtonState[i])
@@ -108,36 +108,37 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
     numberButtonsPressed++;
   }
 
-  //logic for turning the shifted button off if the shift button is released
-  if (config.shiftButton < 24 && i > 3 && i < 12 && currentButtonState == 0 && config.lastButtonState[i + 20] == 1 && config.lastButtonState[config.shiftButton] == 0)
-  {
-    sendActualButtonPress(i + 20, currentButtonState);
-    config.lastButtonState[i + 20] = currentButtonState;
-  }
-
-  // logic for turning the shifted button on if the shift button is depressed
-  if (config.shiftButton < 24 &&  i > 3 && i < 12 && config.lastButtonState[config.shiftButton] == 1)
-  {
-    buttonOffset = i + 20;
-    if (config.lastButtonState[config.shiftButton] == 1)
-    {
+  // Handle shifted buttons (optimize common conditions)
+  if (config.shiftButton < 24 && i > 3 && i < 12) {
+    bool shiftPressed = config.lastButtonState[config.shiftButton] == 1;
+    
+    if (!currentButtonState && config.lastButtonState[i + 20] == 1 && !shiftPressed) {
+      // Logic for turning the shifted button off if the shift button is released
+      sendActualButtonPress(i + 20, currentButtonState);
+      config.lastButtonState[i + 20] = currentButtonState;
+    }
+    
+    if (shiftPressed) {
+      // Logic for turning the shifted button on if the shift button is depressed
+      buttonOffset = i + 20;
       config.lastButtonState[buttonOffset] = currentButtonState;
       sendActualButtonPress(buttonOffset, currentButtonState);
-    }
-    if (currentButtonState == 0)
-    {
-      sendActualButtonPress(i, currentButtonState);
+      
+      if (!currentButtonState) {
+        sendActualButtonPress(i, currentButtonState);
+        sendActualButtonPress(buttonOffset, currentButtonState);
+      }
+    } else {
+      buttonOffset = i;
       sendActualButtonPress(buttonOffset, currentButtonState);
     }
-  }
-  else
-  {
+  } else {
     buttonOffset = i;
     sendActualButtonPress(buttonOffset, currentButtonState);
   }
 
   // trigger solenoid if needed
-  for (int j = 0; j < 4; j++)
+  for (uint8_t j = 0; j < 4; j++)
   {
     if (config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i && config.solenoidOutputMap[j] > 0)
     {
@@ -169,28 +170,7 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
 
   if (config.buttonKeyboard[buttonOffset] > 0)
   {
-    if (currentButtonState == 1)
-    {
-      if (config.buttonKeyboard[buttonOffset] > 251)
-      {
-        handleMediaKey(config.buttonKeyboard[buttonOffset], true);
-      }
-      else
-      {
-        BootKeyboard.press(KeyboardKeycode(config.buttonKeyboard[buttonOffset]));
-      }
-    }
-    else
-    {
-      if (config.buttonKeyboard[buttonOffset] > 251)
-      {
-        handleMediaKey(config.buttonKeyboard[buttonOffset], false);
-      }
-      else
-      {
-        BootKeyboard.release(KeyboardKeycode(config.buttonKeyboard[buttonOffset]));
-      }
-    }
+    processKeyboardAction(config.buttonKeyboard[buttonOffset], currentButtonState == 1);
   }
   if (config.buttonKeyboard[buttonOffset] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0)
   {
@@ -208,14 +188,25 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
 void Buttons::sendButtonState()
 {
   Serial.print(F("B,"));
-  for (int i = 0; i < 31; i++)
+  for (uint8_t i = 0; i < 32; i++)
   {
     Serial.print(config.lastButtonState[i]);
-    Serial.print(F(","));
+    if (i < 31) Serial.print(F(","));
   }
-  Serial.print(config.lastButtonState[31]);
   Serial.print(F("\r\n"));
 }
+void Buttons::processKeyboardAction(unsigned char keyCode, bool pressed) {
+  if (keyCode > 251) {
+    handleMediaKey(keyCode, pressed);
+  } else {
+    if (pressed) {
+      BootKeyboard.press(KeyboardKeycode(keyCode));
+    } else {
+      BootKeyboard.release(KeyboardKeycode(keyCode));
+    }
+  }
+}
+
 void Buttons::handleMediaKey(unsigned char keyCode, bool pressed) {
   if (keyCode == 252) {
     if (pressed) SingleConsumer.press(MEDIA_VOLUME_MUTE);
