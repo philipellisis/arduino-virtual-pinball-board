@@ -19,8 +19,8 @@ class LightShow {
     
   private:
     long int timeInState;
-    unsigned char outputValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    unsigned char outputDirection[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char outputValues[63] = {0};
+    unsigned char outputDirection[63] = {0};
     unsigned char startLight = 0;
     unsigned char finishLight = 0;
     unsigned char incrementor = 5;
@@ -29,6 +29,9 @@ class LightShow {
     unsigned char currentFinishLight = 0;
     bool doneSettingLights = true;
     void setStartFinishLoops();
+    bool isLightShowOutput(int i);
+    bool isMediumLight(int i);
+    void transitionToState(unsigned char newState, long currentTime);
     long lightShowStartTime = 10000;
 };
 
