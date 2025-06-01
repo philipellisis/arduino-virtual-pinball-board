@@ -16,7 +16,7 @@ Communication::Communication() {
 void Communication::communicate() {
   outputs.checkResetOutputs();
   //int maxSerial = Serial.available();
-  for (int i = 0; i < 9; i++) {
+  for (uint8_t i = 0; i < 9; i++) {
     if (Serial.available()) {
       incomingData[dataLocation] = Serial.read();
       // Serial.print(F("DEBUG,getting serial data: ")); Serial.print(incomingData[dataLocation]); Serial.print(F("\r\n"));
@@ -74,24 +74,10 @@ void Communication::sendAdmin() {
     switch (admin)
     {
     case BUTTONS:
-      if (!shouldDelay()) {
-        buttons.sendButtonState();
-      }
-      break;
     case OUTPUTS:
-      if (!shouldDelay()) {
-        outputs.sendOutputState();
-      }
-      break;
     case PLUNGER:
-      if (!shouldDelay()) { 
-        plunger.sendPlungerState();
-      }
-      break;
     case ACCEL:
-      if (!shouldDelay()) {
-        accel.sendAccelerometerState();
-      }
+      handleDelayedAdmin(admin);
       break;
     case SEND_CONFIG:
       config.sendConfig();
@@ -126,6 +112,25 @@ void Communication::sendAdmin() {
   }
 }
 
+void Communication::handleDelayedAdmin(uint8_t adminType) {
+  if (shouldDelay()) return;
+  
+  switch (adminType) {
+    case BUTTONS:
+      buttons.sendButtonState();
+      break;
+    case OUTPUTS:
+      outputs.sendOutputState();
+      break;
+    case PLUNGER:
+      plunger.sendPlungerState();
+      break;
+    case ACCEL:
+      accel.sendAccelerometerState();
+      break;
+  }
+}
+
 bool Communication::shouldDelay() {
   if (delayIncrementor < 20) {
     delayIncrementor++;
@@ -138,12 +143,12 @@ bool Communication::shouldDelay() {
 
 void Communication::updateOutputs() {
   //if (DEBUG) {Serial.print(F("DEBUG,sending output\r\n"));}
-  int tempBankOffset;
-  tempBankOffset = incomingData[1] - bankOffset;
-  for (int i = 2; i < 9; i++) {
-    if (previousDOFValues[tempBankOffset*7 + i-2] != incomingData[i]) {
-      outputs.updateOutput(tempBankOffset*7 + i-2, incomingData[i]);
-      previousDOFValues[tempBankOffset*7 + i-2] = incomingData[i];
+  uint8_t baseIndex = (incomingData[1] - bankOffset) * 7;
+  for (uint8_t i = 2; i < 9; i++) {
+    uint8_t outputIndex = baseIndex + i - 2;
+    if (previousDOFValues[outputIndex] != incomingData[i]) {
+      outputs.updateOutput(outputIndex, incomingData[i]);
+      previousDOFValues[outputIndex] = incomingData[i];
     }
   }
 }
