@@ -59,5 +59,5 @@ void loop() {
   bluetoothController.update();
   
   // Small delay to prevent overwhelming the Bluetooth connection
-  delay(20);  // ~50 Hz updates
+  //delay(20);  // ~50 Hz updates
 }

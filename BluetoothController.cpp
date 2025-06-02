@@ -13,23 +13,19 @@ BluetoothController::BluetoothController() :
     }
 }
 
-void BluetoothController::error(const __FlashStringHelper* msg) {
-    Serial.println(msg);
-    while (1);
-}
 
 void BluetoothController::init() {
-    Serial.println(F("Starting BLE HID Gamepad Controller..."));
+    //Serial.println(F("Starting BLE HID Gamepad Controller..."));
     
     setupBLE();
 }
 
 void BluetoothController::setupBLE() {
     // 1) Initialize the module
-    if (!ble.begin(false)) {
-        error(F("Couldn't find Bluefruit module via SPI. Check wiring."));
-    }
-    Serial.println(F("BLE Module found."));
+    ble.begin(false);
+        //error(F("Couldn't find Bluefruit module via SPI. Check wiring."));
+    
+    //Serial.println(F("BLE Module found."));
 
     // 2) Factory-reset for a clean state (optional after first flash)
     ble.factoryReset();
@@ -44,7 +40,7 @@ void BluetoothController::setupBLE() {
     int32_t hidEnabled = 0;
     ble.sendCommandWithIntReply("AT+BLEHIDEN?", &hidEnabled);
     if (!hidEnabled) {
-        Serial.println(F("Enabling BLE HID service..."));
+        //Serial.println(F("Enabling BLE HID service..."));
         ble.sendCommandCheckOK("AT+BLEHIDEN=1");
     }
 
@@ -52,22 +48,22 @@ void BluetoothController::setupBLE() {
     int32_t gpEnabled = 0;
     ble.sendCommandWithIntReply("AT+BLEHIDGAMEPADEN?", &gpEnabled);
     if (!gpEnabled) {
-        Serial.println(F("Enabling BLE HID Gamepad profile..."));
+        //Serial.println(F("Enabling BLE HID Gamepad profile..."));
         ble.sendCommandCheckOK("AT+BLEHIDGAMEPADEN=1");
     }
 
     // 7) Reset module to apply any service changes
-    Serial.println(F("Resetting BLE module to apply changes..."));
+    //Serial.println(F("Resetting BLE module to apply changes..."));
     ble.reset();
 
     // 8) Wait for a central to connect
-    Serial.print(F("Waiting for BLE connection"));
+    //Serial.print(F("Waiting for BLE connection"));
     while (!ble.isConnected()) {
-        Serial.print(F("."));
+        //Serial.print(F("."));
         delay(500);
     }
 
-    Serial.println(F("\nBLE Connected! Switching to DATA mode..."));
+    //Serial.println(F("\nBLE Connected! Switching to DATA mode..."));
     ble.setMode(1); // DATA mode
 }
 

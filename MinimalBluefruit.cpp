@@ -21,12 +21,12 @@ bool MinimalBluefruit::begin(bool verbose) {
     // Initialize SPI
     SPI.begin();
     
-    if (m_verbose) Serial.println(F("MinimalBluefruit initialized"));
+    //if (m_verbose) Serial.println(F("MinimalBluefruit initialized"));
     return true;
 }
 
 bool MinimalBluefruit::factoryReset() {
-    if (m_verbose) Serial.println(F("Factory reset"));
+    //if (m_verbose) Serial.println(F("Factory reset"));
     
     // Hardware reset if available
     if (m_rst_pin >= 0) {
@@ -41,26 +41,26 @@ bool MinimalBluefruit::factoryReset() {
 }
 
 bool MinimalBluefruit::echo(bool enable) {
-    if (m_verbose) {
-        Serial.print(F("Echo "));
-        Serial.println(enable ? F("on") : F("off"));
-    }
+    // if (m_verbose) {
+    //     Serial.print(F("Echo "));
+    //     Serial.println(enable ? F("on") : F("off"));
+    // }
     return sendATCommand(enable ? "ATE1" : "ATE0");
 }
 
 bool MinimalBluefruit::sendCommandCheckOK(const char* cmd) {
-    if (m_verbose) {
-        Serial.print(F("Sending: "));
-        Serial.println(cmd);
-    }
+    // if (m_verbose) {
+    //     Serial.print(F("Sending: "));
+    //     Serial.println(cmd);
+    // }
     return sendATCommand(cmd);
 }
 
 bool MinimalBluefruit::sendCommandWithIntReply(const char* cmd, int32_t* reply) {
-    if (m_verbose) {
-        Serial.print(F("Sending: "));
-        Serial.println(cmd);
-    }
+    // if (m_verbose) {
+    //     Serial.print(F("Sending: "));
+    //     Serial.println(cmd);
+    // }
     
     // For simplicity, assume query commands return 0 initially
     *reply = 0;
@@ -70,7 +70,7 @@ bool MinimalBluefruit::sendCommandWithIntReply(const char* cmd, int32_t* reply) 
 }
 
 bool MinimalBluefruit::reset() {
-    if (m_verbose) Serial.println(F("Reset"));
+    //if (m_verbose) Serial.println(F("Reset"));
     
     m_reset_time = millis();
     m_connected = false;
@@ -95,10 +95,10 @@ bool MinimalBluefruit::isConnected() {
 }
 
 bool MinimalBluefruit::setMode(uint8_t mode) {
-    if (m_verbose) {
-        Serial.print(F("Set mode: "));
-        Serial.println(mode);
-    }
+    // if (m_verbose) {
+    //     Serial.print(F("Set mode: "));
+    //     Serial.println(mode);
+    // }
     // Mode switching not needed for this implementation
     return true;
 }

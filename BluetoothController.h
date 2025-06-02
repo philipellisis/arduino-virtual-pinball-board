@@ -31,7 +31,7 @@ private:
     
     void setupBLE();
     void sendGamepadReport();
-    void error(const __FlashStringHelper* msg);
+    //void error(const __FlashStringHelper* msg);
     
     // Helper methods for input processing
     uint32_t getButtonMask();
