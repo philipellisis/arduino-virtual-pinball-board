@@ -30,7 +30,7 @@ void setup() {
   }
   
   // Initialize Bluetooth controller after all inputs are ready
-  //bluetoothController.init();
+  bluetoothController.init();
   
 }
 
@@ -55,7 +55,7 @@ void loop() {
   buttons.checkChanged();
   
   // Update Bluetooth controller with current input states
-  //bluetoothController.update();
+  bluetoothController.update();
   
   // Small delay to prevent overwhelming the Bluetooth connection
   //delay(20);  // ~50 Hz updates

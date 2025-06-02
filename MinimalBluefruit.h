@@ -15,6 +15,13 @@
 #define SPI_OVERREAD_BYTE         0xFF
 #define SPI_DEFAULT_DELAY_US      10
 
+// Mode constants (same as Adafruit library)
+#define BLUEFRUIT_MODE_COMMAND    1
+#define BLUEFRUIT_MODE_DATA       0
+
+// Timeout handling
+#define BLE_DEFAULT_TIMEOUT       250
+
 // Minimal Bluefruit LE implementation for gamepad functionality only
 class MinimalBluefruit {
 public:
@@ -38,6 +45,8 @@ private:
     bool m_verbose;
     uint32_t m_reset_time;
     uint8_t m_response_buffer[20];
+    uint8_t m_mode;
+    uint16_t m_timeout;
     
     // SDEP packet structure
     struct __attribute__((packed)) sdep_header_t {

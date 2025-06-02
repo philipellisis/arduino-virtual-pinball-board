@@ -22,7 +22,10 @@ void BluetoothController::init() {
 
 void BluetoothController::setupBLE() {
     // 1) Initialize the module
-    ble.begin(false);
+    if (!ble.begin(false)) {
+        //Serial.println(F("BLE Module not found!!!"));
+        return;
+    }
         //error(F("Couldn't find Bluefruit module via SPI. Check wiring."));
     
     //Serial.println(F("BLE Module found."));
@@ -34,7 +37,7 @@ void BluetoothController::setupBLE() {
     ble.echo(false);
 
     // 4) Set a friendly name
-    ble.sendCommandCheckOK("AT+GAPDEVNAME=Pinball Controller");
+    ble.sendCommandCheckOK("AT+GAPDEVNAME=CSD_Controller");
 
     // 5) Query & enable BLE HID service if needed
     int32_t hidEnabled = 0;
@@ -59,12 +62,12 @@ void BluetoothController::setupBLE() {
     // 8) Wait for a central to connect
     //Serial.print(F("Waiting for BLE connection"));
     while (!ble.isConnected()) {
-        //Serial.print(F("."));
+        Serial.print(F("."));
         delay(500);
     }
 
     //Serial.println(F("\nBLE Connected! Switching to DATA mode..."));
-    ble.setMode(1); // DATA mode
+    ble.setMode(0); // DATA mode
 }
 
 bool BluetoothController::isConnected() {
