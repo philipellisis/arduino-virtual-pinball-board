@@ -4,6 +4,17 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+// SDEP Protocol constants
+#define SDEP_MSGTYPE_COMMAND      0x10
+#define SDEP_MSGTYPE_RESPONSE     0x20
+#define SDEP_MSGTYPE_ERROR        0x80
+#define SDEP_CMDTYPE_AT_WRAPPER   0x0A00
+#define SDEP_CMDTYPE_INITIALIZE   0xBEEF
+#define SDEP_MAX_PACKETSIZE       16
+#define SPI_IGNORED_BYTE          0xFE
+#define SPI_OVERREAD_BYTE         0xFF
+#define SPI_DEFAULT_DELAY_US      10
+
 // Minimal Bluefruit LE implementation for gamepad functionality only
 class MinimalBluefruit {
 public:
@@ -27,16 +38,6 @@ private:
     bool m_verbose;
     uint32_t m_reset_time;
     uint8_t m_response_buffer[20];
-    
-    // SDEP Protocol constants
-    static const uint8_t SDEP_MSGTYPE_COMMAND = 0x10;
-    static const uint8_t SDEP_MSGTYPE_RESPONSE = 0x20;
-    static const uint8_t SDEP_MSGTYPE_ERROR = 0x80;
-    static const uint16_t SDEP_CMDTYPE_AT_WRAPPER = 0x0A00;
-    static const uint8_t SDEP_MAX_PACKETSIZE = 16;
-    static const uint8_t SPI_IGNORED_BYTE = 0xFE;
-    static const uint8_t SPI_OVERREAD_BYTE = 0xFF;
-    static const uint16_t SPI_DEFAULT_DELAY_US = 10;
     
     // SDEP packet structure
     struct __attribute__((packed)) sdep_header_t {
@@ -62,11 +63,6 @@ private:
     uint8_t spiTransfer(uint8_t data);
     bool sendSDEPPacket(uint16_t cmd_id, const uint8_t* buf, uint8_t len, uint8_t more_data = 0);
     bool getSDEPPacket(void* packet_ptr);
-    
-    // SDEP protocol helpers
-    bool sendSDEPPacket(uint16_t cmd_id, const uint8_t* buf, uint8_t len, uint8_t more_data);
-    bool getSDEPPacket(void* packet);
-    uint8_t spiTransfer(uint8_t data);
 };
 
 #endif
