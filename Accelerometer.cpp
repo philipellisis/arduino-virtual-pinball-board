@@ -1,6 +1,6 @@
 #include "Accelerometer.h"
 #include <Arduino.h>
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include "MPU6050.h"
 #include "Enums.h"
 #include "Globals.h"
@@ -127,8 +127,8 @@ void Accelerometer::accelerometerRead()
 
 
 
-updateGamepadAxis(priorXValue, xValue, localMax, &GamepadAPI::xAxis);
-updateGamepadAxis(priorYValue, yValue, localMaxY, &GamepadAPI::yAxis);
+updateXAxis();
+updateYAxis();
 
   // Serial.print(F("DEBUG,AccelX:"));
   // Serial.print(xValue);
@@ -200,10 +200,18 @@ void Accelerometer::processTiltButton() {
   }
 }
 
-void Accelerometer::updateGamepadAxis(int16_t& priorValue, int16_t currentValue, int16_t maxValue, void (GamepadAPI::*axisFunc)(int16_t)) {
-  if (priorValue != currentValue) {
-    (Gamepad1.*axisFunc)(static_cast<int16_t>(static_cast<float>(currentValue) / maxValue * 32767));
-    priorValue = currentValue;
+void Accelerometer::updateXAxis() {
+  if (priorXValue != xValue) {
+    Gamepad1.xAxis(static_cast<int16_t>(static_cast<float>(xValue) / localMax * 32767));
+    priorXValue = xValue;
+    config.updateUSB = true;
+  }
+}
+
+void Accelerometer::updateYAxis() {
+  if (priorYValue != yValue) {
+    Gamepad1.yAxis(static_cast<int16_t>(static_cast<float>(yValue) / localMaxY * 32767));
+    priorYValue = yValue;
     config.updateUSB = true;
   }
 }

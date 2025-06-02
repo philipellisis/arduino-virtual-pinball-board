@@ -2,7 +2,7 @@
 #include <Arduino.h>
 #include "ButtonReader.h"
 #include "Enums.h"
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include "Globals.h"
 
 ButtonReader buttonReader;
@@ -20,6 +20,7 @@ Buttons::Buttons()
 
 void Buttons::init()
 {
+  Gamepad1.begin();
   BootKeyboard.begin();
   SingleConsumer.begin();
 }

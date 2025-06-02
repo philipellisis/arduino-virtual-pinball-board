@@ -1,7 +1,7 @@
 #ifndef OUTPUTS_H
 #define OUTPUTS_H
 #include <Arduino.h>
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include <Adafruit_PWMServoDriver.h>
 #include <Wire.h>
 #include "Config.h"

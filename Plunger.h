@@ -1,7 +1,7 @@
 #ifndef PLUNGER_H
 #define PLUNGER_H
 #include <Arduino.h>
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include "Config.h"
 
 class Plunger {

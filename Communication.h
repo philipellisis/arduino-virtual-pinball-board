@@ -2,7 +2,7 @@
 #define COMMUNICATION_H
 #include <Arduino.h>
 #include "Plunger.h"
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include "Buttons.h"
 #include "Accelerometer.h"
 #include "Config.h"

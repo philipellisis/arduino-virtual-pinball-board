@@ -1,4 +1,4 @@
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include <Wire.h>
 #include "Globals.h"
 
@@ -30,9 +30,8 @@ void setup() {
   }
   
   // Initialize Bluetooth controller after all inputs are ready
-  bluetoothController.init();
+  //bluetoothController.init();
   
-  Serial.println(F("Pinball Bluetooth Controller ready!"));
 }
 
 void loop() {
@@ -56,7 +55,7 @@ void loop() {
   buttons.checkChanged();
   
   // Update Bluetooth controller with current input states
-  bluetoothController.update();
+  //bluetoothController.update();
   
   // Small delay to prevent overwhelming the Bluetooth connection
   //delay(20);  // ~50 Hz updates
