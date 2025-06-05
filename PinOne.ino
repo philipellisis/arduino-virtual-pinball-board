@@ -1,6 +1,7 @@
 #include "MinimalHID.h"
 #include <Wire.h>
 #include "Globals.h"
+#include "SPIController.h"
 
 Plunger plunger;
 Buttons buttons;
@@ -9,7 +10,7 @@ Accelerometer accel;
 Communication comm;
 Outputs outputs;
 Config config;
-//BluetoothController bluetoothController;
+SPIController spiController;
 
 bool DEBUG = false;
 unsigned char toggle = 0;
@@ -29,8 +30,8 @@ void setup() {
     accel.init();
   }
   
-  // Initialize Bluetooth controller after all inputs are ready
-  //bluetoothController.init();
+  // Initialize SPI controller after all inputs are ready
+  spiController.init();
   
 }
 
@@ -64,9 +65,6 @@ void loop() {
     // Serial.println(F(" microseconds"));
   }
   
-  // Update Bluetooth controller with current input states
-  //bluetoothController.update();
-  
-  // Small delay to prevent overwhelming the Bluetooth connection
-  //delay(20);  // ~50 Hz updates
+  // Update SPI controller with current input states
+  spiController.update();
 }

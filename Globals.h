@@ -7,7 +7,7 @@
 #include "Outputs.h"
 #include "Config.h"
 #include "LightShow.h"
-#include "BluetoothController.h"
+#include "SPIController.h"
 
 extern  Buttons buttons;
 
@@ -19,5 +19,5 @@ extern  Accelerometer accel;
 extern  Communication comm;
 extern  Outputs outputs;
 extern  Config config;
-extern  BluetoothController bluetoothController;
+extern  SPIController spiController;
 #endif
