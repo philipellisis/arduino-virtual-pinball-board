@@ -9,7 +9,7 @@ Accelerometer accel;
 Communication comm;
 Outputs outputs;
 Config config;
-BluetoothController bluetoothController;
+//BluetoothController bluetoothController;
 
 bool DEBUG = false;
 unsigned char toggle = 0;
@@ -30,7 +30,7 @@ void setup() {
   }
   
   // Initialize Bluetooth controller after all inputs are ready
-  bluetoothController.init();
+  //bluetoothController.init();
   
 }
 
@@ -53,9 +53,19 @@ void loop() {
   
   // Check for button changes
   buttons.checkChanged();
+  if (config.updateUSB || buttons.numberButtonsPressed > 0) {
+    buttons.readInputs();
+    Gamepad1.write();
+    config.updateUSB = false;
+    config.buttonPressed = false;
+    // unsigned long t2 = micros();
+    // Serial.print(F("DEBUG,Time taken by the task: "));
+    // Serial.print(t2 - t1);
+    // Serial.println(F(" microseconds"));
+  }
   
   // Update Bluetooth controller with current input states
-  bluetoothController.update();
+  //bluetoothController.update();
   
   // Small delay to prevent overwhelming the Bluetooth connection
   //delay(20);  // ~50 Hz updates

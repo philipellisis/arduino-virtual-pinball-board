@@ -153,12 +153,27 @@ void BluetoothController::sendGamepadReport() {
     int16_t yAxis = getYAxisValue();
     int8_t zAxis = getZAxisValue();
     
-    // Build AT command for extended gamepad report
-    // Format: AT+BLEHIDGAMEPAD=<x>,<y>,<buttons>,<hat>,<brake>,<accelerator>,<steering>
-    // We'll use brake for Z-axis (plunger)
-    char cmd[64];
-    snprintf(cmd, sizeof(cmd), "AT+BLEHIDGAMEPAD=%d,%d,0x%08lX,0,%d,0,0", 
-             xAxis, yAxis, buttonMask, zAxis);
+    // Build AT command using correct 3-parameter format from firmware docs
+    // Format: AT+BLEHIDGAMEPAD=x,y,buttons
+    // x: -1=LEFT, 0=NONE, 1=RIGHT
+    // y: -1=UP, 0=NONE, 1=DOWN  
+    // buttons: 0x00-0xFF (8 buttons only, bits 0-7)
+    
+    // Convert accelerometer values to -1, 0, 1 format
+    int8_t gamepadX = 0;
+    if (xAxis < -10000) gamepadX = -1;
+    else if (xAxis > 10000) gamepadX = 1;
+    
+    int8_t gamepadY = 0; 
+    if (yAxis < -10000) gamepadY = -1;
+    else if (yAxis > 10000) gamepadY = 1;
+    
+    // Limit to 8 buttons (firmware limitation)
+    uint8_t buttons8bit = (uint8_t)(buttonMask & 0xFF);
+    
+    char cmd[32];
+    snprintf(cmd, sizeof(cmd), "AT+BLEHIDGAMEPAD=%d,%d,0x%02X", 
+             gamepadX, gamepadY, buttons8bit);
     
     ble.sendCommandCheckOK(cmd);
     
@@ -170,13 +185,19 @@ void BluetoothController::sendGamepadReport() {
     lastYAxis = yAxis;
     lastZAxis = zAxis;
     
-    // Debug output can be enabled if needed
-    // Serial.print(F("BT Report - Buttons: 0x"));
-    // Serial.print(buttonMask, HEX);
-    // Serial.print(F(", X: "));
-    // Serial.print(xAxis);
-    // Serial.print(F(", Y: "));
-    // Serial.print(yAxis);
-    // Serial.print(F(", Z: "));
-    // Serial.println(zAxis);
+    // Debug output to verify commands are being sent
+    Serial.print(F("BT: "));
+    Serial.print(cmd);
+    Serial.print(F(" - Raw: X="));
+    Serial.print(xAxis);
+    Serial.print(F(", Y="));
+    Serial.print(yAxis);
+    Serial.print(F(", Buttons=0x"));
+    Serial.print(buttonMask, HEX);
+    Serial.print(F(" -> GP: X="));
+    Serial.print(gamepadX);
+    Serial.print(F(", Y="));
+    Serial.print(gamepadY);
+    Serial.print(F(", B8=0x"));
+    Serial.println(buttons8bit, HEX);
 }
