@@ -31,7 +31,9 @@ void setup() {
   }
   
   // Initialize SPI controller after all inputs are ready
-  spiController.init();
+  if (config.bluetoothEnable) {
+    spiController.init();
+  }
   
 }
 
@@ -63,8 +65,12 @@ void loop() {
     // Serial.print(F("DEBUG,Time taken by the task: "));
     // Serial.print(t2 - t1);
     // Serial.println(F(" microseconds"));
+    if (config.bluetoothEnable) {
+      spiController.update();
+    }
+    
   }
   
   // Update SPI controller with current input states
-  spiController.update();
+  
 }

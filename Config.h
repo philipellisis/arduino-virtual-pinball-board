@@ -63,6 +63,7 @@ class Config {
     bool disablePlungerWhenNotInUse = true;
     bool disableButtonPressWhenKeyboardEnabled = true;
     bool enablePlunger = true;
+    bool bluetoothEnable = true;
 
     unsigned char tiltSuppress = 10;
     bool lightShowAttractEnabled = true;

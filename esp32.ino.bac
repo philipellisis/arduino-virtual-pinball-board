@@ -1,0 +1,126 @@
+// --- ESP32_SPI_BLE_Gamepad.ino ---
+
+#include <Arduino.h>
+#include <BleGamepad.h>
+#include <BleGamepadConfiguration.h>
+#include <driver/spi_slave.h>
+#include <soc/spi_periph.h>
+
+// === CONFIGURATION ===
+// Must match Arduino's PACKET_SIZE and ordering.
+static const int NUM_BUTTONS   = 32;                        
+static const int BUTTON_BYTES  = (NUM_BUTTONS + 7) / 8;    
+static const int PACKET_SIZE   = BUTTON_BYTES + 6;         
+
+// SPI Slave pins (must match wiring):
+static const int PIN_MISO = 19;
+static const int PIN_MOSI = 23;
+static const int PIN_SCK  = 18;
+static const int PIN_SS   = 5;
+
+// BLE Gamepad objects
+BleGamepadConfiguration bleConfig;
+BleGamepad           bleGamepad("Pinball_Controller", "VirtualPinball", 100);
+
+// Buffers for SPI payload:
+uint8_t spiRxBuf[PACKET_SIZE];
+uint8_t spiTxBuf[PACKET_SIZE];
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+  Serial.println("ESP32: SPI Slave + BLE Gamepad Starting...");
+
+  // --- 1) Configure and start BLE Gamepad ---
+  bleConfig.setButtonCount(NUM_BUTTONS);
+  bleConfig.setHatSwitchCount(0);
+  // Enable X, Y, Z axes only:
+  bleConfig.setWhichAxes(true, true, true,    // X, Y, Z
+                         false, false, false, // Rx, Ry, Rz
+                         false, false);       // Slider1, Slider2
+  // (Leave all simulation controls off; auto-report defaults to true)
+  bleGamepad.begin(&bleConfig);
+
+  // --- 2) Prepare SPI slave configuration ---
+  spi_bus_config_t         busCfg;
+  spi_slave_interface_config_t slaveCfg;
+
+  // Zero everything out
+  memset(&busCfg,   0, sizeof(busCfg));
+  memset(&slaveCfg, 0, sizeof(slaveCfg));
+
+  // Fill in busCfg fields in declaration order
+  busCfg.miso_io_num    = PIN_MISO;
+  busCfg.mosi_io_num    = PIN_MOSI;
+  busCfg.sclk_io_num    = PIN_SCK;
+  busCfg.quadwp_io_num  = -1;
+  busCfg.quadhd_io_num  = -1;
+  busCfg.max_transfer_sz = PACKET_SIZE;
+
+  // Fill in slaveCfg fields in declaration order
+  slaveCfg.spics_io_num  = PIN_SS;
+  slaveCfg.flags         = 0;
+  slaveCfg.queue_size    = 1;
+  slaveCfg.post_setup_cb = nullptr;
+  slaveCfg.post_trans_cb = nullptr;
+
+  // 3) Initialize SPI in slave mode
+  esp_err_t ret = spi_slave_initialize(VSPI_HOST, &busCfg, &slaveCfg, 0);
+  if (ret != ESP_OK) {
+    Serial.printf("Failed to init SPI slave: %d\n", ret);
+    while (1) { delay(1000); }
+  }
+
+  // Zero the buffers
+  memset(spiRxBuf, 0, PACKET_SIZE);
+  memset(spiTxBuf, 0, PACKET_SIZE);
+
+  delay(100);
+  Serial.println("ESP32: Ready to receive SPI data and advertise as BLE Gamepad.");
+}
+
+void loop() {
+  // 1) Prepare and execute SPI transaction
+  spi_slave_transaction_t t;
+  memset(&t, 0, sizeof(t));
+  t.length    = PACKET_SIZE * 8;  // bits
+  t.tx_buffer = spiTxBuf;
+  t.rx_buffer = spiRxBuf;
+
+  if (spi_slave_transmit(VSPI_HOST, &t, portMAX_DELAY) != ESP_OK) {
+    Serial.println("SPI receive failed");
+    return;
+  }
+
+  // 2) Update buttons
+  for (int i = 0; i < NUM_BUTTONS; i++) {
+    bool pressed = (spiRxBuf[i / 8] & (1 << (i % 8))) != 0;
+    if (pressed) {
+      bleGamepad.press(i + 1);
+    } else {
+      bleGamepad.release(i + 1);
+    }
+  }
+
+  // 3) Parse plunger and accelerometer values
+  int16_t plunger = (spiRxBuf[4] << 8) | spiRxBuf[5];
+  int16_t xAxis   = (spiRxBuf[6] << 8) | spiRxBuf[7];
+  int16_t yAxis   = (spiRxBuf[8] << 8) | spiRxBuf[9];
+
+  // 4) Update axes (X, Y, Z, RX, RY, RZ, Slider1, Slider2)
+  bleGamepad.setAxes(xAxis, yAxis, plunger, 0, 0, 0, 0, 0);
+
+  // 5) Send the HID report if connected
+  if (bleGamepad.isConnected()) {
+    bleGamepad.sendReport();
+  }
+
+  // (Uncomment for debug output)
+  /*
+  Serial.printf("Btns:");
+  for (int i = 0; i < NUM_BUTTONS; i++) {
+    Serial.print((spiRxBuf[i/8] & (1 << (i%8))) ? '1' : '0');
+  }
+  Serial.printf("  Z=%d X=%d Y=%d\n", plunger, xAxis, yAxis);
+  */
+}

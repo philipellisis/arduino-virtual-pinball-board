@@ -57,12 +57,15 @@ void Config::init() {
     loadEEPROMArray(buttonKeyDebounce, 532, 24);
     EEPROM.get(564, buttonDebounceCounter);
     EEPROM.get(565, enablePlunger);
+    
 
     EEPROM.get(566, tiltSuppress);
     EEPROM.get(567, lightShowAttractEnabled);
 
     EEPROM.get(568, lightShowTime);
     EEPROM.get(569, reverseButtonOutputPolarity);
+    EEPROM.get(570, disableUSBSuspend);
+    EEPROM.get(571, bluetoothEnable);
 
   } else {
     //save default config in case it's never been done before
@@ -116,6 +119,7 @@ void Config::saveConfig() {
 
     EEPROM.write(564, buttonDebounceCounter);
     EEPROM.write(565, enablePlunger);
+    
 
     EEPROM.write(566, tiltSuppress);
     EEPROM.write(567, lightShowAttractEnabled);
@@ -123,6 +127,7 @@ void Config::saveConfig() {
     EEPROM.write(568, lightShowTime);
     EEPROM.write(569, reverseButtonOutputPolarity);
     EEPROM.write(570, disableUSBSuspend);
+    EEPROM.write(571, bluetoothEnable);
 
     EEPROM.write(1000, 101);
 }
@@ -170,12 +175,14 @@ void Config::updateConfigFromSerial() {
     readConfigArray(buttonKeyDebounce, 24);
     buttonDebounceCounter = blockRead();
     enablePlunger = blockRead();
+    
 
     tiltSuppress = blockRead();
     lightShowAttractEnabled = blockRead();
     lightShowTime = blockRead();
     reverseButtonOutputPolarity = blockRead();
     disableUSBSuspend = blockRead();
+    bluetoothEnable = blockRead();
     
 
     if(blockRead() != 42) {
@@ -234,13 +241,13 @@ void Config::sendConfig() {
     printConfigArray(buttonKeyDebounce, 24);
     printComma(buttonDebounceCounter);
     printComma(enablePlunger);
-
+    
     printComma(tiltSuppress);
     printComma(lightShowAttractEnabled);
     printComma(lightShowTime);
     printComma(reverseButtonOutputPolarity);
     printComma(disableUSBSuspend);
-    
+    printComma(bluetoothEnable);
     
     Serial.print(F("E\r\n"));
 }

@@ -93,6 +93,9 @@ void Outputs::updateOutputInternal(unsigned char outputId, unsigned char outputV
     if (outputId < 5) {
       analogWrite(outputList[outputId], outputValue);
     } else {
+      if (config.bluetoothEnable == true && outputId == 10) {
+        return; // do not update the bluetooth output if bluetooth is enabled, as this pin is being used by SS
+      }
       if (outputValue > 127) {
         digitalWrite(outputList[outputId], HIGH);
       } else {
