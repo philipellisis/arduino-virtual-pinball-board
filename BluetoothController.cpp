@@ -186,18 +186,18 @@ void BluetoothController::sendGamepadReport() {
     lastZAxis = zAxis;
     
     // Debug output to verify commands are being sent
-    Serial.print(F("BT: "));
-    Serial.print(cmd);
-    Serial.print(F(" - Raw: X="));
-    Serial.print(xAxis);
-    Serial.print(F(", Y="));
-    Serial.print(yAxis);
-    Serial.print(F(", Buttons=0x"));
-    Serial.print(buttonMask, HEX);
-    Serial.print(F(" -> GP: X="));
-    Serial.print(gamepadX);
-    Serial.print(F(", Y="));
-    Serial.print(gamepadY);
-    Serial.print(F(", B8=0x"));
-    Serial.println(buttons8bit, HEX);
+    // Serial.print(F("BT: "));
+    // Serial.print(cmd);
+    // Serial.print(F(" - Raw: X="));
+    // Serial.print(xAxis);
+    // Serial.print(F(", Y="));
+    // Serial.print(yAxis);
+    // Serial.print(F(", Buttons=0x"));
+    // Serial.print(buttonMask, HEX);
+    // Serial.print(F(" -> GP: X="));
+    // Serial.print(gamepadX);
+    // Serial.print(F(", Y="));
+    // Serial.print(gamepadY);
+    // Serial.print(F(", B8=0x"));
+    // Serial.println(buttons8bit, HEX);
 }
