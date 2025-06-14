@@ -101,32 +101,43 @@ void loop() {
     return;
   }
 
-  // 2) Update buttons using Steam Controller mapping
+  // 2) Count pressed buttons to detect noise
+  int pressedCount = 0;
   for (int i = 0; i < NUM_BUTTONS; i++) {
-    bool pressed = (spiRxBuf[i / 8] & (1 << (i % 8))) != 0;
-    if (pressed) {
-      bleGamepad.press(steamButtonMap[i]);
-    } else {
-      bleGamepad.release(steamButtonMap[i]);
+    if ((spiRxBuf[i / 8] & (1 << (i % 8))) != 0) {
+      pressedCount++;
+    }
+  }
+  
+  // If more than 3 buttons pressed simultaneously, likely noise - skip this packet
+  if (pressedCount <= 3) {
+    // 3) Update buttons using Steam Controller mapping
+    for (int i = 0; i < NUM_BUTTONS; i++) {
+      bool pressed = (spiRxBuf[i / 8] & (1 << (i % 8))) != 0;
+      if (pressed) {
+        bleGamepad.press(steamButtonMap[i]);
+      } else {
+        bleGamepad.release(steamButtonMap[i]);
+      }
     }
   }
 
-  // 3) Parse plunger and accelerometer values
+  // 4) Parse plunger and accelerometer values
   int16_t plunger = (spiRxBuf[4] << 8) | spiRxBuf[5];
   int16_t xAxis   = (spiRxBuf[6] << 8) | spiRxBuf[7];
   int16_t yAxis   = (spiRxBuf[8] << 8) | spiRxBuf[9];
 
-  // 4) Fast conversion from signed to unsigned range
+  // 5) Fast conversion from signed to unsigned range
   int16_t xAxisCentered = (xAxis >> 1) + 16384;  // Faster than map()
   int16_t yAxisCentered = (yAxis >> 1) + 16384;
 
-  // 5) Scale plunger from -127 to 127 range to gamepad range and reverse direction
+  // 6) Scale plunger from -127 to 127 range to gamepad range and reverse direction
   int16_t plungerScaled = (plunger * 256);  // Scale from 8-bit to 16-bit range and reverse
   
-  // 6) Update axes (X, Y, Z, RX, RY, RZ, Slider1, Slider2)
+  // 7) Update axes (X, Y, Z, RX, RY, RZ, Slider1, Slider2)
   bleGamepad.setAxes(xAxisCentered, yAxisCentered, 0, 0, plungerScaled, 0, 0, 0);
 
-  // 5) Send the HID report if connected
+  // 8) Send the HID report if connected
   if (bleGamepad.isConnected()) {
     bleGamepad.sendReport();
   }

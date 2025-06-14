@@ -20,8 +20,8 @@ void SPIController::init() {
     SPI.begin();
     SPI.setDataMode(SPI_MODE0);
     SPI.setBitOrder(MSBFIRST);
-    // Use a reasonable clock speed - can adjust if needed
-    SPI.setClockDivider(SPI_CLOCK_DIV16);  // 1MHz on 16MHz Arduino
+    // Use a slower clock speed for better reliability
+    SPI.setClockDivider(SPI_CLOCK_DIV128);  // 250kHz on 16MHz Arduino
 }
 
 void SPIController::update() {
