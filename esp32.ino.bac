@@ -170,8 +170,8 @@ void loop() {
   int16_t plungerScaled = (plunger << 7) + 16384;  // Scale 8-bit signed, center at 16384 like accel
   
   // Debug logging for plunger values
-  Serial.printf("Plunger Debug: Raw1=%d Raw2=%d Final=%d Scaled=%d\n", 
-                plunger1, plunger2, plunger, plungerScaled);
+  // Serial.printf("Plunger Debug: Raw1=%d Raw2=%d Final=%d Scaled=%d\n", 
+  //               plunger1, plunger2, plunger, plungerScaled);
   
   // 8) Update axes (X, Y, Z, RX, RY, RZ, Slider1, Slider2)
   bleGamepad.setAxes(xAxisCentered, yAxisCentered, 0, 0, plungerScaled, 0, 0, 0);
