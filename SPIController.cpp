@@ -20,8 +20,8 @@ void SPIController::init() {
     SPI.begin();
     SPI.setDataMode(SPI_MODE0);
     SPI.setBitOrder(MSBFIRST);
-    // Use a slower clock speed for better reliability
-    SPI.setClockDivider(SPI_CLOCK_DIV128);  // 250kHz on 16MHz Arduino
+    // Use a reasonable clock speed - can adjust if needed
+    SPI.setClockDivider(SPI_CLOCK_DIV16);  // 1MHz on 16MHz Arduino
 }
 
 void SPIController::update() {
@@ -99,12 +99,16 @@ void SPIController::sendSPIPacket() {
     int16_t yAxis = getYAxisValue();
     int16_t plungerVal = getPlungerValue();
     
-    // 3) Pack data into packet
+    // 3) Pack data into packet with duplicate values for validation
     // Bytes 0-3: Button data
-    // Bytes 4-5: Plunger value (16-bit, split into 2 bytes)
-    // Bytes 6-7: X-axis (16-bit, split into 2 bytes)
-    // Bytes 8-9: Y-axis (16-bit, split into 2 bytes)
+    // Bytes 4-5: Plunger value #1 (16-bit, split into 2 bytes)
+    // Bytes 6-7: X-axis #1 (16-bit, split into 2 bytes)
+    // Bytes 8-9: Y-axis #1 (16-bit, split into 2 bytes)
+    // Bytes 10-11: Plunger value #2 (duplicate for validation)
+    // Bytes 12-13: X-axis #2 (duplicate for validation)
+    // Bytes 14-15: Y-axis #2 (duplicate for validation)
     
+    // First set of values
     txBuf[4] = (plungerVal >> 8) & 0xFF;  // High byte
     txBuf[5] = plungerVal & 0xFF;         // Low byte
     
@@ -113,6 +117,36 @@ void SPIController::sendSPIPacket() {
     
     txBuf[8] = (yAxis >> 8) & 0xFF;       // High byte
     txBuf[9] = yAxis & 0xFF;              // Low byte
+    
+    // Duplicate set of values for validation
+    txBuf[10] = (plungerVal >> 8) & 0xFF; // High byte duplicate
+    txBuf[11] = plungerVal & 0xFF;        // Low byte duplicate
+    
+    txBuf[12] = (xAxis >> 8) & 0xFF;      // High byte duplicate
+    txBuf[13] = xAxis & 0xFF;             // Low byte duplicate
+    
+    txBuf[14] = (yAxis >> 8) & 0xFF;      // High byte duplicate
+    txBuf[15] = yAxis & 0xFF;             // Low byte duplicate
+    
+    // Count pressed buttons for validation (based on what was actually packed)
+    uint8_t buttonCount = 0;
+    for (int i = 0; i < NUM_BUTTONS && i < 32; i++) {
+        if (txBuf[i / 8] & (1 << (i % 8))) {
+            buttonCount++;
+        }
+    }
+    
+    // Add button count and simple checksum for validation
+    if (PACKET_SIZE > 16) {
+        txBuf[16] = buttonCount;    // Button count for validation
+        
+        // Calculate simple checksum (sum of all bytes except checksum byte)
+        uint8_t checksum = 0;
+        for (int i = 0; i < PACKET_SIZE - 1; i++) {
+            checksum ^= txBuf[i];  // XOR checksum
+        }
+        txBuf[PACKET_SIZE - 1] = checksum;    // Checksum at end
+    }
     
     // 4) Send packet via SPI
     digitalWrite(SS_PIN, LOW);
