@@ -54,9 +54,10 @@ bool SPIController::hasInputChanged() {
 void SPIController::packButtonData(uint8_t* buttonPacket) {
     memset(buttonPacket, 0x00, BUTTON_BYTES);
     
-    // Pack button states into bytes
+    // Pack processed button states (after shift logic) into bytes
+    // This uses the same final button states that the USB gamepad sends
     for (uint8_t i = 0; i < NUM_BUTTONS && i < 32; i++) {
-        if (config.lastButtonState[i]) {
+        if (config.processedButtonState[i]) {
             buttonPacket[i / 8] |= (1 << (i % 8));
         }
     }
