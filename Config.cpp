@@ -66,6 +66,7 @@ void Config::init() {
     EEPROM.get(569, reverseButtonOutputPolarity);
     EEPROM.get(570, disableUSBSuspend);
     EEPROM.get(571, bluetoothEnable);
+    EEPROM.get(572, debug);
 
   } else {
     //save default config in case it's never been done before
@@ -128,6 +129,7 @@ void Config::saveConfig() {
     EEPROM.write(569, reverseButtonOutputPolarity);
     EEPROM.write(570, disableUSBSuspend);
     EEPROM.write(571, bluetoothEnable);
+    EEPROM.write(572, debug);
 
     EEPROM.write(1000, 101);
 }
@@ -183,6 +185,7 @@ void Config::updateConfigFromSerial() {
     reverseButtonOutputPolarity = blockRead();
     disableUSBSuspend = blockRead();
     bluetoothEnable = blockRead();
+    debug = blockRead();
     
 
     if(blockRead() != 42) {
@@ -248,6 +251,7 @@ void Config::sendConfig() {
     printComma(reverseButtonOutputPolarity);
     printComma(disableUSBSuspend);
     printComma(bluetoothEnable);
+    printComma(debug);
     
     Serial.print(F("E\r\n"));
 }

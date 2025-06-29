@@ -12,7 +12,6 @@ Outputs outputs;
 Config config;
 SPIController spiController;
 
-bool DEBUG = false;
 unsigned char toggle = 0;
 
 void setup() {
@@ -21,6 +20,7 @@ void setup() {
   
   // Initialize all components first
   config.init();
+  config.debug = false;
   outputs.init();
   buttons.init();
   plunger.init();
@@ -39,6 +39,7 @@ void setup() {
 
 void loop() {
   // Handle input processing (same as original)
+  unsigned long t1 = micros();
   if (toggle == 0) {
     plunger.plungerRead();
   } else if (toggle == 1 && config.accelerometerEprom > 0) {
@@ -47,6 +48,14 @@ void loop() {
     lightShow.checkSetLights();
   } else if (toggle == 3) {
     comm.communicate();
+  }
+  unsigned long t2 = micros();
+  if (config.debug) {
+    Serial.print(F("DEBUG,Time taken by task: "));
+    Serial.print(toggle);
+    Serial.print(F(", "));
+    Serial.print(t2 - t1);
+    Serial.println(F(" microseconds"));
   }
   
   toggle++;

@@ -38,6 +38,7 @@ class Config {
 
     unsigned char done = 0;
     bool nightMode = false;
+    bool debug = false;
     void updateConfigFromSerial();
     void sendConfig();
     void setPlunger();
@@ -64,7 +65,7 @@ class Config {
     bool disablePlungerWhenNotInUse = true;
     bool disableButtonPressWhenKeyboardEnabled = true;
     bool enablePlunger = true;
-    bool bluetoothEnable = true;
+    bool bluetoothEnable = false;
 
     unsigned char tiltSuppress = 10;
     bool lightShowAttractEnabled = true;
