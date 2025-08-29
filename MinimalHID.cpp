@@ -49,6 +49,69 @@ static const uint8_t _hidReportDescriptorGamepad[] PROGMEM = {
     0xc0                           /* END_COLLECTION */
 };
 
+// HID Report Descriptor for Boot Keyboard (from HID-Project)
+static const uint8_t _hidReportDescriptorKeyboard[] PROGMEM = {
+    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
+    0x09, 0x06,                    // USAGE (Keyboard)
+    0xa1, 0x01,                    // COLLECTION (Application)
+    
+    // Modifiers
+    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
+    0x19, 0xe0,                    //   USAGE_MINIMUM (Keyboard LeftControl)
+    0x29, 0xe7,                    //   USAGE_MAXIMUM (Keyboard Right GUI)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
+    0x75, 0x01,                    //   REPORT_SIZE (1)
+    0x95, 0x08,                    //   REPORT_COUNT (8)
+    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
+    
+    // Reserved
+    0x95, 0x01,                    //   REPORT_COUNT (1)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x81, 0x03,                    //   INPUT (Cnst,Var,Abs)
+    
+    // LEDs
+    0x95, 0x05,                    //   REPORT_COUNT (5)
+    0x75, 0x01,                    //   REPORT_SIZE (1)
+    0x05, 0x08,                    //   USAGE_PAGE (LEDs)
+    0x19, 0x01,                    //   USAGE_MINIMUM (Num Lock)
+    0x29, 0x05,                    //   USAGE_MAXIMUM (Kana)
+    0x91, 0x02,                    //   OUTPUT (Data,Var,Abs)
+    
+    // LED padding
+    0x95, 0x01,                    //   REPORT_COUNT (1)
+    0x75, 0x03,                    //   REPORT_SIZE (3)
+    0x91, 0x03,                    //   OUTPUT (Cnst,Var,Abs)
+    
+    // Key codes
+    0x95, 0x06,                    //   REPORT_COUNT (6)
+    0x75, 0x08,                    //   REPORT_SIZE (8)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x25, 0x65,                    //   LOGICAL_MAXIMUM (101)
+    0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
+    0x19, 0x00,                    //   USAGE_MINIMUM (Reserved (no event indicated))
+    0x29, 0x65,                    //   USAGE_MAXIMUM (Keyboard Application)
+    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+    
+    0xc0                           // END_COLLECTION
+};
+
+// HID Report Descriptor for Consumer Control (from HID-Project)
+static const uint8_t _hidReportDescriptorConsumer[] PROGMEM = {
+    0x05, 0x0c,                    // USAGE_PAGE (Consumer Devices)
+    0x09, 0x01,                    // USAGE (Consumer Control)
+    0xa1, 0x01,                    // COLLECTION (Application)
+    0x85, 0x02,                    //   REPORT_ID (2)
+    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+    0x26, 0xFF, 0x03,              //   LOGICAL_MAXIMUM (1023)
+    0x19, 0x00,                    //   USAGE_MINIMUM (Unassigned)
+    0x2A, 0xFF, 0x03,              //   USAGE_MAXIMUM (0x03FF)
+    0x75, 0x10,                    //   REPORT_SIZE (16)
+    0x95, 0x01,                    //   REPORT_COUNT (1)
+    0x81, 0x00,                    //   INPUT (Data,Ary,Abs)
+    0xc0                           // END_COLLECTION
+};
+
 // MinimalGamepad Implementation
 MinimalGamepad::MinimalGamepad() : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1) {
     epType[0] = EP_TYPE_INTERRUPT_IN;
@@ -156,6 +219,11 @@ void MinimalGamepad::SendReport(void* data, int length) {
 }
 
 // BootKeyboardClass Implementation
+BootKeyboardClass::BootKeyboardClass() : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1) {
+    epType[0] = EP_TYPE_INTERRUPT_IN;
+    PluggableUSB().plug(this);
+}
+
 void BootKeyboardClass::begin() {
     memset(_keyReport, 0, sizeof(_keyReport));
 }
@@ -193,10 +261,73 @@ void BootKeyboardClass::release(uint8_t key) {
 }
 
 void BootKeyboardClass::sendReport() {
-    HID().SendReport(1, _keyReport, sizeof(_keyReport));
+    USB_Send(pluggedEndpoint | TRANSFER_RELEASE, _keyReport, sizeof(_keyReport));
+}
+
+int BootKeyboardClass::getInterface(uint8_t* interfaceCount) {
+    *interfaceCount += 1; // uses 1
+    HIDDescriptor hidInterface = {
+        D_INTERFACE(pluggedInterface, 1, USB_DEVICE_CLASS_HUMAN_INTERFACE, HID_SUBCLASS_BOOT_INTERFACE, HID_PROTOCOL_KEYBOARD),
+        D_HIDREPORT(sizeof(_hidReportDescriptorKeyboard)),
+        D_ENDPOINT(USB_ENDPOINT_IN(pluggedEndpoint), USB_ENDPOINT_TYPE_INTERRUPT, USB_EP_SIZE, 0x01)
+    };
+    return USB_SendControl(0, &hidInterface, sizeof(hidInterface));
+}
+
+int BootKeyboardClass::getDescriptor(USBSetup& setup) {
+    // Check if this is a HID Class Descriptor request
+    if (setup.bmRequestType != REQUEST_DEVICETOHOST_STANDARD_INTERFACE) { return 0; }
+    if (setup.wValueH != HID_REPORT_DESCRIPTOR_TYPE) { return 0; }
+
+    // In a HID Class Descriptor wIndex contains the interface number
+    if (setup.wIndex != pluggedInterface) { return 0; }
+
+    // Reset the protocol on reenumeration
+    protocol = HID_REPORT_PROTOCOL;
+
+    return USB_SendControl(TRANSFER_PGM, _hidReportDescriptorKeyboard, sizeof(_hidReportDescriptorKeyboard));
+}
+
+bool BootKeyboardClass::setup(USBSetup& setup) {
+    if (pluggedInterface != setup.wIndex) {
+        return false;
+    }
+
+    uint8_t request = setup.bRequest;
+    uint8_t requestType = setup.bmRequestType;
+
+    if (requestType == REQUEST_DEVICETOHOST_CLASS_INTERFACE) {
+        if (request == HID_GET_REPORT) {
+            return true;
+        }
+        if (request == HID_GET_PROTOCOL) {
+            return true;
+        }
+    }
+
+    if (requestType == REQUEST_HOSTTODEVICE_CLASS_INTERFACE) {
+        if (request == HID_SET_PROTOCOL) {
+            protocol = setup.wValueL;
+            return true;
+        }
+        if (request == HID_SET_IDLE) {
+            idle = setup.wValueH;
+            return true;
+        }
+        if (request == HID_SET_REPORT) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // SingleConsumerClass Implementation
+SingleConsumerClass::SingleConsumerClass() : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1) {
+    epType[0] = EP_TYPE_INTERRUPT_IN;
+    PluggableUSB().plug(this);
+}
+
 void SingleConsumerClass::begin() {
     _consumerReport = 0;
 }
@@ -214,7 +345,66 @@ void SingleConsumerClass::release(uint16_t key) {
 }
 
 void SingleConsumerClass::sendReport() {
-    HID().SendReport(2, &_consumerReport, sizeof(_consumerReport));
+    uint8_t report[3] = {2, (uint8_t)(_consumerReport & 0xFF), (uint8_t)(_consumerReport >> 8)};
+    USB_Send(pluggedEndpoint | TRANSFER_RELEASE, report, sizeof(report));
+}
+
+int SingleConsumerClass::getInterface(uint8_t* interfaceCount) {
+    *interfaceCount += 1; // uses 1
+    HIDDescriptor hidInterface = {
+        D_INTERFACE(pluggedInterface, 1, USB_DEVICE_CLASS_HUMAN_INTERFACE, HID_SUBCLASS_NONE, HID_PROTOCOL_NONE),
+        D_HIDREPORT(sizeof(_hidReportDescriptorConsumer)),
+        D_ENDPOINT(USB_ENDPOINT_IN(pluggedEndpoint), USB_ENDPOINT_TYPE_INTERRUPT, USB_EP_SIZE, 0x01)
+    };
+    return USB_SendControl(0, &hidInterface, sizeof(hidInterface));
+}
+
+int SingleConsumerClass::getDescriptor(USBSetup& setup) {
+    // Check if this is a HID Class Descriptor request
+    if (setup.bmRequestType != REQUEST_DEVICETOHOST_STANDARD_INTERFACE) { return 0; }
+    if (setup.wValueH != HID_REPORT_DESCRIPTOR_TYPE) { return 0; }
+
+    // In a HID Class Descriptor wIndex contains the interface number
+    if (setup.wIndex != pluggedInterface) { return 0; }
+
+    // Reset the protocol on reenumeration
+    protocol = HID_REPORT_PROTOCOL;
+
+    return USB_SendControl(TRANSFER_PGM, _hidReportDescriptorConsumer, sizeof(_hidReportDescriptorConsumer));
+}
+
+bool SingleConsumerClass::setup(USBSetup& setup) {
+    if (pluggedInterface != setup.wIndex) {
+        return false;
+    }
+
+    uint8_t request = setup.bRequest;
+    uint8_t requestType = setup.bmRequestType;
+
+    if (requestType == REQUEST_DEVICETOHOST_CLASS_INTERFACE) {
+        if (request == HID_GET_REPORT) {
+            return true;
+        }
+        if (request == HID_GET_PROTOCOL) {
+            return true;
+        }
+    }
+
+    if (requestType == REQUEST_HOSTTODEVICE_CLASS_INTERFACE) {
+        if (request == HID_SET_PROTOCOL) {
+            protocol = setup.wValueL;
+            return true;
+        }
+        if (request == HID_SET_IDLE) {
+            idle = setup.wValueH;
+            return true;
+        }
+        if (request == HID_SET_REPORT) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // Global instances

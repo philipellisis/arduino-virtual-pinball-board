@@ -110,11 +110,21 @@ protected:
 };
 
 // Minimal Boot Keyboard class
-class BootKeyboardClass {
+class BootKeyboardClass : public PluggableUSBModule {
 public:
+    BootKeyboardClass();
     void begin();
     void press(uint8_t key);
     void release(uint8_t key);
+    
+protected:
+    int getInterface(uint8_t* interfaceCount);
+    int getDescriptor(USBSetup& setup);
+    bool setup(USBSetup& setup);
+    
+    EPTYPE_DESCRIPTOR_SIZE epType[1];
+    uint8_t protocol;
+    uint8_t idle;
     
 private:
     uint8_t _keyReport[8];
@@ -122,11 +132,21 @@ private:
 };
 
 // Minimal Consumer Control class
-class SingleConsumerClass {
+class SingleConsumerClass : public PluggableUSBModule {
 public:
+    SingleConsumerClass();
     void begin();
     void press(uint16_t key);
     void release(uint16_t key);
+    
+protected:
+    int getInterface(uint8_t* interfaceCount);
+    int getDescriptor(USBSetup& setup);
+    bool setup(USBSetup& setup);
+    
+    EPTYPE_DESCRIPTOR_SIZE epType[1];
+    uint8_t protocol;
+    uint8_t idle;
     
 private:
     uint16_t _consumerReport;
