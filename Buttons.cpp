@@ -177,17 +177,17 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
   {
     if (currentButtonState == 1)
     {
-      Gamepad1.press(buttonOffset + 1);
+      Gamepad1.press(config.buttonRemap[buttonOffset]);
     }
     else
     {
-      Gamepad1.release(buttonOffset + 1);
+      Gamepad1.release(config.buttonRemap[buttonOffset]);
     }
   }
   
   // Update processed button state array for SPI/Bluetooth controller
   // This represents the final button state after all shift logic processing
-  config.processedButtonState[buttonOffset] = currentButtonState;
+  config.processedButtonState[config.buttonRemap[buttonOffset]] = currentButtonState;
 }
 
 void Buttons::sendButtonState()
