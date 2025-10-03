@@ -194,8 +194,25 @@ void Accelerometer::processTiltButton() {
   
   if (currentTiltState == 0 && tiltThresholdExceeded) {
     config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 1);
+    if (xValue > config.accelerometerTilt) {
+      config.lastButtonState[config.tiltButtonRight] = buttons.sendButtonPush(config.tiltButtonRight, 1);
+    }
+    if (xValue < -config.accelerometerTilt) {
+      config.lastButtonState[config.tiltButtonLeft] = buttons.sendButtonPush(config.tiltButtonLeft, 1);
+    }
+    if (yValue > config.accelerometerTiltY) {
+      config.lastButtonState[config.tiltButtonUp] = buttons.sendButtonPush(config.tiltButtonUp, 1);
+    }
+    if (yValue < -config.accelerometerTiltY) {
+      config.lastButtonState[config.tiltButtonRight] = buttons.sendButtonPush(config.tiltButtonRight, 1);
+    }
+
   } else if (currentTiltState == 1 && !tiltThresholdExceeded) {
     config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 0);
+    config.lastButtonState[config.tiltButtonRight] = buttons.sendButtonPush(config.tiltButtonRight, 0);
+    config.lastButtonState[config.tiltButtonLeft] = buttons.sendButtonPush(config.tiltButtonLeft, 0);
+    config.lastButtonState[config.tiltButtonUp] = buttons.sendButtonPush(config.tiltButtonUp, 0);
+    config.lastButtonState[config.tiltButtonRight] = buttons.sendButtonPush(config.tiltButtonRight, 0);
     tiltSuppressTime = config.tiltSuppress;
   }
 }

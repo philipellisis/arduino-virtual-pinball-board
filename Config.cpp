@@ -68,6 +68,10 @@ void Config::init() {
     EEPROM.get(571, bluetoothEnable);
     EEPROM.get(572, debug);
     loadEEPROMArray(buttonRemap, 573, 32);
+    EEPROM.get(605, tiltButtonUp);
+    EEPROM.get(606, tiltButtonDown);
+    EEPROM.get(607, tiltButtonLeft);
+    EEPROM.get(608, tiltButtonRight);
 
   } else {
     //save default config in case it's never been done before
@@ -132,6 +136,10 @@ void Config::saveConfig() {
     EEPROM.write(571, bluetoothEnable);
     EEPROM.write(572, debug);
     saveEEPROMArray(buttonRemap, 573, 32);
+    EEPROM.write(605, tiltButtonUp);
+    EEPROM.write(606, tiltButtonDown);
+    EEPROM.write(607, tiltButtonLeft);
+    EEPROM.write(608, tiltButtonRight);
 
     EEPROM.write(1000, 101);
 }
@@ -189,6 +197,10 @@ void Config::updateConfigFromSerial() {
     bluetoothEnable = blockRead();
     debug = blockRead();
     readConfigArray(buttonRemap, 32);
+    tiltButtonUp = blockRead();
+    tiltButtonDown = blockRead();
+    tiltButtonLeft = blockRead();
+    tiltButtonRight = blockRead();
     
 
     if(blockRead() != 42) {
@@ -256,6 +268,10 @@ void Config::sendConfig() {
     printComma(bluetoothEnable);
     printComma(debug);
     printConfigArray(buttonRemap, 32);
+    printComma(tiltButtonUp);
+    printComma(tiltButtonDown);
+    printComma(tiltButtonLeft);
+    printComma(tiltButtonRight);
     
     Serial.print(F("E\r\n"));
 }

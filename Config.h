@@ -36,6 +36,11 @@ class Config {
     unsigned char tiltButton = 22;
     unsigned char shiftButton = 2;
 
+    unsigned char tiltButtonUp = 9;
+    unsigned char tiltButtonDown = 10;
+    unsigned char tiltButtonLeft = 11;
+    unsigned char tiltButtonRight = 12;
+
     unsigned char done = 0;
     bool nightMode = false;
     bool debug = false;
