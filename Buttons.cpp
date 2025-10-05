@@ -167,6 +167,8 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
         config.nightMode = !config.nightMode;
       }
     }
+    // Don't process this button as a joystick/keyboard press
+    return;
   }
 
   if (config.buttonKeyboard[config.buttonRemap[buttonOffset]] > 0)
