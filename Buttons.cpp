@@ -4,8 +4,10 @@
 #include "Enums.h"
 #include "MinimalHID.h"
 #include "Globals.h"
+#include "IRTransmit.h"
 
 ButtonReader buttonReader;
+IRTransmit irTransmit;
 
 // Pin 18, A0 = UP
 // Pin 19, A1 = RIGHT
@@ -23,6 +25,7 @@ void Buttons::init()
   Gamepad1.begin();
   BootKeyboard.begin();
   SingleConsumer.begin();
+  irTransmit.init(config.irOutputPin);
 }
 
 bool Buttons::checkChanged()
@@ -138,12 +141,22 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
     sendActualButtonPress(buttonOffset, currentButtonState);
   }
 
-  // trigger solenoid if needed
+  // trigger solenoid or IR command if needed
   for (uint8_t j = 0; j < 4; j++)
   {
-    if (config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i && config.solenoidOutputMap[j] > 0)
+    if (config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i)
     {
-      outputs.updateOutput(config.solenoidOutputMap[j] - 1, currentButtonState ? 255 : 0);
+      if (config.solenoidOutputMap[j] > 0)
+      {
+        outputs.updateOutput(config.solenoidOutputMap[j] - 1, currentButtonState ? 255 : 0);
+      }
+
+      // Trigger IR command on button press (rising edge only)
+      // irOutputPin range 0-62 is valid, >62 is disabled
+      if (currentButtonState && config.irOutputPin <= 62)
+      {
+        irTransmit.sendCommand();
+      }
     }
   }
   return currentButtonState;

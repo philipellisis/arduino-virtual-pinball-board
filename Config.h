@@ -19,6 +19,7 @@ class Config {
     int plungerMid = 203;
     unsigned char solenoidButtonMap[4] = {0};
     unsigned char solenoidOutputMap[4] = {0};
+    unsigned char irOutputPin = 255;
     unsigned char orientation = 0;
     unsigned char accelerometerEprom = 0;
     unsigned char accelerometer = 1;

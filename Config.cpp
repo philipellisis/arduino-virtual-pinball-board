@@ -73,6 +73,8 @@ void Config::init() {
     EEPROM.get(607, tiltButtonLeft);
     EEPROM.get(608, tiltButtonRight);
 
+    EEPROM.get(609, irOutputPin);
+
   } else {
     //save default config in case it's never been done before
     saveConfig();
@@ -141,6 +143,8 @@ void Config::saveConfig() {
     EEPROM.write(607, tiltButtonLeft);
     EEPROM.write(608, tiltButtonRight);
 
+    EEPROM.write(609, irOutputPin);
+
     EEPROM.write(1000, 101);
 }
 
@@ -201,7 +205,15 @@ void Config::updateConfigFromSerial() {
     tiltButtonDown = blockRead();
     tiltButtonLeft = blockRead();
     tiltButtonRight = blockRead();
-    
+
+    irOutputPin = blockRead();
+
+    // Read IR command data (1 command, 361 bytes) and save directly to EEPROM
+    // Using temporary buffer to avoid keeping 361 bytes in RAM
+    for (uint16_t i = 0; i < 361; i++) {
+      unsigned char irByte = blockRead();
+      EEPROM.write(610 + i, irByte);
+    }
 
     if(blockRead() != 42) {
       done = 1;
@@ -272,7 +284,14 @@ void Config::sendConfig() {
     printComma(tiltButtonDown);
     printComma(tiltButtonLeft);
     printComma(tiltButtonRight);
-    
+
+    printComma(irOutputPin);
+
+    // Send IR command data (1 command, 361 bytes) from EEPROM
+    for (uint16_t i = 0; i < 361; i++) {
+      printComma(EEPROM.read(610 + i));
+    }
+
     Serial.print(F("E\r\n"));
 }
 
