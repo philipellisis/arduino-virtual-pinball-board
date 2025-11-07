@@ -25,7 +25,6 @@ void Buttons::init()
   Gamepad1.begin();
   BootKeyboard.begin();
   SingleConsumer.begin();
-  irTransmit.init(config.irOutputPin);
 }
 
 bool Buttons::checkChanged()
@@ -150,14 +149,13 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
       {
         outputs.updateOutput(config.solenoidOutputMap[j] - 1, currentButtonState ? 255 : 0);
       }
-
-      // Trigger IR command on button press (rising edge only)
-      // irOutputPin range 0-62 is valid, >62 is disabled
-      if (currentButtonState && config.irOutputPin <= 62)
-      {
-        irTransmit.sendCommand();
-      }
     }
+  }
+
+  // Trigger IR command on button press (rising edge only)
+  if (currentButtonState && config.irOutputPin < 15 && config.irButton == i)
+  {
+    irTransmit.sendCommand(outputs.outputList[config.irOutputPin]);
   }
   return currentButtonState;
 }

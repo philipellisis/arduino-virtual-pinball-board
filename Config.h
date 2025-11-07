@@ -20,6 +20,10 @@ class Config {
     unsigned char solenoidButtonMap[4] = {0};
     unsigned char solenoidOutputMap[4] = {0};
     unsigned char irOutputPin = 255;
+    unsigned char irButton = 255;
+    unsigned char irProtocol = 0;
+    uint32_t irCode = 0;
+    unsigned char irBits = 0;
     unsigned char orientation = 0;
     unsigned char accelerometerEprom = 0;
     unsigned char accelerometer = 1;

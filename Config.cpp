@@ -74,6 +74,12 @@ void Config::init() {
     EEPROM.get(608, tiltButtonRight);
 
     EEPROM.get(609, irOutputPin);
+    EEPROM.get(610, irProtocol);
+    irCode = readIntFromEEPROM(611);
+    irCode |= ((uint32_t)readIntFromEEPROM(613) << 16);
+    EEPROM.get(615, irBits);
+    EEPROM.get(616, irButton);
+
 
   } else {
     //save default config in case it's never been done before
@@ -144,6 +150,11 @@ void Config::saveConfig() {
     EEPROM.write(608, tiltButtonRight);
 
     EEPROM.write(609, irOutputPin);
+    EEPROM.write(610, irProtocol);
+    writeIntIntoEEPROM(611, (int16_t)(irCode & 0xFFFF));
+    writeIntIntoEEPROM(613, (int16_t)(irCode >> 16));
+    EEPROM.write(615, irBits);
+    EEPROM.write(616, irButton);
 
     EEPROM.write(1000, 101);
 }
@@ -207,13 +218,13 @@ void Config::updateConfigFromSerial() {
     tiltButtonRight = blockRead();
 
     irOutputPin = blockRead();
-
-    // Read IR command data (1 command, 361 bytes) and save directly to EEPROM
-    // Using temporary buffer to avoid keeping 361 bytes in RAM
-    for (uint16_t i = 0; i < 361; i++) {
-      unsigned char irByte = blockRead();
-      EEPROM.write(610 + i, irByte);
-    }
+    irProtocol = blockRead();
+    irCode = (uint32_t)blockRead() << 24;
+    irCode |= (uint32_t)blockRead() << 16;
+    irCode |= (uint32_t)blockRead() << 8;
+    irCode |= blockRead();
+    irBits = blockRead();
+    irButton = blockRead();
 
     if(blockRead() != 42) {
       done = 1;
@@ -286,11 +297,13 @@ void Config::sendConfig() {
     printComma(tiltButtonRight);
 
     printComma(irOutputPin);
-
-    // Send IR command data (1 command, 361 bytes) from EEPROM
-    for (uint16_t i = 0; i < 361; i++) {
-      printComma(EEPROM.read(610 + i));
-    }
+    printComma(irProtocol);
+    printComma((unsigned char)(irCode >> 24));
+    printComma((unsigned char)(irCode >> 16));
+    printComma((unsigned char)(irCode >> 8));
+    printComma((unsigned char)(irCode & 0xFF));
+    printComma(irBits);
+    printComma(irButton);
 
     Serial.print(F("E\r\n"));
 }
