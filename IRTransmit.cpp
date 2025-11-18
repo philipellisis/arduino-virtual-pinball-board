@@ -165,14 +165,25 @@ void IRTransmit::sendSony(uint32_t data, uint8_t bits, uint8_t pin) {
 
 // ===== Carrier helpers (38 kHz via bit-banging) =====
 void IRTransmit::mark(uint16_t usec, uint8_t pin) {
-  // 38kHz = 26.3µs period, ~33% duty cycle = 9µs on, 17µs off
-  unsigned long start = micros();
-  while (micros() - start < usec) {
-    digitalWrite(pin, HIGH);
+  // 38kHz = 26.3µs period, ~33% duty cycle
+  // Calculate number of carrier cycles needed
+  uint16_t cycles = (usec * 38UL) / 1000UL;
+
+  // Get port and bitmask for fast direct port access
+  volatile uint8_t *outPort = portOutputRegister(digitalPinToPort(pin));
+  uint8_t pinMask = digitalPinToBitMask(pin);
+
+  // Disable interrupts for precise timing
+  noInterrupts();
+
+  for (uint16_t i = 0; i < cycles; i++) {
+    *outPort |= pinMask;   // HIGH
     delayMicroseconds(9);
-    digitalWrite(pin, LOW);
+    *outPort &= ~pinMask;  // LOW
     delayMicroseconds(17);
   }
+
+  interrupts();
 }
 
 void IRTransmit::space(uint16_t usec, uint8_t pin) {
