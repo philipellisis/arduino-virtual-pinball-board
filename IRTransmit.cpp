@@ -163,11 +163,13 @@ void IRTransmit::sendSony(uint32_t data, uint8_t bits, uint8_t pin) {
   space(0, pin);
 }
 
-// ===== Carrier helpers (38 kHz via bit-banging) =====
+// ===== Carrier helpers (via bit-banging) =====
 void IRTransmit::mark(uint16_t usec, uint8_t pin) {
-  // 38kHz = 26.3µs period, ~33% duty cycle
+  // Carrier frequency: NEC/Samsung = 38kHz, Sony = 40kHz
+  uint8_t freqKHz = (config.irProtocol == IR_PROTOCOL_SONY) ? 40 : 38;
+
   // Calculate number of carrier cycles needed
-  uint16_t cycles = (usec * 38UL) / 1000UL;
+  uint16_t cycles = (usec * (uint32_t)freqKHz) / 1000UL;
 
   // Get port and bitmask for fast direct port access
   volatile uint8_t *outPort = portOutputRegister(digitalPinToPort(pin));
