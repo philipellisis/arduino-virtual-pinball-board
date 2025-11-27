@@ -50,8 +50,8 @@ void IRTransmit::sendCommand(uint8_t outputPin) {
       break;
   }
 
-  Serial.print(F("DEBUG,IR transmission complete\r\n"));
-  Serial.flush();
+  //Serial.print(F("DEBUG,IR transmission complete\r\n"));
+  //Serial.flush();
 }
 
 // ===== NEC =====

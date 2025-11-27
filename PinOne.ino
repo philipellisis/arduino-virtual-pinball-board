@@ -39,7 +39,7 @@ void setup() {
 
 void loop() {
   // Handle input processing (same as original)
-  unsigned long t1 = micros();
+  //unsigned long t1 = micros();
   if (toggle == 0) {
     plunger.plungerRead();
   } else if (toggle == 1 && config.accelerometerEprom > 0) {
@@ -49,14 +49,14 @@ void loop() {
   } else if (toggle == 3) {
     comm.communicate();
   }
-  unsigned long t2 = micros();
-  if (config.debug) {
-    Serial.print(F("DEBUG,Time taken by task: "));
-    Serial.print(toggle);
-    Serial.print(F(", "));
-    Serial.print(t2 - t1);
-    Serial.println(F(" microseconds"));
-  }
+  // unsigned long t2 = micros();
+  // if (config.debug) {
+  //   Serial.print(F("DEBUG,Time taken by task: "));
+  //   Serial.print(toggle);
+  //   Serial.print(F(", "));
+  //   Serial.print(t2 - t1);
+  //   Serial.println(F(" microseconds"));
+  // }
   
   toggle++;
   if (toggle > 3) {
