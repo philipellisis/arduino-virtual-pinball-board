@@ -2,10 +2,12 @@
 #include <Arduino.h>
 #include "ButtonReader.h"
 #include "Enums.h"
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include "Globals.h"
+#include "IRTransmit.h"
 
 ButtonReader buttonReader;
+IRTransmit irTransmit;
 
 // Pin 18, A0 = UP
 // Pin 19, A1 = RIGHT
@@ -15,17 +17,14 @@ ButtonReader buttonReader;
 Buttons::Buttons()
 {
   // Initialize Button Pins
-  // if (DEBUG) {Serial.print(F("DEBUG,buttons: About to initialize pins\r\n"));}
   buttonReader.init();
-  // if (DEBUG) {Serial.print(F("DEBUG,buttons: pins initialized\r\n"));}
 }
 
 void Buttons::init()
 {
-  // if (DEBUG) {Serial.print(F("DEBUG,buttons: initializing Gamepad1\r\n"));}
+  Gamepad1.begin();
   BootKeyboard.begin();
   SingleConsumer.begin();
-  // if (DEBUG) {Serial.print(F("DEBUG,buttons: initialized Gamepad1\r\n"));}
 }
 
 bool Buttons::checkChanged()
@@ -48,15 +47,13 @@ bool Buttons::checkChanged()
 
 void Buttons::readInputs()
 {
-  unsigned char buttonPushed = 2; // this is set to notify light show that a button press has happened
+  uint8_t buttonPushed = 2; // this is set to notify light show that a button press has happened
   // read shift register values
-  // if (DEBUG) {Serial.print(F("DEBUG"));}
   if (config.buttonPressed || buttons.numberButtonsPressed > 0)
   {
-    for (unsigned char i = 0; i < 24; i++)
+    for (uint8_t i = 0; i < 24; i++)
     {
       bool currentButtonState = !buttonReader.state(i);
-      // if (DEBUG) {Serial.print(currentButtonState);}
       if (currentButtonState != config.lastButtonState[i])
       {
 
@@ -72,7 +69,6 @@ void Buttons::readInputs()
         config.lastButtonState[i] = sendButtonPush(i, currentButtonState);
       }
 
-      // if (DEBUG) {Serial.print("\r\n");}
     }
   }
   if (buttonPushed == 1)
@@ -108,64 +104,58 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
     {
       config.buttonKeyDebounce[i] = 1;
       numberButtonsPressed--;
-      // Serial.print(F("decrementing"));
-      // Serial.print(numberButtonsPressed);
-      // Serial.print(F("\r\n"));
     }
   }
   else if (config.buttonKeyDebounce[i] > 0 && currentButtonState == 1)
   {
     numberButtonsPressed++;
-    // Serial.print(F("incrementing"));
-    // Serial.print(numberButtonsPressed);
-    // Serial.print(F("\r\n"));
   }
 
-  //logic for turning the shifted button off if the shift button is released
-  if (config.shiftButton < 24 && i > 3 && i < 12 && currentButtonState == 0 && config.lastButtonState[i + 20] == 1 && config.lastButtonState[config.shiftButton] == 0)
-  {
-    sendActualButtonPress(i + 20, currentButtonState);
-    config.lastButtonState[i + 20] = currentButtonState;
-  }
-
-  // logic for turning the shifted button on if the shift button is depressed
-  if (config.shiftButton < 24 &&  i > 3 && i < 12 && config.lastButtonState[config.shiftButton] == 1)
-  {
-    buttonOffset = i + 20;
-    if (config.lastButtonState[config.shiftButton] == 1)
-    {
+  // Handle shifted buttons (optimize common conditions)
+  if (config.shiftButton < 24 && i > 3 && i < 12) {
+    bool shiftPressed = config.lastButtonState[config.shiftButton] == 1;
+    
+    if (!currentButtonState && config.lastButtonState[i + 20] == 1 && !shiftPressed) {
+      // Logic for turning the shifted button off if the shift button is released
+      sendActualButtonPress(i + 20, currentButtonState);
+      config.lastButtonState[i + 20] = currentButtonState;
+    }
+    
+    if (shiftPressed) {
+      // Logic for turning the shifted button on if the shift button is depressed
+      buttonOffset = i + 20;
       config.lastButtonState[buttonOffset] = currentButtonState;
       sendActualButtonPress(buttonOffset, currentButtonState);
-    }
-    if (currentButtonState == 0)
-    {
-      sendActualButtonPress(i, currentButtonState);
+      
+      if (!currentButtonState) {
+        sendActualButtonPress(i, currentButtonState);
+        sendActualButtonPress(buttonOffset, currentButtonState);
+      }
+    } else {
+      buttonOffset = i;
       sendActualButtonPress(buttonOffset, currentButtonState);
     }
-  }
-  else
-  {
+  } else {
     buttonOffset = i;
     sendActualButtonPress(buttonOffset, currentButtonState);
   }
 
-  // trigger solenoid if needed
-  for (int j = 0; j < 4; j++)
+  // trigger solenoid or IR command if needed
+  for (uint8_t j = 0; j < 4; j++)
   {
-    if (currentButtonState == 1 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i)
+    if (config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i)
     {
       if (config.solenoidOutputMap[j] > 0)
       {
-        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 255);
+        outputs.updateOutput(config.solenoidOutputMap[j] - 1, currentButtonState ? 255 : 0);
       }
     }
-    else if (currentButtonState == 0 && config.solenoidButtonMap[j] > 0 && config.solenoidButtonMap[j] - 1 == i)
-    {
-      if (config.solenoidOutputMap[j] > 0)
-      {
-        outputs.updateOutput(config.solenoidOutputMap[j] - 1, 0);
-      }
-    }
+  }
+
+  // Trigger IR command on button press (rising edge only)
+  if (currentButtonState && config.irOutputPin < 15 && config.irButton == i)
+  {
+    irTransmit.sendCommand(outputs.outputList[config.irOutputPin]);
   }
   return currentButtonState;
 }
@@ -185,80 +175,65 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
     {
       if (currentButtonState == 1)
       {
-        // if (DEBUG) {Serial.print("DEBUG,setting night mode to ");Serial.print(config.nightMode); Serial.print(F("\r\n"));}
         config.nightMode = !config.nightMode;
       }
     }
+    // Don't process this button as a joystick/keyboard press
+    return;
   }
 
-  if (config.buttonKeyboard[buttonOffset] > 0)
+  if (config.buttonKeyboard[config.buttonRemap[buttonOffset]] > 0)
+  {
+    processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset]], currentButtonState == 1);
+  }
+  if (config.buttonKeyboard[config.buttonRemap[buttonOffset]] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0)
   {
     if (currentButtonState == 1)
     {
-      if (config.buttonKeyboard[buttonOffset] > 251)
-      {
-        if (config.buttonKeyboard[buttonOffset] == 252)
-        {
-          SingleConsumer.press(MEDIA_VOLUME_MUTE);
-        }
-        else if (config.buttonKeyboard[buttonOffset] == 253)
-        {
-          SingleConsumer.press(MEDIA_VOLUME_DOWN);
-        }
-        else if (config.buttonKeyboard[buttonOffset] == 254)
-        {
-          SingleConsumer.press(MEDIA_VOLUME_UP);
-        }
-      }
-      else
-      {
-        BootKeyboard.press(KeyboardKeycode(config.buttonKeyboard[buttonOffset]));
-      }
+      Gamepad1.press(config.buttonRemap[buttonOffset]);
     }
     else
     {
-      if (config.buttonKeyboard[buttonOffset] > 251)
-      {
-        if (config.buttonKeyboard[buttonOffset] == 252)
-        {
-          SingleConsumer.release(MEDIA_VOLUME_MUTE);
-        }
-        else if (config.buttonKeyboard[buttonOffset] == 253)
-        {
-          SingleConsumer.release(MEDIA_VOLUME_DOWN);
-        }
-        else if (config.buttonKeyboard[buttonOffset] == 254)
-        {
-          SingleConsumer.release(MEDIA_VOLUME_UP);
-        }
-      }
-      else
-      {
-        BootKeyboard.release(KeyboardKeycode(config.buttonKeyboard[buttonOffset]));
-      }
+      Gamepad1.release(config.buttonRemap[buttonOffset]);
     }
   }
-  if (config.buttonKeyboard[buttonOffset] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0)
-  {
-    if (currentButtonState == 1)
-    {
-      Gamepad1.press(buttonOffset + 1);
-    }
-    else
-    {
-      Gamepad1.release(buttonOffset + 1);
-    }
-  }
+  
+  // Update processed button state array for SPI/Bluetooth controller
+  // This represents the final button state after all shift logic processing
+  config.processedButtonState[config.buttonRemap[buttonOffset]] = currentButtonState;
 }
 
 void Buttons::sendButtonState()
 {
   Serial.print(F("B,"));
-  for (int i = 0; i < 31; i++)
+  for (uint8_t i = 0; i < 32; i++)
   {
     Serial.print(config.lastButtonState[i]);
-    Serial.print(F(","));
+    if (i < 31) Serial.print(F(","));
   }
-  Serial.print(config.lastButtonState[31]);
   Serial.print(F("\r\n"));
+}
+void Buttons::processKeyboardAction(unsigned char keyCode, bool pressed) {
+  if (keyCode > 251) {
+    handleMediaKey(keyCode, pressed);
+  } else {
+    if (pressed) {
+      BootKeyboard.press(KeyboardKeycode(keyCode));
+    } else {
+      BootKeyboard.release(KeyboardKeycode(keyCode));
+    }
+  }
+}
+
+void Buttons::handleMediaKey(unsigned char keyCode, bool pressed) {
+  if (keyCode == 252) {
+    if (pressed) SingleConsumer.press(MEDIA_VOLUME_MUTE);
+    else SingleConsumer.release(MEDIA_VOLUME_MUTE);
+  } else if (keyCode == 253) {
+    if (pressed) SingleConsumer.press(MEDIA_VOLUME_DOWN);
+    else SingleConsumer.release(MEDIA_VOLUME_DOWN);
+  } else if (keyCode == 254) {
+    if (pressed) SingleConsumer.press(MEDIA_VOLUME_UP);
+    else SingleConsumer.release(MEDIA_VOLUME_UP);
+  }
 }

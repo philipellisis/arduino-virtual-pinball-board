@@ -8,29 +8,23 @@ Config::Config() {
 }
 
 void Config::init() {
-  //if (DEBUG) {Serial.print(F("DEBUG,Config: initializing\r\n"));}
 
-  unsigned char eepromCheck;
+  uint8_t eepromCheck;
   EEPROM.get(1000, eepromCheck);
 
   if (eepromCheck == 101) {
-    //if (DEBUG) {Serial.print(F("DEBUG,eeprom check indicates values are all saved, reading from eeprom\r\n"));}
     // get first 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      EEPROM.get(i, toySpecialOption[i]);
-      EEPROM.get(i + 100, turnOffState[i]);
-      EEPROM.get(i + 200, maxOutputState[i]);
-      EEPROM.get(i + 300, maxOutputTime[i]);
-    }
+    loadEEPROMArray(toySpecialOption, 0, 63);
+    loadEEPROMArray(turnOffState, 100, 63);
+    loadEEPROMArray(maxOutputState, 200, 63);
+    loadEEPROMArray(maxOutputTime, 300, 63);
 
     plungerMax = readIntFromEEPROM(401);
     plungerMin = readIntFromEEPROM(403);
     plungerMid = readIntFromEEPROM(405);
     
-    for (int i = 0; i < 4; i++) {
-      EEPROM.get(i + 407, solenoidButtonMap[i]);
-      EEPROM.get(i + 417, solenoidOutputMap[i]);
-    }
+    loadEEPROMArray(solenoidButtonMap, 407, 4);
+    loadEEPROMArray(solenoidOutputMap, 417, 4);
 
     EEPROM.get(426, orientation);
     EEPROM.get(427, accelerometer);
@@ -58,21 +52,35 @@ void Config::init() {
     accelerometerTiltY = readIntFromEEPROM(468);
     accelerometerMaxY = readIntFromEEPROM(470);
 
-    for (int i = 0; i < 32; i++) {
-      EEPROM.get(i + 500, buttonKeyboard[i]);
-    }
+    loadEEPROMArray(buttonKeyboard, 500, 32);
 
-    for (int i = 0; i < 24; i++) {
-      EEPROM.get(i + 532, buttonKeyDebounce[i]);
-    }
+    loadEEPROMArray(buttonKeyDebounce, 532, 24);
     EEPROM.get(564, buttonDebounceCounter);
     EEPROM.get(565, enablePlunger);
+    
 
     EEPROM.get(566, tiltSuppress);
     EEPROM.get(567, lightShowAttractEnabled);
 
     EEPROM.get(568, lightShowTime);
     EEPROM.get(569, reverseButtonOutputPolarity);
+    EEPROM.get(570, disableUSBSuspend);
+    EEPROM.get(571, bluetoothEnable);
+    EEPROM.get(572, debug);
+    loadEEPROMArray(buttonRemap, 573, 32);
+    EEPROM.get(605, tiltButtonUp);
+    EEPROM.get(606, tiltButtonDown);
+    EEPROM.get(607, tiltButtonLeft);
+    EEPROM.get(608, tiltButtonRight);
+
+    EEPROM.get(609, irOutputPin);
+    EEPROM.get(610, irProtocol);
+    irCode = readIntFromEEPROM(611);
+    irCode |= ((uint32_t)readIntFromEEPROM(613) << 16);
+    EEPROM.get(615, irBits);
+    EEPROM.get(616, irButton);
+    EEPROM.get(617, lowLatencyMode);
+
 
   } else {
     //save default config in case it's never been done before
@@ -84,23 +92,17 @@ void Config::init() {
 
 void Config::saveConfig() {
     // get first 62 bank maximum values
-    for (int i = 0; i < 63; i++) {
-      EEPROM.write(i, toySpecialOption[i]);
-      EEPROM.write(i + 100, turnOffState[i]);
-      EEPROM.write(i + 200, maxOutputState[i]);
-      EEPROM.write(i + 300, maxOutputTime[i]);
-    }
+    saveEEPROMArray(toySpecialOption, 0, 63);
+    saveEEPROMArray(turnOffState, 100, 63);
+    saveEEPROMArray(maxOutputState, 200, 63);
+    saveEEPROMArray(maxOutputTime, 300, 63);
   
     writeIntIntoEEPROM(401, plungerMax);
     writeIntIntoEEPROM(403, plungerMin);
     writeIntIntoEEPROM(405, plungerMid);
     
-    for (int i = 0; i < 4; i++) {
-      EEPROM.write(i + 407, solenoidButtonMap[i]);
-    }
-    for (int i = 0; i < 4; i++) {
-      EEPROM.write(i + 417, solenoidOutputMap[i]);
-    }
+    saveEEPROMArray(solenoidButtonMap, 407, 4);
+    saveEEPROMArray(solenoidOutputMap, 417, 4);
     
     EEPROM.write(426, orientation);
     EEPROM.write(427, accelerometer);
@@ -126,16 +128,13 @@ void Config::saveConfig() {
     writeIntIntoEEPROM(468, accelerometerTiltY);
     writeIntIntoEEPROM(470, accelerometerMaxY);
 
-    for (int i = 0; i < 32; i++) {
-      EEPROM.write(i + 500, buttonKeyboard[i]);
-    }
+    saveEEPROMArray(buttonKeyboard, 500, 32);
 
-    for (int i = 0; i < 24; i++) {
-      EEPROM.write(i + 532, buttonKeyDebounce[i]);
-    }
+    saveEEPROMArray(buttonKeyDebounce, 532, 24);
 
     EEPROM.write(564, buttonDebounceCounter);
     EEPROM.write(565, enablePlunger);
+    
 
     EEPROM.write(566, tiltSuppress);
     EEPROM.write(567, lightShowAttractEnabled);
@@ -143,6 +142,21 @@ void Config::saveConfig() {
     EEPROM.write(568, lightShowTime);
     EEPROM.write(569, reverseButtonOutputPolarity);
     EEPROM.write(570, disableUSBSuspend);
+    EEPROM.write(571, bluetoothEnable);
+    EEPROM.write(572, debug);
+    saveEEPROMArray(buttonRemap, 573, 32);
+    EEPROM.write(605, tiltButtonUp);
+    EEPROM.write(606, tiltButtonDown);
+    EEPROM.write(607, tiltButtonLeft);
+    EEPROM.write(608, tiltButtonRight);
+
+    EEPROM.write(609, irOutputPin);
+    EEPROM.write(610, irProtocol);
+    writeIntIntoEEPROM(611, (int16_t)(irCode & 0xFFFF));
+    writeIntIntoEEPROM(613, (int16_t)(irCode >> 16));
+    EEPROM.write(615, irBits);
+    EEPROM.write(616, irButton);
+    EEPROM.write(617, lowLatencyMode);
 
     EEPROM.write(1000, 101);
 }
@@ -190,13 +204,30 @@ void Config::updateConfigFromSerial() {
     readConfigArray(buttonKeyDebounce, 24);
     buttonDebounceCounter = blockRead();
     enablePlunger = blockRead();
+    
 
     tiltSuppress = blockRead();
     lightShowAttractEnabled = blockRead();
     lightShowTime = blockRead();
     reverseButtonOutputPolarity = blockRead();
     disableUSBSuspend = blockRead();
-    
+    bluetoothEnable = blockRead();
+    debug = blockRead();
+    readConfigArray(buttonRemap, 32);
+    tiltButtonUp = blockRead();
+    tiltButtonDown = blockRead();
+    tiltButtonLeft = blockRead();
+    tiltButtonRight = blockRead();
+
+    irOutputPin = blockRead();
+    irProtocol = blockRead();
+    irCode = (uint32_t)blockRead() << 24;
+    irCode |= (uint32_t)blockRead() << 16;
+    irCode |= (uint32_t)blockRead() << 8;
+    irCode |= blockRead();
+    irBits = blockRead();
+    irButton = blockRead();
+    lowLatencyMode = blockRead();
 
     if(blockRead() != 42) {
       done = 1;
@@ -254,14 +285,30 @@ void Config::sendConfig() {
     printConfigArray(buttonKeyDebounce, 24);
     printComma(buttonDebounceCounter);
     printComma(enablePlunger);
-
+    
     printComma(tiltSuppress);
     printComma(lightShowAttractEnabled);
     printComma(lightShowTime);
     printComma(reverseButtonOutputPolarity);
     printComma(disableUSBSuspend);
-    
-    
+    printComma(bluetoothEnable);
+    printComma(debug);
+    printConfigArray(buttonRemap, 32);
+    printComma(tiltButtonUp);
+    printComma(tiltButtonDown);
+    printComma(tiltButtonLeft);
+    printComma(tiltButtonRight);
+
+    printComma(irOutputPin);
+    printComma(irProtocol);
+    printComma((unsigned char)(irCode >> 24));
+    printComma((unsigned char)(irCode >> 16));
+    printComma((unsigned char)(irCode >> 8));
+    printComma((unsigned char)(irCode & 0xFF));
+    printComma(irBits);
+    printComma(irButton);
+    printComma(lowLatencyMode);
+
     Serial.print(F("E\r\n"));
 }
 
@@ -283,8 +330,8 @@ unsigned char Config::blockRead() {
     if (done > 0) {
       return 0;
     }
-    long int t1 = millis();
-    long int t2 = millis();
+    uint32_t t1 = millis();
+    uint32_t t2 = millis();
     while ((t2 - t1) < 5000) {
       if (Serial.available() > 0) {
         return Serial.read();
@@ -296,29 +343,41 @@ unsigned char Config::blockRead() {
     return 0;
 }
 
-void Config::writeIntIntoEEPROM(int address, int number)
+void Config::writeIntIntoEEPROM(uint16_t address, int16_t number)
 { 
   EEPROM.write(address, number >> 8);
   EEPROM.write(address + 1, number & 0xFF);
 }
 
-int Config::readIntFromEEPROM(int address)
+int16_t Config::readIntFromEEPROM(uint16_t address)
 {
   return (EEPROM.read(address) << 8) + EEPROM.read(address + 1);
 }
 
-int Config::readIntFromByte() {
+int16_t Config::readIntFromByte() {
   return (blockRead() << 8) + blockRead();
 }
 
 void Config::readConfigArray(unsigned char* configArray, unsigned char size) {
-  for (unsigned char i = 0; i < size; i++) {
+  for (uint8_t i = 0; i < size; i++) {
     configArray[i] = blockRead();
   }
 }
 
+void Config::loadEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size) {
+  for (uint8_t i = 0; i < size; i++) {
+    EEPROM.get(address + i, configArray[i]);
+  }
+}
+
+void Config::saveEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size) {
+  for (uint8_t i = 0; i < size; i++) {
+    EEPROM.write(address + i, configArray[i]);
+  }
+}
+
 void Config::printConfigArray(unsigned char* configArray, unsigned char size) {
-  for (unsigned char i = 0; i < size; i++) {
+  for (uint8_t i = 0; i < size; i++) {
     printComma(configArray[i]);
   }
 }

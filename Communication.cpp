@@ -1,12 +1,11 @@
 #include "Communication.h"
 #include <Arduino.h>
 #include "Plunger.h"
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include "Buttons.h"
 #include "Accelerometer.h"
 #include "Enums.h"
 #include "Globals.h"
-#include <avr/wdt.h>
 
 Communication::Communication() {
 }
@@ -16,7 +15,7 @@ Communication::Communication() {
 void Communication::communicate() {
   outputs.checkResetOutputs();
   //int maxSerial = Serial.available();
-  for (int i = 0; i < 9; i++) {
+  for (uint8_t i = 0; i < 9; i++) {
     if (Serial.available()) {
       incomingData[dataLocation] = Serial.read();
       // Serial.print(F("DEBUG,getting serial data: ")); Serial.print(incomingData[dataLocation]); Serial.print(F("\r\n"));
@@ -74,24 +73,10 @@ void Communication::sendAdmin() {
     switch (admin)
     {
     case BUTTONS:
-      if (!shouldDelay()) {
-        buttons.sendButtonState();
-      }
-      break;
     case OUTPUTS:
-      if (!shouldDelay()) {
-        outputs.sendOutputState();
-      }
-      break;
     case PLUNGER:
-      if (!shouldDelay()) { 
-        plunger.sendPlungerState();
-      }
-      break;
     case ACCEL:
-      if (!shouldDelay()) {
-        accel.sendAccelerometerState();
-      }
+      handleDelayedAdmin(admin);
       break;
     case SEND_CONFIG:
       config.sendConfig();
@@ -113,16 +98,34 @@ void Communication::sendAdmin() {
       admin = 0;
       break;
     case VERSION:
-      Serial.print(F("V,1.20.0\r\n"));
+      Serial.print(F("V,2.1.0\r\n"));
       admin = 0;
       break;
     case RESET:
       pinMode(11, OUTPUT);
       digitalWrite(11, LOW);
-      wdt_enable(WDTO_15MS);
       admin = 0;
     }
     
+  }
+}
+
+void Communication::handleDelayedAdmin(uint8_t adminType) {
+  if (shouldDelay()) return;
+  
+  switch (adminType) {
+    case BUTTONS:
+      buttons.sendButtonState();
+      break;
+    case OUTPUTS:
+      outputs.sendOutputState();
+      break;
+    case PLUNGER:
+      plunger.sendPlungerState();
+      break;
+    case ACCEL:
+      accel.sendAccelerometerState();
+      break;
   }
 }
 
@@ -138,12 +141,12 @@ bool Communication::shouldDelay() {
 
 void Communication::updateOutputs() {
   //if (DEBUG) {Serial.print(F("DEBUG,sending output\r\n"));}
-  int tempBankOffset;
-  tempBankOffset = incomingData[1] - bankOffset;
-  for (int i = 2; i < 9; i++) {
-    if (previousDOFValues[tempBankOffset*7 + i-2] != incomingData[i]) {
-      outputs.updateOutput(tempBankOffset*7 + i-2, incomingData[i]);
-      previousDOFValues[tempBankOffset*7 + i-2] = incomingData[i];
+  uint8_t baseIndex = (incomingData[1] - bankOffset) * 7;
+  for (uint8_t i = 2; i < 9; i++) {
+    uint8_t outputIndex = baseIndex + i - 2;
+    if (previousDOFValues[outputIndex] != incomingData[i]) {
+      outputs.updateOutput(outputIndex, incomingData[i]);
+      previousDOFValues[outputIndex] = incomingData[i];
     }
   }
 }

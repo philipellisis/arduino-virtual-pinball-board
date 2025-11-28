@@ -2,7 +2,7 @@
 #define COMMUNICATION_H
 #include <Arduino.h>
 #include "Plunger.h"
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include "Buttons.h"
 #include "Accelerometer.h"
 #include "Config.h"
@@ -16,25 +16,25 @@ class Communication {
     void communicate();
     
   private:
-    bool DEBUG = false;
     char* connectedString = "DEBUG,CSD Board Connected\r\n";
-    unsigned char firstNumber = 0; //0 normally
-    unsigned char bankOffset = 200; //200 normally
-    unsigned char adminNumber = 250; //250 normally
-    unsigned char connectionNumber = 251;//251 normally
-    unsigned char outputSingleNumber = 252;//252 normally
-    unsigned char outputButtonNumber = 253;//252 normally
-    unsigned char maxNumber = 255; //255 normally
-    unsigned char delayIncrementor = 0;
+    uint8_t firstNumber = 0; //0 normally
+    uint8_t bankOffset = 200; //200 normally
+    uint8_t adminNumber = 250; //250 normally
+    uint8_t connectionNumber = 251;//251 normally
+    uint8_t outputSingleNumber = 252;//252 normally
+    uint8_t outputButtonNumber = 253;//252 normally
+    uint8_t maxNumber = 255; //255 normally
+    uint8_t delayIncrementor = 0;
 
-    unsigned char incomingData[10];
-    int dataLocation = 0;
+    uint8_t incomingData[10];
+    uint8_t dataLocation = 0;
     void updateOutputs();
-    int admin = 0;
+    uint8_t admin = 0;
     void sendAdmin();
     bool shouldDelay();
+    void handleDelayedAdmin(uint8_t adminType);
 
-    unsigned char previousDOFValues[63] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    uint8_t previousDOFValues[63] = {0};
 };
 
 #endif

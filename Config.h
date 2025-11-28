@@ -17,8 +17,13 @@ class Config {
     int plungerMax = 842;
     int plungerMin = 61;
     int plungerMid = 203;
-    unsigned char solenoidButtonMap[4] = {0,0,0,0};
-    unsigned char solenoidOutputMap[4] = {0,0,0,0};
+    unsigned char solenoidButtonMap[4] = {0};
+    unsigned char solenoidOutputMap[4] = {0};
+    unsigned char irOutputPin = 255;
+    unsigned char irButton = 255;
+    unsigned char irProtocol = 0;
+    uint32_t irCode = 0;
+    unsigned char irBits = 0;
     unsigned char orientation = 0;
     unsigned char accelerometerEprom = 0;
     unsigned char accelerometer = 1;
@@ -36,18 +41,27 @@ class Config {
     unsigned char tiltButton = 22;
     unsigned char shiftButton = 2;
 
+    unsigned char tiltButtonUp = 9;
+    unsigned char tiltButtonDown = 10;
+    unsigned char tiltButtonLeft = 11;
+    unsigned char tiltButtonRight = 12;
+
     unsigned char done = 0;
     bool nightMode = false;
+    bool debug = false;
     void updateConfigFromSerial();
     void sendConfig();
     void setPlunger();
     void setAccelerometer();
+    bool lowLatencyMode = false;
 
     unsigned char lightShowState = 1;
 
     unsigned char buttonKeyboard[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    unsigned char buttonRemap[32] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
     unsigned char buttonKeyDebounce[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     bool lastButtonState[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+    bool processedButtonState[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     unsigned char buttonDebounceCounter = 0;
     bool plungerMoving = false; 
     long restingStateMax = 160;
@@ -63,6 +77,7 @@ class Config {
     bool disablePlungerWhenNotInUse = true;
     bool disableButtonPressWhenKeyboardEnabled = true;
     bool enablePlunger = true;
+    bool bluetoothEnable = false;
 
     unsigned char tiltSuppress = 10;
     bool lightShowAttractEnabled = true;
@@ -72,17 +87,18 @@ class Config {
 
 
   private:
-    bool DEBUG = false;
     unsigned char Config::blockRead();
-    void writeIntIntoEEPROM(int address, int number);
-    int readIntFromEEPROM(int address);
+    void writeIntIntoEEPROM(uint16_t address, int16_t number);
+    int16_t readIntFromEEPROM(uint16_t address);
     void printError();
     void printComma(unsigned char value);
     void printIntComma(int value);
     void printSuccess();
-    int readIntFromByte();
+    int16_t readIntFromByte();
     void readConfigArray(unsigned char* configArray, unsigned char size);
     void printConfigArray(unsigned char* configArray, unsigned char size);
+    void loadEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size);
+    void saveEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size);
     
     
 };

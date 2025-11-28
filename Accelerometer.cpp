@@ -1,6 +1,6 @@
 #include "Accelerometer.h"
 #include <Arduino.h>
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include "MPU6050.h"
 #include "Enums.h"
 #include "Globals.h"
@@ -15,7 +15,7 @@ Accelerometer::Accelerometer()
 void Accelerometer::init()
 {
 
-  unsigned char count = 0;
+  uint8_t count = 0;
   if (!mpu.init())
   {
     delay(1000);
@@ -51,20 +51,16 @@ void Accelerometer::centerAccelerometer()
 {
   delay(400);
 
-  unsigned char count = 0;
-  long offsetxCounter = 0;
-  long offsetycounter = 0;
+  uint8_t count = 0;
+  int32_t offsetxCounter = 0;
+  int32_t offsetycounter = 0;
 
   xValueOffset = 0;
   yValueOffset = 0;
   while (count < 10)
   {
     mpu.read();
-    if (config.orientation > 7) {
-      offsetxCounter += mpu.getZ();
-    } else {
-      offsetxCounter += mpu.getX();
-    }
+    offsetxCounter += getRawAccelValue();
     offsetycounter += mpu.getY();
 
     count++;
@@ -109,11 +105,7 @@ void Accelerometer::accelerometerRead()
   /* Get new sensor events with the readings */
   mpu.read();
 
-  if (config.orientation > 7) {
-    xValue = floor((mpu.getZ() - xValueOffset));
-  } else {
-    xValue = floor((mpu.getX() - xValueOffset));
-  }
+  xValue = floor((getRawAccelValue() - xValueOffset));
   yValue = floor((mpu.getY() - yValueOffset));
 
   // Serial.print(F("DEBUG,AccelX:"));
@@ -129,71 +121,14 @@ void Accelerometer::accelerometerRead()
   {
     yValue = 0;
   }
-  int temp = xValue;
-  if (orientation == RIGHT)
-  {
-    xValue = -yValue;
-    yValue = temp;
-  }
-  else if (orientation == FORWARD)
-  {
-    xValue = -xValue;
-    yValue = -yValue;
-  }
-  else if (orientation == LEFT)
-  {
-    xValue = yValue;
-    yValue = -temp;
-  }
-  else if (orientation == UP_BACK)
-  {
-    xValue = -xValue;
-    yValue = yValue;
-  }
-  else if (orientation == UP_RIGHT)
-  {
-    xValue = -yValue;
-    yValue = -temp;
-  }
-  else if (orientation == UP_FORWARD)
-  {
-    xValue = xValue;
-    yValue = -yValue;
-  }
-  else if (orientation == UP_LEFT)
-  {
-    xValue = yValue;
-    yValue = temp;
-  }
-  if (config.tiltButton < 24) {
-    if (tiltSuppressTime > 0) {
-      tiltSuppressTime--;
-    } else {
-      if (config.lastButtonState[config.tiltButton] == 0 && (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTiltY))
-      {
-        config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 1);
-      }
-      else if (config.lastButtonState[config.tiltButton] == 1 && (abs(xValue) < config.accelerometerTilt && abs(yValue) < config.accelerometerTiltY))
-      {
-        config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 0);
-        tiltSuppressTime = config.tiltSuppress;
-      }
-    }
-  }
+  
+  applyOrientationTransform(xValue, yValue);
+  processTiltButton();
 
 
 
-if (priorXValue != xValue) {
-    Gamepad1.xAxis(static_cast<int16_t>(static_cast<float>(xValue) / localMax * 32767));
-    priorXValue = xValue;
-    config.updateUSB = true;
-}
-
-if (priorYValue != yValue) {
-    Gamepad1.yAxis(static_cast<int16_t>(static_cast<float>(yValue) / localMaxY * 32767));
-    priorYValue = yValue;
-    config.updateUSB = true;
-}
+updateXAxis();
+updateYAxis();
 
   // Serial.print(F("DEBUG,AccelX:"));
   // Serial.print(xValue);
@@ -215,14 +150,93 @@ if (priorYValue != yValue) {
   // Serial.print(F("\r\n"));
 }
 
+int16_t Accelerometer::getRawAccelValue() {
+  return (config.orientation > 7) ? mpu.getZ() : mpu.getX();
+}
+
+void Accelerometer::applyOrientationTransform(int16_t& x, int16_t& y) {
+  int16_t temp = x;
+  switch (orientation) {
+    case RIGHT:
+      x = -y; y = temp;
+      break;
+    case FORWARD:
+      x = -x; y = -y;
+      break;
+    case LEFT:
+      x = y; y = -temp;
+      break;
+    case UP_BACK:
+      x = -x;
+      break;
+    case UP_RIGHT:
+      x = -y; y = -temp;
+      break;
+    case UP_FORWARD:
+      y = -y;
+      break;
+    case UP_LEFT:
+      x = y; y = temp;
+      break;
+  }
+}
+
+void Accelerometer::processTiltButton() {
+  if (config.tiltButton >= 24) return;
+  
+  if (tiltSuppressTime > 0) {
+    tiltSuppressTime--;
+    return;
+  }
+  
+  bool tiltThresholdExceeded = (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTiltY);
+  uint8_t currentTiltState = config.lastButtonState[config.tiltButton];
+  
+  if (currentTiltState == 0 && tiltThresholdExceeded) {
+    config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 1);
+    if (xValue > config.accelerometerTilt) {
+      config.lastButtonState[config.tiltButtonRight] = buttons.sendButtonPush(config.tiltButtonRight, 1);
+    }
+    if (xValue < -config.accelerometerTilt) {
+      config.lastButtonState[config.tiltButtonLeft] = buttons.sendButtonPush(config.tiltButtonLeft, 1);
+    }
+    if (yValue > config.accelerometerTiltY) {
+      config.lastButtonState[config.tiltButtonUp] = buttons.sendButtonPush(config.tiltButtonUp, 1);
+    }
+    if (yValue < -config.accelerometerTiltY) {
+      config.lastButtonState[config.tiltButtonDown] = buttons.sendButtonPush(config.tiltButtonDown, 1);
+    }
+
+  } else if (currentTiltState == 1 && !tiltThresholdExceeded) {
+    config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 0);
+    config.lastButtonState[config.tiltButtonRight] = buttons.sendButtonPush(config.tiltButtonRight, 0);
+    config.lastButtonState[config.tiltButtonLeft] = buttons.sendButtonPush(config.tiltButtonLeft, 0);
+    config.lastButtonState[config.tiltButtonUp] = buttons.sendButtonPush(config.tiltButtonUp, 0);
+    config.lastButtonState[config.tiltButtonDown] = buttons.sendButtonPush(config.tiltButtonDown, 0);
+    tiltSuppressTime = config.tiltSuppress;
+  }
+}
+
+void Accelerometer::updateXAxis() {
+  if (priorXValue != xValue) {
+    Gamepad1.xAxis(static_cast<int16_t>(static_cast<float>(xValue) / localMax * 32767));
+    priorXValue = xValue;
+    config.updateUSB = true;
+  }
+}
+
+void Accelerometer::updateYAxis() {
+  if (priorYValue != yValue) {
+    Gamepad1.yAxis(static_cast<int16_t>(static_cast<float>(yValue) / localMaxY * 32767));
+    priorYValue = yValue;
+    config.updateUSB = true;
+  }
+}
+
 void Accelerometer::sendAccelerometerState()
 {
   Serial.print(F("A,"));
-  if (config.orientation > 7) {
-     Serial.print((mpu.getZ() - xValueOffset));
-  } else {
-     Serial.print((mpu.getX() - xValueOffset));
-  }
+  Serial.print((getRawAccelValue() - xValueOffset));
   Serial.print(F(","));
   Serial.print((mpu.getY() - yValueOffset));
   Serial.print(F(","));

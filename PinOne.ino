@@ -1,62 +1,78 @@
-#include "HID-Project.h"
+#include "MinimalHID.h"
 #include <Wire.h>
 #include "Globals.h"
-
+#include "SPIController.h"
 
 Plunger plunger;
 Buttons buttons;
 LightShow lightShow;
-
 Accelerometer accel;
 Communication comm;
 Outputs outputs;
 Config config;
-bool DEBUG = false;
+SPIController spiController;
+
 unsigned char toggle = 0;
 
 void setup() {
-
   Serial.begin(9600);
   delay(1000);
-  //if (DEBUG) {Serial.print(F("DEBUG,Starting up arduino\r\n"));}
-  delay(1000);
-  // Initialize Gamepad1 Library
-  Gamepad1.begin();
+  
+  // Initialize all components first
   config.init();
+  config.debug = false;
   outputs.init();
-
   buttons.init();
   plunger.init();
   lightShow.init();
+  
   if (config.accelerometer > 0) {
     accel.init();
   }
-
+  
+  // Initialize SPI controller after all inputs are ready
+  if (config.bluetoothEnable) {
+    spiController.init();
+  }
   
 }
 
-
-
 void loop() {
+  // Handle input processing (same as original)
   //unsigned long t1 = micros();
-  if (!USBDevice.isSuspended() || config.disableUSBSuspend) {
-
-      if (toggle == 0) {
-        plunger.plungerRead();
-      } else if (toggle == 1 && config.accelerometerEprom > 0) {
-        accel.accelerometerRead();
-      } else if (toggle == 2) {
-        lightShow.checkSetLights();
-      } else if (toggle == 3) {
-        comm.communicate();
-      }
-      toggle++;
-      if (toggle > 3) {
-        toggle = 0;
-      }
+  if (config.lowLatencyMode) {
+    if (toggle == 0) {
+      plunger.plungerRead();
+    } else if (toggle == 1 && config.accelerometerEprom > 0) {
+      accel.accelerometerRead();
+    } else if (toggle == 2) {
+      lightShow.checkSetLights();
+    } else if (toggle == 3) {
+      comm.communicate();
+    }
+    toggle++;
+    if (toggle > 3) {
+      toggle = 0;
+    }
   } else {
-    lightShow.setLightsOff();
+    plunger.plungerRead();
+    accel.accelerometerRead();
+    lightShow.checkSetLights();
+    comm.communicate();
   }
+
+  // unsigned long t2 = micros();
+  // if (config.debug) {
+  //   Serial.print(F("DEBUG,Time taken by task: "));
+  //   Serial.print(toggle);
+  //   Serial.print(F(", "));
+  //   Serial.print(t2 - t1);
+  //   Serial.println(F(" microseconds"));
+  // }
+  
+
+  
+  // Check for button changes
   buttons.checkChanged();
   if (config.updateUSB || buttons.numberButtonsPressed > 0) {
     buttons.readInputs();
@@ -67,9 +83,12 @@ void loop() {
     // Serial.print(F("DEBUG,Time taken by the task: "));
     // Serial.print(t2 - t1);
     // Serial.println(F(" microseconds"));
+    if (config.bluetoothEnable) {
+      spiController.update();
+    }
+    
   }
-
-  //delay(100);
-  //Serial.println("arduino is running");
+  
+  // Update SPI controller with current input states
   
 }
