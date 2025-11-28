@@ -53,6 +53,7 @@ class Config {
     void sendConfig();
     void setPlunger();
     void setAccelerometer();
+    bool lowLatencyMode = false;
 
     unsigned char lightShowState = 1;
 

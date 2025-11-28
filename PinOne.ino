@@ -40,15 +40,27 @@ void setup() {
 void loop() {
   // Handle input processing (same as original)
   //unsigned long t1 = micros();
-  if (toggle == 0) {
+  if (config.lowLatencyMode) {
+    if (toggle == 0) {
+      plunger.plungerRead();
+    } else if (toggle == 1 && config.accelerometerEprom > 0) {
+      accel.accelerometerRead();
+    } else if (toggle == 2) {
+      lightShow.checkSetLights();
+    } else if (toggle == 3) {
+      comm.communicate();
+    }
+    toggle++;
+    if (toggle > 3) {
+      toggle = 0;
+    }
+  } else {
     plunger.plungerRead();
-  } else if (toggle == 1 && config.accelerometerEprom > 0) {
     accel.accelerometerRead();
-  } else if (toggle == 2) {
     lightShow.checkSetLights();
-  } else if (toggle == 3) {
     comm.communicate();
   }
+
   // unsigned long t2 = micros();
   // if (config.debug) {
   //   Serial.print(F("DEBUG,Time taken by task: "));
@@ -58,10 +70,7 @@ void loop() {
   //   Serial.println(F(" microseconds"));
   // }
   
-  toggle++;
-  if (toggle > 3) {
-    toggle = 0;
-  }
+
   
   // Check for button changes
   buttons.checkChanged();

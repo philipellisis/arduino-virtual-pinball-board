@@ -79,6 +79,7 @@ void Config::init() {
     irCode |= ((uint32_t)readIntFromEEPROM(613) << 16);
     EEPROM.get(615, irBits);
     EEPROM.get(616, irButton);
+    EEPROM.get(617, lowLatencyMode);
 
 
   } else {
@@ -155,6 +156,7 @@ void Config::saveConfig() {
     writeIntIntoEEPROM(613, (int16_t)(irCode >> 16));
     EEPROM.write(615, irBits);
     EEPROM.write(616, irButton);
+    EEPROM.write(617, lowLatencyMode);
 
     EEPROM.write(1000, 101);
 }
@@ -225,6 +227,7 @@ void Config::updateConfigFromSerial() {
     irCode |= blockRead();
     irBits = blockRead();
     irButton = blockRead();
+    lowLatencyMode = blockRead();
 
     if(blockRead() != 42) {
       done = 1;
@@ -304,6 +307,7 @@ void Config::sendConfig() {
     printComma((unsigned char)(irCode & 0xFF));
     printComma(irBits);
     printComma(irButton);
+    printComma(lowLatencyMode);
 
     Serial.print(F("E\r\n"));
 }
