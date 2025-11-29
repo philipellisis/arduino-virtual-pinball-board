@@ -14,7 +14,6 @@ Outputs::Outputs() {
    }
    
   
-  //if (DEBUG) {Serial.print(F("DEBUG,Communication: pins initialized\r\n"));}
 }
 
 void Outputs::init() {
@@ -44,36 +43,24 @@ void Outputs::updateOutput(unsigned char outputId, unsigned char outputValue) {
   if (outputValue > config.maxOutputState[outputId]) {
     outputValue = config.maxOutputState[outputId];
   }
-  if (config.nightMode == true && (config.toySpecialOption[outputId] == NOISY || config.toySpecialOption[outputId] == SHARED)) {
+  if (config.flags.nightMode == true && (config.toySpecialOption[outputId] == NOISY || config.toySpecialOption[outputId] == SHARED)) {
     outputValue = 0;
   }
-  // Serial.print(F("DEBUG,outputID: "));
-  // Serial.print(outputId);
-  // Serial.print(F(" outputValue: "));
-  // Serial.print(outputValue);
-  // Serial.print(F("\r\n"));
   if (config.toySpecialOption[outputId] == SHARED && outputValue > 0 && outputValues[outputId] > 0) {
     for (int i = 0; i < 9; i++) {
       if(config.toySpecialOption[i] == SHARED && outputValues[i] == 0) {
         outputId = i;
-        virtualOutputOn[i] = 1;
-        // Serial.print(F("DEBUG,switching to port "));
-        // Serial.print(outputId);
-        // Serial.print(F("\r\n"));
+        SET_BIT(virtualOutputOnPacked, i, 1);
         break;
       }
     }
   }
   if (config.toySpecialOption[outputId] == SHARED && outputValue == 0 && outputId < 10) {
-    if (virtualOutputOn[outputId] == 0) {
+    if (GET_BIT(virtualOutputOnPacked, outputId) == 0) {
       for (int i = 0; i < 9; i++) {
-        if(config.toySpecialOption[i] == SHARED && outputValues[i] > 0 && virtualOutputOn[i] > 0) {
-          // Serial.print(F("DEBUG,turning off port "));
-          // Serial.print(i);
-          // Serial.print(F("\r\n"));
+        if(config.toySpecialOption[i] == SHARED && outputValues[i] > 0 && GET_BIT(virtualOutputOnPacked, i) > 0) {
           updateOutputInternal(i, 0);
-          virtualOutputOn[i] = 0;
-          //Serial.print(F("DEBUG,turning off shared outputs\r\n"));
+          SET_BIT(virtualOutputOnPacked, i, 0);
         }
       }
     }
@@ -84,7 +71,6 @@ void Outputs::updateOutput(unsigned char outputId, unsigned char outputValue) {
 }
 
 void Outputs::updateOutputInternal(unsigned char outputId, unsigned char outputValue) {
-  //if (DEBUG) {Serial.print(F("DEBUG,output ")); Serial.print(outputId); Serial.print(F(" set to ")); Serial.print(outputValue); Serial.print("\r\n");}
   outputValues[outputId] = outputValue;
   if (outputValue != 0) {
     timeTurnedOn[outputId] = millis();
@@ -93,7 +79,7 @@ void Outputs::updateOutputInternal(unsigned char outputId, unsigned char outputV
     if (outputId < 5) {
       analogWrite(outputList[outputId], outputValue);
     } else {
-      if (config.bluetoothEnable == true && outputId == 10) {
+      if (config.flags.bluetoothEnable == true && outputId == 10) {
         return; // do not update the bluetooth output if bluetooth is enabled, as this pin is being used by SS
       }
       if (outputValue > 127) {
@@ -104,7 +90,7 @@ void Outputs::updateOutputInternal(unsigned char outputId, unsigned char outputV
     }
   } else {
     // if the output is the button board output, then invert the value
-    if (outputId < 31 && config.reverseButtonOutputPolarity == true) {
+    if (outputId < 31 && config.flags.reverseButtonOutputPolarity == true) {
       outputValue = 255 - outputValue;
     }
     if (outputValue == 255) {

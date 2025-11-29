@@ -26,7 +26,7 @@ class Outputs {
     long int timeTurnedOn[63] = {0};
     void updateOutputActual(unsigned char outputId, int outputValueStart, int outputValueFinish);
     unsigned char resetOutputNumber = 0;
-    unsigned char virtualOutputOn[10] = {0};
+    uint16_t virtualOutputOnPacked = 0;  // Bit-packed (10 bits = 2 bytes instead of 10)
 };
 
 #endif

@@ -5,6 +5,22 @@
 
 
 Config::Config() {
+  // Initialize bit-packed flags with default values
+  flags.nightMode = false;
+  flags.debug = false;
+  flags.lowLatencyMode = false;
+  flags.plungerMoving = false;
+  flags.updateUSB = false;
+  flags.disableUSBSuspend = true;
+  flags.buttonPressed = false;
+  flags.bluetoothEnable = false;
+  flags.disableAccelOnPlungerMove = true;
+  flags.disablePlungerWhenNotInUse = true;
+  flags.disableButtonPressWhenKeyboardEnabled = true;
+  flags.enablePlunger = true;
+  flags.lightShowAttractEnabled = true;
+  flags.reverseButtonOutputPolarity = true;
+  flags._reserved = 0;
 }
 
 void Config::init() {
@@ -44,10 +60,12 @@ void Config::init() {
     EEPROM.get(462, tiltButton);
     EEPROM.get(463, shiftButton);
 
-    EEPROM.get(464, disableAccelOnPlungerMove);
+    // Read bit-packed flags from EEPROM
+    uint8_t tempBool;
+    EEPROM.get(464, tempBool); flags.disableAccelOnPlungerMove = tempBool;
     EEPROM.get(465, enablePlungerQuickRelease);
-    EEPROM.get(466, disablePlungerWhenNotInUse);
-    EEPROM.get(467, disableButtonPressWhenKeyboardEnabled);
+    EEPROM.get(466, tempBool); flags.disablePlungerWhenNotInUse = tempBool;
+    EEPROM.get(467, tempBool); flags.disableButtonPressWhenKeyboardEnabled = tempBool;
 
     accelerometerTiltY = readIntFromEEPROM(468);
     accelerometerMaxY = readIntFromEEPROM(470);
@@ -56,17 +74,17 @@ void Config::init() {
 
     loadEEPROMArray(buttonKeyDebounce, 532, 24);
     EEPROM.get(564, buttonDebounceCounter);
-    EEPROM.get(565, enablePlunger);
+    EEPROM.get(565, tempBool); flags.enablePlunger = tempBool;
     
 
     EEPROM.get(566, tiltSuppress);
-    EEPROM.get(567, lightShowAttractEnabled);
+    EEPROM.get(567, tempBool); flags.lightShowAttractEnabled = tempBool;
 
     EEPROM.get(568, lightShowTime);
-    EEPROM.get(569, reverseButtonOutputPolarity);
-    EEPROM.get(570, disableUSBSuspend);
-    EEPROM.get(571, bluetoothEnable);
-    EEPROM.get(572, debug);
+    EEPROM.get(569, tempBool); flags.reverseButtonOutputPolarity = tempBool;
+    EEPROM.get(570, tempBool); flags.disableUSBSuspend = tempBool;
+    EEPROM.get(571, tempBool); flags.bluetoothEnable = tempBool;
+    EEPROM.get(572, tempBool); flags.debug = tempBool;
     loadEEPROMArray(buttonRemap, 573, 32);
     EEPROM.get(605, tiltButtonUp);
     EEPROM.get(606, tiltButtonDown);
@@ -79,7 +97,7 @@ void Config::init() {
     irCode |= ((uint32_t)readIntFromEEPROM(613) << 16);
     EEPROM.get(615, irBits);
     EEPROM.get(616, irButton);
-    EEPROM.get(617, lowLatencyMode);
+    EEPROM.get(617, tempBool); flags.lowLatencyMode = tempBool;
 
 
   } else {
@@ -120,10 +138,11 @@ void Config::saveConfig() {
     EEPROM.write(462, tiltButton);
     EEPROM.write(463, shiftButton);
 
-    EEPROM.write(464, disableAccelOnPlungerMove);
+    // Write bit-packed flags to EEPROM
+    EEPROM.write(464, flags.disableAccelOnPlungerMove);
     EEPROM.write(465, enablePlungerQuickRelease);
-    EEPROM.write(466, disablePlungerWhenNotInUse);
-    EEPROM.write(467, disableButtonPressWhenKeyboardEnabled);
+    EEPROM.write(466, flags.disablePlungerWhenNotInUse);
+    EEPROM.write(467, flags.disableButtonPressWhenKeyboardEnabled);
 
     writeIntIntoEEPROM(468, accelerometerTiltY);
     writeIntIntoEEPROM(470, accelerometerMaxY);
@@ -133,17 +152,17 @@ void Config::saveConfig() {
     saveEEPROMArray(buttonKeyDebounce, 532, 24);
 
     EEPROM.write(564, buttonDebounceCounter);
-    EEPROM.write(565, enablePlunger);
-    
+    EEPROM.write(565, flags.enablePlunger);
+
 
     EEPROM.write(566, tiltSuppress);
-    EEPROM.write(567, lightShowAttractEnabled);
+    EEPROM.write(567, flags.lightShowAttractEnabled);
 
     EEPROM.write(568, lightShowTime);
-    EEPROM.write(569, reverseButtonOutputPolarity);
-    EEPROM.write(570, disableUSBSuspend);
-    EEPROM.write(571, bluetoothEnable);
-    EEPROM.write(572, debug);
+    EEPROM.write(569, flags.reverseButtonOutputPolarity);
+    EEPROM.write(570, flags.disableUSBSuspend);
+    EEPROM.write(571, flags.bluetoothEnable);
+    EEPROM.write(572, flags.debug);
     saveEEPROMArray(buttonRemap, 573, 32);
     EEPROM.write(605, tiltButtonUp);
     EEPROM.write(606, tiltButtonDown);
@@ -156,7 +175,7 @@ void Config::saveConfig() {
     writeIntIntoEEPROM(613, (int16_t)(irCode >> 16));
     EEPROM.write(615, irBits);
     EEPROM.write(616, irButton);
-    EEPROM.write(617, lowLatencyMode);
+    EEPROM.write(617, flags.lowLatencyMode);
 
     EEPROM.write(1000, 101);
 }
@@ -193,26 +212,26 @@ void Config::updateConfigFromSerial() {
 
     readConfigArray(buttonKeyboard, 32);
 
-    disableAccelOnPlungerMove = blockRead();
+    flags.disableAccelOnPlungerMove = blockRead();
     enablePlungerQuickRelease = blockRead();
-    disablePlungerWhenNotInUse = blockRead();
-    disableButtonPressWhenKeyboardEnabled = blockRead();
+    flags.disablePlungerWhenNotInUse = blockRead();
+    flags.disableButtonPressWhenKeyboardEnabled = blockRead();
     accelerometerTiltY = readIntFromByte();
     accelerometerMaxY = readIntFromByte();
 
 
     readConfigArray(buttonKeyDebounce, 24);
     buttonDebounceCounter = blockRead();
-    enablePlunger = blockRead();
-    
+    flags.enablePlunger = blockRead();
+
 
     tiltSuppress = blockRead();
-    lightShowAttractEnabled = blockRead();
+    flags.lightShowAttractEnabled = blockRead();
     lightShowTime = blockRead();
-    reverseButtonOutputPolarity = blockRead();
-    disableUSBSuspend = blockRead();
-    bluetoothEnable = blockRead();
-    debug = blockRead();
+    flags.reverseButtonOutputPolarity = blockRead();
+    flags.disableUSBSuspend = blockRead();
+    flags.bluetoothEnable = blockRead();
+    flags.debug = blockRead();
     readConfigArray(buttonRemap, 32);
     tiltButtonUp = blockRead();
     tiltButtonDown = blockRead();
@@ -227,7 +246,7 @@ void Config::updateConfigFromSerial() {
     irCode |= blockRead();
     irBits = blockRead();
     irButton = blockRead();
-    lowLatencyMode = blockRead();
+    flags.lowLatencyMode = blockRead();
 
     if(blockRead() != 42) {
       done = 1;
@@ -275,24 +294,24 @@ void Config::sendConfig() {
     printComma(shiftButton);
     printConfigArray(buttonKeyboard, 32);
 
-    printComma(disableAccelOnPlungerMove);
+    printComma(flags.disableAccelOnPlungerMove);
     printComma(enablePlungerQuickRelease);
-    printComma(disablePlungerWhenNotInUse);
-    printComma(disableButtonPressWhenKeyboardEnabled);
+    printComma(flags.disablePlungerWhenNotInUse);
+    printComma(flags.disableButtonPressWhenKeyboardEnabled);
     printIntComma(accelerometerTiltY);
     printIntComma(accelerometerMaxY);
 
     printConfigArray(buttonKeyDebounce, 24);
     printComma(buttonDebounceCounter);
-    printComma(enablePlunger);
-    
+    printComma(flags.enablePlunger);
+
     printComma(tiltSuppress);
-    printComma(lightShowAttractEnabled);
+    printComma(flags.lightShowAttractEnabled);
     printComma(lightShowTime);
-    printComma(reverseButtonOutputPolarity);
-    printComma(disableUSBSuspend);
-    printComma(bluetoothEnable);
-    printComma(debug);
+    printComma(flags.reverseButtonOutputPolarity);
+    printComma(flags.disableUSBSuspend);
+    printComma(flags.bluetoothEnable);
+    printComma(flags.debug);
     printConfigArray(buttonRemap, 32);
     printComma(tiltButtonUp);
     printComma(tiltButtonDown);
@@ -307,7 +326,7 @@ void Config::sendConfig() {
     printComma((unsigned char)(irCode & 0xFF));
     printComma(irBits);
     printComma(irButton);
-    printComma(lowLatencyMode);
+    printComma(flags.lowLatencyMode);
 
     Serial.print(F("E\r\n"));
 }

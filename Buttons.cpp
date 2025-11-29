@@ -29,14 +29,14 @@ void Buttons::init()
 
 bool Buttons::checkChanged()
 {
-  if (config.buttonPressed)
+  if (config.flags.buttonPressed)
   {
     return true;
   }
   if (buttonReader.update())
   {
-    config.buttonPressed = true;
-    config.updateUSB = true;
+    config.flags.buttonPressed = true;
+    config.flags.updateUSB = true;
     return true;
   }
   else
@@ -49,12 +49,12 @@ void Buttons::readInputs()
 {
   uint8_t buttonPushed = 2; // this is set to notify light show that a button press has happened
   // read shift register values
-  if (config.buttonPressed || buttons.numberButtonsPressed > 0)
+  if (config.flags.buttonPressed || buttons.numberButtonsPressed > 0)
   {
     for (uint8_t i = 0; i < 24; i++)
     {
       bool currentButtonState = !buttonReader.state(i);
-      if (currentButtonState != config.lastButtonState[i])
+      if (currentButtonState != config.lastButtonState(i))
       {
 
         if (currentButtonState == 1)
@@ -66,7 +66,7 @@ void Buttons::readInputs()
           buttonPushed = 0;
         }
 
-        config.lastButtonState[i] = sendButtonPush(i, currentButtonState);
+        config.setLastButtonState(i, sendButtonPush(i, currentButtonState));
       }
 
     }
@@ -90,7 +90,7 @@ void Buttons::readInputs()
 bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
 {
 
-  config.updateUSB = true;
+  config.flags.updateUSB = true;
 
 
   if (config.buttonKeyDebounce[i] > 0 && currentButtonState == 0)
@@ -113,18 +113,18 @@ bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
 
   // Handle shifted buttons (optimize common conditions)
   if (config.shiftButton < 24 && i > 3 && i < 12) {
-    bool shiftPressed = config.lastButtonState[config.shiftButton] == 1;
+    bool shiftPressed = config.lastButtonState(config.shiftButton) == 1;
     
-    if (!currentButtonState && config.lastButtonState[i + 20] == 1 && !shiftPressed) {
+    if (!currentButtonState && config.lastButtonState(i + 20) == 1 && !shiftPressed) {
       // Logic for turning the shifted button off if the shift button is released
       sendActualButtonPress(i + 20, currentButtonState);
-      config.lastButtonState[i + 20] = currentButtonState;
+      config.setLastButtonState(i + 20, currentButtonState);
     }
-    
+
     if (shiftPressed) {
       // Logic for turning the shifted button on if the shift button is depressed
       buttonOffset = i + 20;
-      config.lastButtonState[buttonOffset] = currentButtonState;
+      config.setLastButtonState(buttonOffset, currentButtonState);
       sendActualButtonPress(buttonOffset, currentButtonState);
       
       if (!currentButtonState) {
@@ -169,13 +169,13 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
 
     if (config.nightModeButton < 32)
     {
-      config.nightMode = currentButtonState;
+      config.flags.nightMode = currentButtonState;
     }
     else
     {
       if (currentButtonState == 1)
       {
-        config.nightMode = !config.nightMode;
+        config.flags.nightMode = !config.flags.nightMode;
       }
     }
     // Don't process this button as a joystick/keyboard press
@@ -186,7 +186,7 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
   {
     processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1], currentButtonState == 1);
   }
-  if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0)
+  if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] == 0 || config.flags.disableButtonPressWhenKeyboardEnabled == 0)
   {
     if (currentButtonState == 1)
     {
@@ -200,7 +200,7 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
   
   // Update processed button state array for SPI/Bluetooth controller
   // This represents the final button state after all shift logic processing
-  config.processedButtonState[config.buttonRemap[buttonOffset]] = currentButtonState;
+  config.setProcessedButtonState(config.buttonRemap[buttonOffset] - 1, currentButtonState);
 }
 
 void Buttons::sendButtonState()
@@ -208,7 +208,7 @@ void Buttons::sendButtonState()
   Serial.print(F("B,"));
   for (uint8_t i = 0; i < 32; i++)
   {
-    Serial.print(config.lastButtonState[i]);
+    Serial.print((uint8_t)config.lastButtonState(i));
     if (i < 31) Serial.print(F(","));
   }
   Serial.print(F("\r\n"));

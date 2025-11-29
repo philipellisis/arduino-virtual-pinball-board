@@ -21,7 +21,7 @@ void Plunger::resetPlunger() {
 }
 
 void Plunger::plungerRead() {
-  if (config.enablePlunger == false) {
+  if (config.flags.enablePlunger == false) {
     updateGamepadZAxis(0);
     return;
   }
@@ -44,7 +44,7 @@ void Plunger::plungerRead() {
     sensorValue = newReading;
   }
 
-  if (config.plungerMoving == true || config.disablePlungerWhenNotInUse == 0) {
+  if (config.flags.plungerMoving == true || config.flags.disablePlungerWhenNotInUse == 0) {
     for (uint8_t i = 0; i < config.plungerAverageRead; i++) {
       sensorValue += analogRead(23);
     }
@@ -58,12 +58,12 @@ void Plunger::plungerRead() {
   if ((sensorValue < config.plungerMid + 50 && sensorValue > config.plungerMid - 50) || sensorValue > 990) {
     if (currentTime - restingStartTime >= config.restingStateMax) {
       // Plunger is in the resting state when the timer exceeds restingStateMax
-      config.plungerMoving = false;
+      config.flags.plungerMoving = false;
     }
   } else {
     // Reset the timer if the plunger is moving
     restingStartTime = currentTime;
-    config.plungerMoving = true;
+    config.flags.plungerMoving = true;
   }
 
   // Handle plunger button push logic for max position
@@ -94,7 +94,7 @@ void Plunger::plungerRead() {
   int8_t currentDelayedValue = getDelayedPlungerValue(adjustedValue, currentTime);
 
   if (priorValue != currentDelayedValue) {
-    if (config.plungerMoving) {
+    if (config.flags.plungerMoving) {
       if (adjustedValue > 0 && !plungerReleased) {
         currentPlungerMax = currentDelayedValue;
       }
@@ -102,7 +102,7 @@ void Plunger::plungerRead() {
     } else {
       currentPlungerMax = 0;
       plungerReleased = false;
-      if (config.disablePlungerWhenNotInUse == 1) {
+      if (config.flags.disablePlungerWhenNotInUse == 1) {
         updateGamepadZAxis(0);
       } else {
         updateGamepadZAxis(currentDelayedValue, true);
@@ -122,16 +122,16 @@ int8_t Plunger::getDelayedPlungerValue(int8_t sensorValue, uint32_t currentTime)
   if (config.enablePlungerQuickRelease == 0) {
     return sensorValue;
   }
-  if (config.plungerMoving == false && plungerReleased == true) {
+  if (config.flags.plungerMoving == false && plungerReleased == true) {
     plungerReleased = false;
-    config.updateUSB = true;
+    config.flags.updateUSB = true;
     return 0;
   }
-  if ((sensorValue < 0 && config.plungerMoving == true && currentPlungerMax > 0 && truePriorValue > 50) || plungerReleased == true) {
+  if ((sensorValue < 0 && config.flags.plungerMoving == true && currentPlungerMax > 0 && truePriorValue > 50) || plungerReleased == true) {
     if (plungerReleased == false) {
-      config.lastButtonState[config.plungerLaunchButton] = buttons.sendButtonPush(config.plungerLaunchButton, 1);
+      config.setLastButtonState(config.plungerLaunchButton, buttons.sendButtonPush(config.plungerLaunchButton, 1));
     } else {
-      config.lastButtonState[config.plungerLaunchButton] = buttons.sendButtonPush(config.plungerLaunchButton, 0);
+      config.setLastButtonState(config.plungerLaunchButton, buttons.sendButtonPush(config.plungerLaunchButton, 0));
     }
     plungerReleased = true;
     return 0;
@@ -147,11 +147,6 @@ int8_t Plunger::getDelayedPlungerValue(int8_t sensorValue, uint32_t currentTime)
   }
 
 
-  // Serial.print("plunger delay timer: ");
-  // Serial.print(index);
-  // Serial.print(", ");
-  // Serial.print(plungerDataCounter);
-  // Serial.print(F("\r\n"));
   return plungerData[index];
   // if (plungerDataCounter == 25) {
   //   return plungerData[0];
@@ -163,14 +158,14 @@ int8_t Plunger::getDelayedPlungerValue(int8_t sensorValue, uint32_t currentTime)
 void Plunger::updateButtonState(uint8_t& buttonState, bool condition, bool pressed) {
   if (condition && buttonState != pressed) {
     buttonState = buttons.sendButtonPush(config.plungerLaunchButton, pressed);
-    config.lastButtonState[config.plungerLaunchButton] = buttonState;
+    config.setLastButtonState(config.plungerLaunchButton, buttonState);
   }
 }
 
 void Plunger::updateGamepadZAxis(int8_t value, bool forceUpdate) {
   Gamepad1.zAxis(value);
   if (forceUpdate) {
-    config.updateUSB = true;
+    config.flags.updateUSB = true;
   }
 }
 

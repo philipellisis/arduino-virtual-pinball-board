@@ -47,44 +47,61 @@ class Config {
     unsigned char tiltButtonRight = 12;
 
     unsigned char done = 0;
-    bool nightMode = false;
-    bool debug = false;
+
+    // Bit-packed flags to save memory (14 bools = 2 bytes instead of 14 bytes)
+    struct {
+      uint8_t nightMode : 1;
+      uint8_t debug : 1;
+      uint8_t lowLatencyMode : 1;
+      uint8_t plungerMoving : 1;
+      uint8_t updateUSB : 1;
+      uint8_t disableUSBSuspend : 1;
+      uint8_t buttonPressed : 1;
+      uint8_t bluetoothEnable : 1;
+
+      uint8_t disableAccelOnPlungerMove : 1;
+      uint8_t disablePlungerWhenNotInUse : 1;
+      uint8_t disableButtonPressWhenKeyboardEnabled : 1;
+      uint8_t enablePlunger : 1;
+      uint8_t lightShowAttractEnabled : 1;
+      uint8_t reverseButtonOutputPolarity : 1;
+      uint8_t _reserved : 2;  // Reserved for future use
+    } flags;
+
+    // Bit-packed button state arrays (32 bools = 4 bytes instead of 32 bytes each)
+    uint32_t lastButtonStatePacked = 0;
+    uint32_t processedButtonStatePacked = 0;
+
     void updateConfigFromSerial();
     void sendConfig();
     void setPlunger();
     void setAccelerometer();
-    bool lowLatencyMode = false;
 
     unsigned char lightShowState = 1;
 
     unsigned char buttonKeyboard[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     unsigned char buttonRemap[32] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32};
     unsigned char buttonKeyDebounce[24] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    bool lastButtonState[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-    bool processedButtonState[32] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     unsigned char buttonDebounceCounter = 0;
-    bool plungerMoving = false; 
     long restingStateMax = 160;
-    bool updateUSB = false;
-    bool disableUSBSuspend = true;
-    bool buttonPressed = false;
     // 0 is ignore accel option
     // 1 is quick release option
     // 2 ignore when not in use option
-    // 3 
-    bool disableAccelOnPlungerMove = true;
+    // 3
     unsigned char  enablePlungerQuickRelease = true;
-    bool disablePlungerWhenNotInUse = true;
-    bool disableButtonPressWhenKeyboardEnabled = true;
-    bool enablePlunger = true;
-    bool bluetoothEnable = false;
 
     unsigned char tiltSuppress = 10;
-    bool lightShowAttractEnabled = true;
     unsigned char lightShowTime = 10;
-    bool reverseButtonOutputPolarity = true;
-    
 
+    // Compact bit access helpers
+    bool lastButtonState(uint8_t i) const { return lastButtonStatePacked & (1UL << i); }
+    void setLastButtonState(uint8_t i, bool v) {
+      v ? (lastButtonStatePacked |= (1UL << i)) : (lastButtonStatePacked &= ~(1UL << i));
+    }
+    bool processedButtonState(uint8_t i) const { return processedButtonStatePacked & (1UL << i); }
+    void setProcessedButtonState(uint8_t i, bool v) {
+      v ? (processedButtonStatePacked |= (1UL << i)) : (processedButtonStatePacked &= ~(1UL << i));
+    }
 
   private:
     unsigned char Config::blockRead();
@@ -99,8 +116,10 @@ class Config {
     void printConfigArray(unsigned char* configArray, unsigned char size);
     void loadEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size);
     void saveEEPROMArray(unsigned char* configArray, uint16_t address, uint8_t size);
-    
-    
 };
+
+// Lightweight bit macros (only for less-frequently accessed data)
+#define GET_BIT(var, i) ((var >> i) & 1)
+#define SET_BIT(var, i, v) do { if (v) var |= (1UL << i); else var &= ~(1UL << i); } while(0)
 
 #endif

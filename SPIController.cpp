@@ -6,10 +6,7 @@ SPIController::SPIController() :
     lastYAxis(0),
     lastPlungerValue(0)
 {
-    // Initialize button states
-    for (int i = 0; i < NUM_BUTTONS; i++) {
-        lastButtonStates[i] = false;
-    }
+    // Initialize button states (already initialized to 0)
 }
 
 void SPIController::init() {
@@ -34,7 +31,7 @@ void SPIController::update() {
 bool SPIController::hasInputChanged() {
     // Check button changes
     for (int i = 0; i < NUM_BUTTONS && i < 32; i++) {
-        if (lastButtonStates[i] != config.lastButtonState[i]) {
+        if (GET_BIT(lastButtonStatesPacked, i) != config.lastButtonState(i)) {
             return true;
         }
     }
@@ -53,11 +50,11 @@ bool SPIController::hasInputChanged() {
 
 void SPIController::packButtonData(uint8_t* buttonPacket) {
     memset(buttonPacket, 0x00, BUTTON_BYTES);
-    
+
     // Pack processed button states (after shift logic) into bytes
     // This uses the same final button states that the USB gamepad sends
     for (uint8_t i = 0; i < NUM_BUTTONS && i < 32; i++) {
-        if (config.processedButtonState[i]) {
+        if (config.processedButtonState(i)) {
             buttonPacket[i / 8] |= (1 << (i % 8));
         }
     }
@@ -83,7 +80,7 @@ int16_t SPIController::getYAxisValue() {
 
 int16_t SPIController::getPlungerValue() {
     // Get plunger value
-    if (config.enablePlunger) {
+    if (config.flags.enablePlunger) {
         return plunger.getAdjustedValue();
     }
     return 0;
@@ -158,7 +155,7 @@ void SPIController::sendSPIPacket() {
     
     // 5) Update last known states
     for (int i = 0; i < NUM_BUTTONS && i < 32; i++) {
-        lastButtonStates[i] = config.lastButtonState[i];
+        SET_BIT(lastButtonStatesPacked, i, config.lastButtonState(i));
     }
     lastXAxis = xAxis;
     lastYAxis = yAxis;

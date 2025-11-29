@@ -20,7 +20,7 @@ class LightShow {
   private:
     uint32_t timeInState;
     uint8_t outputValues[63] = {0};
-    uint8_t outputDirection[63] = {0};
+    uint64_t outputDirectionPacked = 0;  // Bit-packed (63 bits = 8 bytes instead of 63)
     uint8_t startLight = 0;
     uint8_t finishLight = 0;
     uint8_t incrementor = 5;

@@ -35,7 +35,7 @@ void LightShow::checkSetLights() {
     break;
   case WAITING_INPUT:
     //here an output has not been received in 10 seconds, and now waiting for button input
-    if (currentTime - timeInState > (lightShowStartTime * 2) && config.lightShowAttractEnabled == true) {
+    if (currentTime - timeInState > (lightShowStartTime * 2) && config.flags.lightShowAttractEnabled == true) {
       setLightsRandom();
       if (doneSettingLights == true) {
         config.lightShowState = IN_RANDOM_MODE_WAITING_INPUT;
@@ -118,7 +118,7 @@ void LightShow::setLightsRandom() {
     if (isLightShowOutput(i)) {
       uint8_t rnd = rand();
       updateLightValue(i, rnd);
-      outputDirection[i] = rnd & 1; // More efficient than modulo
+      SET_BIT(outputDirectionPacked, i, rnd & 1); // More efficient than modulo
       outputValues[i] = rnd;
     }
   }
@@ -129,17 +129,17 @@ void LightShow::incrementRandom() {
   for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
     if (isLightShowOutput(i)) {
       // Simplified bouncing logic
-      int16_t newValue = outputValues[i] + (outputDirection[i] ? incrementor : -incrementor);
-      
+      int16_t newValue = outputValues[i] + (GET_BIT(outputDirectionPacked, i) ? incrementor : -incrementor);
+
       // Bounce off limits and reverse direction
       if (newValue >= 255) {
         newValue = 255;
-        outputDirection[i] = 0;
+        SET_BIT(outputDirectionPacked, i, 0);
       } else if (newValue <= 0) {
         newValue = 0;
-        outputDirection[i] = 1;
+        SET_BIT(outputDirectionPacked, i, 1);
       }
-      
+
       outputValues[i] = newValue;
       updateLightValue(i, outputValues[i]);
     }
