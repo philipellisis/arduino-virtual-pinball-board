@@ -182,7 +182,7 @@ void Accelerometer::applyOrientationTransform(int16_t& x, int16_t& y) {
 }
 
 void Accelerometer::processTiltButton() {
-  if (config.tiltButton >= 24) return;
+  if (config.tiltButton >= 24 || config.tiltButtonRight >=32 || config.tiltButtonLeft >= 32 || config.tiltButtonUp >= 32 || config.tiltButtonDown >= 32) return;
   
   if (tiltSuppressTime > 0) {
     tiltSuppressTime--;
@@ -190,25 +190,28 @@ void Accelerometer::processTiltButton() {
   }
   
   bool tiltThresholdExceeded = (abs(xValue) > config.accelerometerTilt || abs(yValue) > config.accelerometerTiltY);
-  uint8_t currentTiltState = config.lastButtonState[config.tiltButton];
+  uint8_t currentTiltState = config.lastButtonState[config.tiltButtonRight] ||
+                            config.lastButtonState[config.tiltButtonLeft] ||
+                            config.lastButtonState[config.tiltButtonUp] ||
+                            config.lastButtonState[config.tiltButtonDown];
   
   if (currentTiltState == 0 && tiltThresholdExceeded) {
-    config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 1);
+    //config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 1);
     if (xValue > config.accelerometerTilt) {
       config.lastButtonState[config.tiltButtonRight] = buttons.sendButtonPush(config.tiltButtonRight, 1);
     }
-    if (xValue < -config.accelerometerTilt) {
+    else if (xValue < -config.accelerometerTilt) {
       config.lastButtonState[config.tiltButtonLeft] = buttons.sendButtonPush(config.tiltButtonLeft, 1);
     }
-    if (yValue > config.accelerometerTiltY) {
+    else if (yValue > config.accelerometerTiltY) {
       config.lastButtonState[config.tiltButtonUp] = buttons.sendButtonPush(config.tiltButtonUp, 1);
     }
-    if (yValue < -config.accelerometerTiltY) {
+    else if (yValue < -config.accelerometerTiltY) {
       config.lastButtonState[config.tiltButtonDown] = buttons.sendButtonPush(config.tiltButtonDown, 1);
     }
 
   } else if (currentTiltState == 1 && !tiltThresholdExceeded) {
-    config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 0);
+    //config.lastButtonState[config.tiltButton] = buttons.sendButtonPush(config.tiltButton, 0);
     config.lastButtonState[config.tiltButtonRight] = buttons.sendButtonPush(config.tiltButtonRight, 0);
     config.lastButtonState[config.tiltButtonLeft] = buttons.sendButtonPush(config.tiltButtonLeft, 0);
     config.lastButtonState[config.tiltButtonUp] = buttons.sendButtonPush(config.tiltButtonUp, 0);
