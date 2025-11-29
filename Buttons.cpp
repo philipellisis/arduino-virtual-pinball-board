@@ -182,11 +182,11 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
     return;
   }
 
-  if (config.buttonKeyboard[config.buttonRemap[buttonOffset]] > 0)
+  if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] > 0)
   {
-    processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset]], currentButtonState == 1);
+    processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1], currentButtonState == 1);
   }
-  if (config.buttonKeyboard[config.buttonRemap[buttonOffset]] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0)
+  if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0)
   {
     if (currentButtonState == 1)
     {
