@@ -1,6 +1,6 @@
 #ifndef ENUMS_H
 #define ENUMS_H
-enum admin_type {
+enum admin_type : uint8_t {
     BUTTONS = 1,
     OUTPUTS = 2,
     PLUNGER = 3,
@@ -23,7 +23,7 @@ enum admin_type {
   // 5 means an output has been received in the last 10 seconds
   // 6 means it's in random mode and just waiting for the next update
   // 7 means input has been recieved and lights are on high, waiting for button to be depressed
-enum light_show_state {
+enum light_show_state : uint8_t {
   DISABLED = 0,
   OUTPUT_RECEIVED_RESET_TIMER = 1,
   INPUT_RECEIVED_SET_LIGHTS_LOW = 2,
@@ -34,7 +34,7 @@ enum light_show_state {
   IN_RANDOM_MODE_WAITING_INPUT = 6
 
 };
-enum output_type {
+enum output_type : uint8_t {
   NONE = 0,
   NOISY = 1,
   LIGHT_SHOW_MEDIUM = 2,
@@ -42,7 +42,7 @@ enum output_type {
   SHARED = 4,
 };
 
-enum eeprom {
+enum eeprom : uint8_t {
   PLUNGER_MIN = 1,
   PLUNGER_MAX = 2,
   LEFT_FLIPPER = 3,
@@ -51,7 +51,7 @@ enum eeprom {
   OUTPUT_X_MAX_TIME = 200, // max of 3 expansion boards -- 16, 32, 48
 };
 
-enum accel_direction {
+enum accel_direction : uint8_t {
   BACK = 0,
   RIGHT = 1,
   FORWARD = 2,

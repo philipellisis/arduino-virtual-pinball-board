@@ -30,8 +30,7 @@ class Plunger {
     int8_t plungerDataCounter = 0;
     int8_t getDelayedPlungerValue(int8_t sensorValue, uint32_t currentTime);
     int8_t currentPlungerMax = 0;
-    void updateButtonState(uint8_t& buttonState, bool condition, bool pressed);
-    void updateGamepadZAxis(int8_t value, bool forceUpdate = false);
+    inline void updateButtonState(uint8_t& buttonState, bool condition, bool pressed);
 
 };
 

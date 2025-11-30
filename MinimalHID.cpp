@@ -125,30 +125,25 @@ void MinimalGamepad::begin() {
 
 void MinimalGamepad::xAxis(int16_t value) {
     _report.xAxis = value;
-    write();
 }
 
 void MinimalGamepad::yAxis(int16_t value) {
     _report.yAxis = value;
-    write();
 }
 
 void MinimalGamepad::zAxis(int8_t value) {
     _report.zAxis = value;
-    write();
 }
 
 void MinimalGamepad::press(uint8_t button) {
     if (button >= 1 && button <= 32) {
         _report.buttons |= (1UL << (button - 1));
-        write();
     }
 }
 
 void MinimalGamepad::release(uint8_t button) {
     if (button >= 1 && button <= 32) {
         _report.buttons &= ~(1UL << (button - 1));
-        write();
     }
 }
 

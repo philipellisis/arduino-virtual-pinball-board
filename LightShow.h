@@ -29,10 +29,7 @@ class LightShow {
     uint8_t currentFinishLight = 0;
     bool doneSettingLights = true;
     void setStartFinishLoops();
-    bool isLightShowOutput(int i);
-    bool isMediumLight(int i);
-    void transitionToState(uint8_t newState, uint32_t currentTime);
-    void updateLightValue(uint8_t i, uint8_t value);
+    inline void transitionToState(uint8_t newState, uint32_t currentTime);
     uint32_t lightShowStartTime = 10000;
 };
 

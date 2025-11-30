@@ -21,8 +21,8 @@ void Plunger::resetPlunger() {
 }
 
 void Plunger::plungerRead() {
-  if (config.flags.enablePlunger == false) {
-    updateGamepadZAxis(0);
+  if (!config.flags.enablePlunger) {
+    Gamepad1.zAxis(0);
     return;
   }
 
@@ -44,7 +44,7 @@ void Plunger::plungerRead() {
     sensorValue = newReading;
   }
 
-  if (config.flags.plungerMoving == true || config.flags.disablePlungerWhenNotInUse == 0) {
+  if (config.flags.plungerMoving || config.flags.disablePlungerWhenNotInUse == 0) {
     for (uint8_t i = 0; i < config.plungerAverageRead; i++) {
       sensorValue += analogRead(23);
     }
@@ -98,14 +98,16 @@ void Plunger::plungerRead() {
       if (adjustedValue > 0 && !plungerReleased) {
         currentPlungerMax = currentDelayedValue;
       }
-      updateGamepadZAxis(currentDelayedValue, true);
+      Gamepad1.zAxis(currentDelayedValue);
+      config.flags.updateUSB = true;
     } else {
       currentPlungerMax = 0;
       plungerReleased = false;
       if (config.flags.disablePlungerWhenNotInUse == 1) {
-        updateGamepadZAxis(0);
+        Gamepad1.zAxis(0);
       } else {
-        updateGamepadZAxis(currentDelayedValue, true);
+        Gamepad1.zAxis(currentDelayedValue);
+        config.flags.updateUSB = true;
       }
     }
     priorValue = currentDelayedValue;
@@ -122,13 +124,13 @@ int8_t Plunger::getDelayedPlungerValue(int8_t sensorValue, uint32_t currentTime)
   if (config.enablePlungerQuickRelease == 0) {
     return sensorValue;
   }
-  if (config.flags.plungerMoving == false && plungerReleased == true) {
+  if (!config.flags.plungerMoving && plungerReleased) {
     plungerReleased = false;
     config.flags.updateUSB = true;
     return 0;
   }
-  if ((sensorValue < 0 && config.flags.plungerMoving == true && currentPlungerMax > 0 && truePriorValue > 50) || plungerReleased == true) {
-    if (plungerReleased == false) {
+  if ((sensorValue < 0 && config.flags.plungerMoving && currentPlungerMax > 0 && truePriorValue > 50) || plungerReleased) {
+    if (!plungerReleased) {
       config.setLastButtonState(config.plungerLaunchButton, buttons.sendButtonPush(config.plungerLaunchButton, 1));
     } else {
       config.setLastButtonState(config.plungerLaunchButton, buttons.sendButtonPush(config.plungerLaunchButton, 0));
@@ -148,24 +150,12 @@ int8_t Plunger::getDelayedPlungerValue(int8_t sensorValue, uint32_t currentTime)
 
 
   return plungerData[index];
-  // if (plungerDataCounter == 25) {
-  //   return plungerData[0];
-  // } else {
-  //   return plungerData[plungerDataCounter + 1];
-  // }
 }
 
 void Plunger::updateButtonState(uint8_t& buttonState, bool condition, bool pressed) {
   if (condition && buttonState != pressed) {
     buttonState = buttons.sendButtonPush(config.plungerLaunchButton, pressed);
     config.setLastButtonState(config.plungerLaunchButton, buttonState);
-  }
-}
-
-void Plunger::updateGamepadZAxis(int8_t value, bool forceUpdate) {
-  Gamepad1.zAxis(value);
-  if (forceUpdate) {
-    config.flags.updateUSB = true;
   }
 }
 

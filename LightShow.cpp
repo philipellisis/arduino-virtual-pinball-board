@@ -35,9 +35,9 @@ void LightShow::checkSetLights() {
     break;
   case WAITING_INPUT:
     //here an output has not been received in 10 seconds, and now waiting for button input
-    if (currentTime - timeInState > (lightShowStartTime * 2) && config.flags.lightShowAttractEnabled == true) {
+    if (currentTime - timeInState > (lightShowStartTime * 2) && config.flags.lightShowAttractEnabled) {
       setLightsRandom();
-      if (doneSettingLights == true) {
+      if (doneSettingLights) {
         config.lightShowState = IN_RANDOM_MODE_WAITING_INPUT;
         timeInState = currentTime;
       }
@@ -71,7 +71,7 @@ void LightShow::checkSetLights() {
 }
 
 void LightShow::setStartFinishLoops() {
-  if (doneSettingLights == true) {
+  if (doneSettingLights) {
     currentStartLight = startLight;
     doneSettingLights = false;
   } else {
@@ -87,10 +87,10 @@ void LightShow::setStartFinishLoops() {
 void LightShow::setLightsNormal() {
   setStartFinishLoops();
   for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
-    if (isMediumLight(i)) {
-      updateLightValue(i, 60);
+    if (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM) {
+      outputs.updateOutput(i, 60);
     } else if (config.toySpecialOption[i] == LIGHT_SHOW_HIGH) {
-      updateLightValue(i, 255);
+      outputs.updateOutput(i, 255);
     }
   }
 }
@@ -98,16 +98,16 @@ void LightShow::setLightsNormal() {
 void LightShow::setLightsHigh() {
   setStartFinishLoops();
   for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
-    if (isMediumLight(i)) {
-      updateLightValue(i, 255);
+    if (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM) {
+      outputs.updateOutput(i, 255);
     }
   }
 }
 
 void LightShow::setLightsOff() {
   for (uint8_t i = startLight; i < finishLight; i++) {
-    if (isLightShowOutput(i)) {
-      updateLightValue(i, 0);
+    if (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM || config.toySpecialOption[i] == LIGHT_SHOW_HIGH) {
+      outputs.updateOutput(i, 0);
     }
   }
 }
@@ -115,9 +115,9 @@ void LightShow::setLightsOff() {
 void LightShow::setLightsRandom() {
   setStartFinishLoops();
   for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
-    if (isLightShowOutput(i)) {
+    if (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM || config.toySpecialOption[i] == LIGHT_SHOW_HIGH) {
       uint8_t rnd = rand();
-      updateLightValue(i, rnd);
+      outputs.updateOutput(i, rnd);
       SET_BIT(outputDirectionPacked, i, rnd & 1); // More efficient than modulo
       outputValues[i] = rnd;
     }
@@ -127,7 +127,7 @@ void LightShow::setLightsRandom() {
 void LightShow::incrementRandom() {
   setStartFinishLoops();
   for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
-    if (isLightShowOutput(i)) {
+    if (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM || config.toySpecialOption[i] == LIGHT_SHOW_HIGH) {
       // Simplified bouncing logic
       int16_t newValue = outputValues[i] + (GET_BIT(outputDirectionPacked, i) ? incrementor : -incrementor);
 
@@ -141,7 +141,7 @@ void LightShow::incrementRandom() {
       }
 
       outputValues[i] = newValue;
-      updateLightValue(i, outputValues[i]);
+      outputs.updateOutput(i, outputValues[i]);
     }
   }
 }
@@ -151,16 +151,4 @@ void LightShow::transitionToState(uint8_t newState, uint32_t currentTime) {
     timeInState = currentTime;
     config.lightShowState = newState;
   }
-}
-
-bool LightShow::isLightShowOutput(int i) {
-  return (config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM || config.toySpecialOption[i] == LIGHT_SHOW_HIGH);
-}
-
-void LightShow::updateLightValue(uint8_t i, uint8_t value) {
-  outputs.updateOutput(i, value);
-}
-
-bool LightShow::isMediumLight(int i) {
-  return config.toySpecialOption[i] == LIGHT_SHOW_MEDIUM;
 }

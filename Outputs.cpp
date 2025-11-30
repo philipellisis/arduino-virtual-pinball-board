@@ -9,7 +9,7 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40);
 Adafruit_PWMServoDriver pwm1 = Adafruit_PWMServoDriver(0x41);
 Adafruit_PWMServoDriver pwm2 = Adafruit_PWMServoDriver(0x42);
 Outputs::Outputs() {
-   for (int index = 0; index < numberOutputs; index++) {
+   for (uint8_t index = 0; index < numberOutputs; index++) {
     pinMode(outputList[index], OUTPUT);
    }
    
@@ -34,7 +34,7 @@ void Outputs::init() {
 }
 
 void Outputs::turnOff() {
-  for (int i = 0; i < 62; i++) {
+  for (uint8_t i = 0; i < 62; i++) {
     updateOutput(i, 0);
   }
 }
@@ -43,11 +43,11 @@ void Outputs::updateOutput(unsigned char outputId, unsigned char outputValue) {
   if (outputValue > config.maxOutputState[outputId]) {
     outputValue = config.maxOutputState[outputId];
   }
-  if (config.flags.nightMode == true && (config.toySpecialOption[outputId] == NOISY || config.toySpecialOption[outputId] == SHARED)) {
+  if (config.flags.nightMode && (config.toySpecialOption[outputId] == NOISY || config.toySpecialOption[outputId] == SHARED)) {
     outputValue = 0;
   }
   if (config.toySpecialOption[outputId] == SHARED && outputValue > 0 && outputValues[outputId] > 0) {
-    for (int i = 0; i < 9; i++) {
+    for (uint8_t i = 0; i < 9; i++) {
       if(config.toySpecialOption[i] == SHARED && outputValues[i] == 0) {
         outputId = i;
         SET_BIT(virtualOutputOnPacked, i, 1);
@@ -57,7 +57,7 @@ void Outputs::updateOutput(unsigned char outputId, unsigned char outputValue) {
   }
   if (config.toySpecialOption[outputId] == SHARED && outputValue == 0 && outputId < 10) {
     if (GET_BIT(virtualOutputOnPacked, outputId) == 0) {
-      for (int i = 0; i < 9; i++) {
+      for (uint8_t i = 0; i < 9; i++) {
         if(config.toySpecialOption[i] == SHARED && outputValues[i] > 0 && GET_BIT(virtualOutputOnPacked, i) > 0) {
           updateOutputInternal(i, 0);
           SET_BIT(virtualOutputOnPacked, i, 0);
@@ -79,7 +79,7 @@ void Outputs::updateOutputInternal(unsigned char outputId, unsigned char outputV
     if (outputId < 5) {
       analogWrite(outputList[outputId], outputValue);
     } else {
-      if (config.flags.bluetoothEnable == true && outputId == 10) {
+      if (config.flags.bluetoothEnable && outputId == 10) {
         return; // do not update the bluetooth output if bluetooth is enabled, as this pin is being used by SS
       }
       if (outputValue > 127) {
@@ -90,7 +90,7 @@ void Outputs::updateOutputInternal(unsigned char outputId, unsigned char outputV
     }
   } else {
     // if the output is the button board output, then invert the value
-    if (outputId < 31 && config.flags.reverseButtonOutputPolarity == true) {
+    if (outputId < 31 && config.flags.reverseButtonOutputPolarity) {
       outputValue = 255 - outputValue;
     }
     if (outputValue == 255) {
@@ -107,7 +107,7 @@ void Outputs::updateOutputInternal(unsigned char outputId, unsigned char outputV
 
 void Outputs::checkResetOutputs() {
   long int t1 = millis();
-  for(int i = 0; i < 5; i++) {
+  for(uint8_t i = 0; i < 5; i++) {
     resetOutputNumber = (resetOutputNumber + 1) % 63;
     if (outputValues[resetOutputNumber] > config.turnOffState[resetOutputNumber] && config.maxOutputTime[resetOutputNumber] > 0) {
       if (t1 - timeTurnedOn[resetOutputNumber] >= config.maxOutputTime[resetOutputNumber] * 100) {
@@ -131,7 +131,7 @@ void Outputs::updateOutputActual(unsigned char outputId, int outputValueStart, i
 
 void Outputs::sendOutputState() {
   Serial.print(F("O,"));
-  for (int i = 0; i < 62; i++) {
+  for (uint8_t i = 0; i < 62; i++) {
     Serial.print(outputValues[i]);
     Serial.print(F(","));
   }

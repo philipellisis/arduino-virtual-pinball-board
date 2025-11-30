@@ -35,10 +35,6 @@ void Accelerometer::init()
   {
     return;
   }
-  else
-  {
-    count = 0;
-  }
 
   mpu.config();
   resetAccelerometer();
@@ -82,12 +78,12 @@ void Accelerometer::resetAccelerometer()
 
 void Accelerometer::accelerometerRead()
 {
-  if (config.flags.plungerMoving == true && config.flags.disableAccelOnPlungerMove == 1) {
+  if (config.flags.plungerMoving && config.flags.disableAccelOnPlungerMove == 1) {
     return;
   }
   if (config.lightShowState == IN_RANDOM_MODE_WAITING_INPUT)
   {
-    if (recentered == false)
+    if (!recentered)
     {
       centerAccelerometer();
       recentered = true;
@@ -97,14 +93,11 @@ void Accelerometer::accelerometerRead()
   {
     recentered = false;
   }
-  // xValue = 0;
-  // yValue = 0;
-  // if(mpu.getMotionInterruptStatus()) {
-  /* Get new sensor events with the readings */
+
   mpu.read();
 
-  xValue = floor((getRawAccelValue() - xValueOffset));
-  yValue = floor((mpu.getY() - yValueOffset));
+  xValue = getRawAccelValue() - xValueOffset;
+  yValue = mpu.getY() - yValueOffset;
 
   
   if (abs(xValue) < config.accelerometerDeadZone)
@@ -170,9 +163,8 @@ void Accelerometer::processTiltButton() {
                             config.lastButtonState(config.tiltButtonLeft) ||
                             config.lastButtonState(config.tiltButtonUp) ||
                             config.lastButtonState(config.tiltButtonDown);
-  
+
   if (currentTiltState == 0 && tiltThresholdExceeded) {
-    //config.setLastButtonState(config.tiltButton, buttons.sendButtonPush(config.tiltButton, 1));
     if (xValue > config.accelerometerTilt) {
       config.setLastButtonState(config.tiltButtonRight, buttons.sendButtonPush(config.tiltButtonRight, 1));
     }
@@ -187,7 +179,6 @@ void Accelerometer::processTiltButton() {
     }
 
   } else if (currentTiltState == 1 && !tiltThresholdExceeded) {
-    //config.setLastButtonState(config.tiltButton, buttons.sendButtonPush(config.tiltButton, 0));
     config.setLastButtonState(config.tiltButtonRight, buttons.sendButtonPush(config.tiltButtonRight, 0));
     config.setLastButtonState(config.tiltButtonLeft, buttons.sendButtonPush(config.tiltButtonLeft, 0));
     config.setLastButtonState(config.tiltButtonUp, buttons.sendButtonPush(config.tiltButtonUp, 0));

@@ -30,7 +30,7 @@ void SPIController::update() {
 
 bool SPIController::hasInputChanged() {
     // Check button changes
-    for (int i = 0; i < NUM_BUTTONS && i < 32; i++) {
+    for (uint8_t i = 0; i < NUM_BUTTONS && i < 32; i++) {
         if (GET_BIT(lastButtonStatesPacked, i) != config.lastButtonState(i)) {
             return true;
         }
@@ -128,7 +128,7 @@ void SPIController::sendSPIPacket() {
     
     // Count pressed buttons for validation (based on what was actually packed)
     uint8_t buttonCount = 0;
-    for (int i = 0; i < NUM_BUTTONS && i < 32; i++) {
+    for (uint8_t i = 0; i < NUM_BUTTONS && i < 32; i++) {
         if (txBuf[i / 8] & (1 << (i % 8))) {
             buttonCount++;
         }
@@ -140,7 +140,7 @@ void SPIController::sendSPIPacket() {
         
         // Calculate simple checksum (sum of all bytes except checksum byte)
         uint8_t checksum = 0;
-        for (int i = 0; i < PACKET_SIZE - 1; i++) {
+        for (uint8_t i = 0; i < PACKET_SIZE - 1; i++) {
             checksum ^= txBuf[i];  // XOR checksum
         }
         txBuf[PACKET_SIZE - 1] = checksum;    // Checksum at end
@@ -154,7 +154,7 @@ void SPIController::sendSPIPacket() {
     digitalWrite(SS_PIN, HIGH);
     
     // 5) Update last known states
-    for (int i = 0; i < NUM_BUTTONS && i < 32; i++) {
+    for (uint8_t i = 0; i < NUM_BUTTONS && i < 32; i++) {
         SET_BIT(lastButtonStatesPacked, i, config.lastButtonState(i));
     }
     lastXAxis = xAxis;
