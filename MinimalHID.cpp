@@ -112,6 +112,47 @@ static const uint8_t _hidReportDescriptorConsumer[] PROGMEM = {
     0xc0                           // END_COLLECTION
 };
 
+// Shared HID helpers (used by all 3 HID classes)
+static bool handleHIDSetup(USBSetup& setup, uint8_t pluggedInterface, uint8_t& protocol, uint8_t& idle) {
+    if (pluggedInterface != setup.wIndex) {
+        return false;
+    }
+
+    uint8_t request = setup.bRequest;
+    uint8_t requestType = setup.bmRequestType;
+
+    if (requestType == REQUEST_DEVICETOHOST_CLASS_INTERFACE) {
+        if (request == HID_GET_REPORT || request == HID_GET_PROTOCOL) {
+            return true;
+        }
+    }
+
+    if (requestType == REQUEST_HOSTTODEVICE_CLASS_INTERFACE) {
+        if (request == HID_SET_PROTOCOL) {
+            protocol = setup.wValueL;
+            return true;
+        }
+        if (request == HID_SET_IDLE) {
+            idle = setup.wValueH;
+            return true;
+        }
+        if (request == HID_SET_REPORT) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static int handleHIDDescriptor(USBSetup& setup, uint8_t pluggedInterface, uint8_t& protocol, const uint8_t* descriptor, size_t descriptorSize) {
+    if (setup.bmRequestType != REQUEST_DEVICETOHOST_STANDARD_INTERFACE) { return 0; }
+    if (setup.wValueH != HID_REPORT_DESCRIPTOR_TYPE) { return 0; }
+    if (setup.wIndex != pluggedInterface) { return 0; }
+
+    protocol = HID_REPORT_PROTOCOL;
+    return USB_SendControl(TRANSFER_PGM, descriptor, descriptorSize);
+}
+
 // MinimalGamepad Implementation
 MinimalGamepad::MinimalGamepad() : PluggableUSBModule(1, 1, epType), protocol(HID_REPORT_PROTOCOL), idle(1) {
     epType[0] = EP_TYPE_INTERRUPT_IN;
@@ -152,7 +193,7 @@ void MinimalGamepad::write() {
 }
 
 int MinimalGamepad::getInterface(uint8_t* interfaceCount) {
-    *interfaceCount += 1; // uses 1
+    (*interfaceCount)++;
     HIDDescriptor hidInterface = {
         D_INTERFACE(pluggedInterface, 1, USB_DEVICE_CLASS_HUMAN_INTERFACE, HID_SUBCLASS_NONE, HID_PROTOCOL_NONE),
         D_HIDREPORT(sizeof(_hidReportDescriptorGamepad)),
@@ -162,51 +203,11 @@ int MinimalGamepad::getInterface(uint8_t* interfaceCount) {
 }
 
 int MinimalGamepad::getDescriptor(USBSetup& setup) {
-    // Check if this is a HID Class Descriptor request
-    if (setup.bmRequestType != REQUEST_DEVICETOHOST_STANDARD_INTERFACE) { return 0; }
-    if (setup.wValueH != HID_REPORT_DESCRIPTOR_TYPE) { return 0; }
-
-    // In a HID Class Descriptor wIndex contains the interface number
-    if (setup.wIndex != pluggedInterface) { return 0; }
-
-    // Reset the protocol on reenumeration
-    protocol = HID_REPORT_PROTOCOL;
-
-    return USB_SendControl(TRANSFER_PGM, _hidReportDescriptorGamepad, sizeof(_hidReportDescriptorGamepad));
+    return handleHIDDescriptor(setup, pluggedInterface, protocol, _hidReportDescriptorGamepad, sizeof(_hidReportDescriptorGamepad));
 }
 
 bool MinimalGamepad::setup(USBSetup& setup) {
-    if (pluggedInterface != setup.wIndex) {
-        return false;
-    }
-
-    uint8_t request = setup.bRequest;
-    uint8_t requestType = setup.bmRequestType;
-
-    if (requestType == REQUEST_DEVICETOHOST_CLASS_INTERFACE) {
-        if (request == HID_GET_REPORT) {
-            return true;
-        }
-        if (request == HID_GET_PROTOCOL) {
-            return true;
-        }
-    }
-
-    if (requestType == REQUEST_HOSTTODEVICE_CLASS_INTERFACE) {
-        if (request == HID_SET_PROTOCOL) {
-            protocol = setup.wValueL;
-            return true;
-        }
-        if (request == HID_SET_IDLE) {
-            idle = setup.wValueH;
-            return true;
-        }
-        if (request == HID_SET_REPORT) {
-            return true;
-        }
-    }
-
-    return false;
+    return handleHIDSetup(setup, pluggedInterface, protocol, idle);
 }
 
 void MinimalGamepad::SendReport(void* data, int length) {
@@ -260,7 +261,7 @@ void BootKeyboardClass::sendReport() {
 }
 
 int BootKeyboardClass::getInterface(uint8_t* interfaceCount) {
-    *interfaceCount += 1; // uses 1
+    (*interfaceCount)++;
     HIDDescriptor hidInterface = {
         D_INTERFACE(pluggedInterface, 1, USB_DEVICE_CLASS_HUMAN_INTERFACE, HID_SUBCLASS_BOOT_INTERFACE, HID_PROTOCOL_KEYBOARD),
         D_HIDREPORT(sizeof(_hidReportDescriptorKeyboard)),
@@ -270,51 +271,11 @@ int BootKeyboardClass::getInterface(uint8_t* interfaceCount) {
 }
 
 int BootKeyboardClass::getDescriptor(USBSetup& setup) {
-    // Check if this is a HID Class Descriptor request
-    if (setup.bmRequestType != REQUEST_DEVICETOHOST_STANDARD_INTERFACE) { return 0; }
-    if (setup.wValueH != HID_REPORT_DESCRIPTOR_TYPE) { return 0; }
-
-    // In a HID Class Descriptor wIndex contains the interface number
-    if (setup.wIndex != pluggedInterface) { return 0; }
-
-    // Reset the protocol on reenumeration
-    protocol = HID_REPORT_PROTOCOL;
-
-    return USB_SendControl(TRANSFER_PGM, _hidReportDescriptorKeyboard, sizeof(_hidReportDescriptorKeyboard));
+    return handleHIDDescriptor(setup, pluggedInterface, protocol, _hidReportDescriptorKeyboard, sizeof(_hidReportDescriptorKeyboard));
 }
 
 bool BootKeyboardClass::setup(USBSetup& setup) {
-    if (pluggedInterface != setup.wIndex) {
-        return false;
-    }
-
-    uint8_t request = setup.bRequest;
-    uint8_t requestType = setup.bmRequestType;
-
-    if (requestType == REQUEST_DEVICETOHOST_CLASS_INTERFACE) {
-        if (request == HID_GET_REPORT) {
-            return true;
-        }
-        if (request == HID_GET_PROTOCOL) {
-            return true;
-        }
-    }
-
-    if (requestType == REQUEST_HOSTTODEVICE_CLASS_INTERFACE) {
-        if (request == HID_SET_PROTOCOL) {
-            protocol = setup.wValueL;
-            return true;
-        }
-        if (request == HID_SET_IDLE) {
-            idle = setup.wValueH;
-            return true;
-        }
-        if (request == HID_SET_REPORT) {
-            return true;
-        }
-    }
-
-    return false;
+    return handleHIDSetup(setup, pluggedInterface, protocol, idle);
 }
 
 // SingleConsumerClass Implementation
@@ -345,7 +306,7 @@ void SingleConsumerClass::sendReport() {
 }
 
 int SingleConsumerClass::getInterface(uint8_t* interfaceCount) {
-    *interfaceCount += 1; // uses 1
+    (*interfaceCount)++;
     HIDDescriptor hidInterface = {
         D_INTERFACE(pluggedInterface, 1, USB_DEVICE_CLASS_HUMAN_INTERFACE, HID_SUBCLASS_NONE, HID_PROTOCOL_NONE),
         D_HIDREPORT(sizeof(_hidReportDescriptorConsumer)),
@@ -355,51 +316,11 @@ int SingleConsumerClass::getInterface(uint8_t* interfaceCount) {
 }
 
 int SingleConsumerClass::getDescriptor(USBSetup& setup) {
-    // Check if this is a HID Class Descriptor request
-    if (setup.bmRequestType != REQUEST_DEVICETOHOST_STANDARD_INTERFACE) { return 0; }
-    if (setup.wValueH != HID_REPORT_DESCRIPTOR_TYPE) { return 0; }
-
-    // In a HID Class Descriptor wIndex contains the interface number
-    if (setup.wIndex != pluggedInterface) { return 0; }
-
-    // Reset the protocol on reenumeration
-    protocol = HID_REPORT_PROTOCOL;
-
-    return USB_SendControl(TRANSFER_PGM, _hidReportDescriptorConsumer, sizeof(_hidReportDescriptorConsumer));
+    return handleHIDDescriptor(setup, pluggedInterface, protocol, _hidReportDescriptorConsumer, sizeof(_hidReportDescriptorConsumer));
 }
 
 bool SingleConsumerClass::setup(USBSetup& setup) {
-    if (pluggedInterface != setup.wIndex) {
-        return false;
-    }
-
-    uint8_t request = setup.bRequest;
-    uint8_t requestType = setup.bmRequestType;
-
-    if (requestType == REQUEST_DEVICETOHOST_CLASS_INTERFACE) {
-        if (request == HID_GET_REPORT) {
-            return true;
-        }
-        if (request == HID_GET_PROTOCOL) {
-            return true;
-        }
-    }
-
-    if (requestType == REQUEST_HOSTTODEVICE_CLASS_INTERFACE) {
-        if (request == HID_SET_PROTOCOL) {
-            protocol = setup.wValueL;
-            return true;
-        }
-        if (request == HID_SET_IDLE) {
-            idle = setup.wValueH;
-            return true;
-        }
-        if (request == HID_SET_REPORT) {
-            return true;
-        }
-    }
-
-    return false;
+    return handleHIDSetup(setup, pluggedInterface, protocol, idle);
 }
 
 // Global instances

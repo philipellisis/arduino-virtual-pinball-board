@@ -107,10 +107,10 @@ class Config {
     unsigned char Config::blockRead();
     void writeIntIntoEEPROM(uint16_t address, int16_t number);
     int16_t readIntFromEEPROM(uint16_t address);
-    void printError();
-    void printComma(unsigned char value);
-    void printIntComma(int value);
-    void printSuccess();
+    inline void printError();
+    inline void printComma(unsigned char value);
+    inline void printIntComma(int value);
+    inline void printSuccess();
     int16_t readIntFromByte();
     void readConfigArray(unsigned char* configArray, unsigned char size);
     void printConfigArray(unsigned char* configArray, unsigned char size);

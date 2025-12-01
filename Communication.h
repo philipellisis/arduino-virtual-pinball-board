@@ -16,7 +16,7 @@ class Communication {
     void communicate();
     
   private:
-    char* connectedString = "DEBUG,CSD Board Connected\r\n";
+    const char* connectedString = "D,C\r\n";  // Shortened from "DEBUG,CSD Board Connected"
     uint8_t firstNumber = 0; //0 normally
     uint8_t bankOffset = 200; //200 normally
     uint8_t adminNumber = 250; //250 normally

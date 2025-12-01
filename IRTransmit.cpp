@@ -14,43 +14,29 @@ void IRTransmit::sendCommand(uint8_t outputPin) {
     _lastPin = outputPin;
   }
 
-  // Idle low before starting
   digitalWrite(outputPin, LOW);
 
   switch (config.irProtocol) {
-    case IR_PROTOCOL_NEC: {
-      // config.irCode is expected as AA ~AA CC ~CC (e.g., 0x40BF12ED)
+    case IR_PROTOCOL_NEC:
       sendNEC(config.irCode, outputPin);
       delay(40);
       necSendRepeat(outputPin);
       delay(40);
       necSendRepeat(outputPin);
       break;
-    }
-
-    case IR_PROTOCOL_SAMSUNG: {
-      // Many Samsung sets accept full-frame repeats
+    case IR_PROTOCOL_SAMSUNG:
       sendSamsung(config.irCode, outputPin);
       delay(40);
       sendSamsung(config.irCode, outputPin);
       delay(40);
       sendSamsung(config.irCode, outputPin);
       break;
-    }
-
-    case IR_PROTOCOL_SONY: {
-      // config.irBits typically 12/15/20
+    case IR_PROTOCOL_SONY:
       sendSony(config.irCode, config.irBits, outputPin);
       delay(45);
       sendSony(config.irCode, config.irBits, outputPin);
       break;
-    }
-
-    default:
-      break;
   }
-
-  //Serial.flush();
 }
 
 // ===== NEC =====
@@ -122,10 +108,9 @@ void IRTransmit::necSendRepeat(uint8_t pin) {
 }
 
 void IRTransmit::necSendByteLSB(uint8_t b, uint8_t pin) {
-  for (uint8_t i = 0; i < 8; i++) {
+  for (uint8_t i = 0; i < 8; i++, b >>= 1) {
     mark(560, pin);
-    space((b & 0x01) ? 1690 : 560, pin);
-    b >>= 1;
+    space((b & 1) ? 1690 : 560, pin);
   }
 }
 
@@ -134,12 +119,10 @@ void IRTransmit::sendSamsung(uint32_t wordAAiiCCjj, uint8_t pin) {
   // Leader (Samsung uses 4.5ms/4.5ms)
   mark(4500, pin); space(4500, pin);
 
-  // 32 bits, LSB-first (byte order on-air AA, ~AA, CC, ~CC)
-  uint32_t data = wordAAiiCCjj;
-  for (uint8_t i = 0; i < 32; i++) {
+  // 32 bits, LSB-first
+  for (uint8_t i = 0; i < 32; i++, wordAAiiCCjj >>= 1) {
     mark(560, pin);
-    space((data & 0x1) ? 1690 : 560, pin);
-    data >>= 1;
+    space((wordAAiiCCjj & 1) ? 1690 : 560, pin);
   }
 
   mark(560, pin);
@@ -153,10 +136,9 @@ void IRTransmit::sendSony(uint32_t data, uint8_t bits, uint8_t pin) {
   space(600, pin);
 
   // LSB-first
-  for (uint8_t i = 0; i < bits; i++) {
+  for (uint8_t i = 0; i < bits; i++, data >>= 1) {
     mark(600, pin);
-    space((data & 0x1) ? 1200 : 600, pin);
-    data >>= 1;
+    space((data & 1) ? 1200 : 600, pin);
   }
 
   space(0, pin);
