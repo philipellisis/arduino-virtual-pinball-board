@@ -200,7 +200,7 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
   
   // Update processed button state array for SPI/Bluetooth controller
   // This represents the final button state after all shift logic processing
-  config.processedButtonState[config.buttonRemap[buttonOffset]] = currentButtonState;
+  config.processedButtonState[config.buttonRemap[buttonOffset] -1] = currentButtonState;
 }
 
 void Buttons::sendButtonState()

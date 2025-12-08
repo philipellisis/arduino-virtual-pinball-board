@@ -233,6 +233,12 @@ void BootKeyboardClass::press(uint8_t key) {
     if (key >= 0x80 && key <= 0x87) {
         _keyReport[0] |= (1 << (key - 0x80));
     } else {
+        // Check if key is already pressed
+        for (uint8_t i = 2; i < 8; i++) {
+            if (_keyReport[i] == key) {
+                return; // Already pressed, don't add again
+            }
+        }
         // Find empty slot for regular key
         for (uint8_t i = 2; i < 8; i++) {
             if (_keyReport[i] == 0) {
