@@ -230,8 +230,8 @@ void BootKeyboardClass::begin() {
 
 void BootKeyboardClass::press(uint8_t key) {
     // Handle modifier keys
-    if (key >= 0x80 && key <= 0x87) {
-        _keyReport[0] |= (1 << (key - 0x80));
+    if (key >= 0xE0 && key <= 0xE7) {
+        _keyReport[0] |= (1 << (key - 0xE0));
     } else {
         // Check if key is already pressed
         for (uint8_t i = 2; i < 8; i++) {
@@ -252,8 +252,8 @@ void BootKeyboardClass::press(uint8_t key) {
 
 void BootKeyboardClass::release(uint8_t key) {
     // Handle modifier keys
-    if (key >= 0x80 && key <= 0x87) {
-        _keyReport[0] &= ~(1 << (key - 0x80));
+    if (key >= 0xE0 && key <= 0xE7) {
+        _keyReport[0] &= ~(1 << (key - 0xE0));
     } else {
         // Remove regular key
         for (uint8_t i = 2; i < 8; i++) {
