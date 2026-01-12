@@ -40,26 +40,20 @@ void setup() {
 void loop() {
   // Handle input processing (same as original)
   //unsigned long t1 = micros();
-  if (config.lowLatencyMode) {
-    if (toggle == 0) {
-      plunger.plungerRead();
-    } else if (toggle == 1 && config.accelerometerEprom > 0) {
-      accel.accelerometerRead();
-    } else if (toggle == 2) {
-      lightShow.checkSetLights();
-    } else if (toggle == 3) {
-      comm.communicate();
-    }
-    toggle++;
-    if (toggle > 3) {
-      toggle = 0;
-    }
-  } else {
+  if (toggle == 0) {
     plunger.plungerRead();
+  } else if (toggle == 1 && config.accelerometerEprom > 0) {
     accel.accelerometerRead();
+  } else if (toggle == 2) {
     lightShow.checkSetLights();
+  } else if (toggle == 3) {
     comm.communicate();
   }
+  toggle++;
+  if (toggle > 3) {
+    toggle = 0;
+  }
+
 
   // unsigned long t2 = micros();
   // if (config.debug) {
