@@ -7,6 +7,7 @@ static const uint8_t _hidReportDescriptorGamepad[] PROGMEM = {
     0x05, 0x01,                    /* USAGE_PAGE (Generic Desktop) */
     0x09, 0x04,                    /* USAGE (Joystick) */
     0xa1, 0x01,                    /* COLLECTION (Application) */
+    0x85, 0x01,                    /*   REPORT_ID (1) */
     /* 32 Buttons */
     0x05, 0x09,                    /*   USAGE_PAGE (Button) */
     0x19, 0x01,                    /*   USAGE_MINIMUM (Button 1) */
@@ -54,7 +55,8 @@ static const uint8_t _hidReportDescriptorKeyboard[] PROGMEM = {
     0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
     0x09, 0x06,                    // USAGE (Keyboard)
     0xa1, 0x01,                    // COLLECTION (Application)
-    
+    0x85, 0x03,                    //   REPORT_ID (3)
+
     // Modifiers
     0x05, 0x07,                    //   USAGE_PAGE (Keyboard)
     0x19, 0xe0,                    //   USAGE_MINIMUM (Keyboard LeftControl)
@@ -215,7 +217,11 @@ bool MinimalGamepad::setup(USBSetup& setup) {
 }
 
 void MinimalGamepad::SendReport(void* data, int length) {
-    USB_Send(pluggedEndpoint | TRANSFER_RELEASE, data, length);
+    // Prepend Report ID (1) to the data
+    uint8_t reportWithID[length + 1];
+    reportWithID[0] = 1;  // Report ID
+    memcpy(&reportWithID[1], data, length);
+    USB_Send(pluggedEndpoint | TRANSFER_RELEASE, reportWithID, length + 1);
 }
 
 // BootKeyboardClass Implementation
@@ -267,7 +273,11 @@ void BootKeyboardClass::release(uint8_t key) {
 }
 
 void BootKeyboardClass::sendReport() {
-    USB_Send(pluggedEndpoint | TRANSFER_RELEASE, _keyReport, sizeof(_keyReport));
+    // Prepend Report ID (3) to the data
+    uint8_t reportWithID[sizeof(_keyReport) + 1];
+    reportWithID[0] = 3;  // Report ID
+    memcpy(&reportWithID[1], _keyReport, sizeof(_keyReport));
+    USB_Send(pluggedEndpoint | TRANSFER_RELEASE, reportWithID, sizeof(reportWithID));
 }
 
 int BootKeyboardClass::getInterface(uint8_t* interfaceCount) {
