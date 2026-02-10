@@ -89,6 +89,8 @@ void Buttons::readInputs()
 
 bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
 {
+  // Check for button 9 mode toggle (5 second hold)
+  checkModeToggle(i, currentButtonState);
 
   config.updateUSB = true;
 
@@ -182,12 +184,17 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
     return;
   }
 
-  if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] > 0)
+  if (config.disableButtonPressWhenKeyboardEnabled)
   {
-    processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1], currentButtonState == 1);
+    // Keyboard mode: send keyboard events only (if keycode assigned)
+    if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] > 0)
+    {
+      processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1], currentButtonState == 1);
+    }
   }
-  if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0)
+  else
   {
+    // Button mode: send gamepad events only
     if (currentButtonState == 1)
     {
       Gamepad1.press(config.buttonRemap[buttonOffset]);
@@ -235,5 +242,28 @@ void Buttons::handleMediaKey(unsigned char keyCode, bool pressed) {
   } else if (keyCode == 254) {
     if (pressed) SingleConsumer.press(MEDIA_VOLUME_UP);
     else SingleConsumer.release(MEDIA_VOLUME_UP);
+  }
+}
+
+void Buttons::checkModeToggle(unsigned char buttonIndex, bool currentButtonState) {
+  // Button 9 is index 8 (0-based)
+  if (buttonIndex != 8) {
+    return;
+  }
+
+  if (currentButtonState) {
+    // Button 9 pressed - record start time if not already tracking
+    if (button9PressStart == 0) {
+      button9PressStart = millis();
+    } else if (millis() - button9PressStart >= MODE_TOGGLE_HOLD_MS) {
+      // Held for 5 seconds - toggle mode
+      config.disableButtonPressWhenKeyboardEnabled = !config.disableButtonPressWhenKeyboardEnabled;
+      config.saveConfig();
+      // Reset to prevent repeated toggles while still holding
+      button9PressStart = millis();
+    }
+  } else {
+    // Button 9 released - reset timer
+    button9PressStart = 0;
   }
 }
