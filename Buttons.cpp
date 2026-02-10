@@ -36,8 +36,8 @@ bool Buttons::checkChanged()
     unsigned char keyCode = config.buttonKeyboard[config.buttonRemap[8] - 1];
     if (keyCode > 0) processKeyboardAction(keyCode, false);
     Gamepad1.release(config.buttonRemap[8]);
+    lightShow.flashLights();
     button9PressStart = millis();
-    Serial.print(F("DEBUG,setting config to buttonpress\r\n"));
   }
   if (config.buttonPressed)
   {

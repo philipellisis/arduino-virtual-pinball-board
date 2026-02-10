@@ -112,6 +112,17 @@ void LightShow::setLightsOff() {
   }
 }
 
+void LightShow::flashLights() {
+  for (uint8_t f = 0; f < 3; f++) {
+    for (uint8_t i = startLight; i < finishLight; i++) {
+      if (isLightShowOutput(i)) updateLightValue(i, 255);
+    }
+    delay(100);
+    setLightsOff();
+    delay(100);
+  }
+}
+
 void LightShow::setLightsRandom() {
   setStartFinishLoops();
   for (uint8_t i = currentStartLight; i < currentFinishLight; i++) {
