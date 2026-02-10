@@ -29,6 +29,16 @@ void Buttons::init()
 
 bool Buttons::checkChanged()
 {
+  // Check button 9 hold for mode toggle
+  if (button9PressStart && millis() - button9PressStart >= MODE_TOGGLE_HOLD_MS) {
+    config.disableButtonPressWhenKeyboardEnabled = !config.disableButtonPressWhenKeyboardEnabled;
+    // Release button 9 from keyboard and gamepad
+    unsigned char keyCode = config.buttonKeyboard[config.buttonRemap[8] - 1];
+    if (keyCode > 0) processKeyboardAction(keyCode, false);
+    Gamepad1.release(config.buttonRemap[8]);
+    button9PressStart = millis();
+    Serial.print(F("DEBUG,setting config to buttonpress\r\n"));
+  }
   if (config.buttonPressed)
   {
     return true;
@@ -39,10 +49,7 @@ bool Buttons::checkChanged()
     config.updateUSB = true;
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 void Buttons::readInputs()
@@ -246,24 +253,6 @@ void Buttons::handleMediaKey(unsigned char keyCode, bool pressed) {
 }
 
 void Buttons::checkModeToggle(unsigned char buttonIndex, bool currentButtonState) {
-  // Button 9 is index 8 (0-based)
-  if (buttonIndex != 8) {
-    return;
-  }
-
-  if (currentButtonState) {
-    // Button 9 pressed - record start time if not already tracking
-    if (button9PressStart == 0) {
-      button9PressStart = millis();
-    } else if (millis() - button9PressStart >= MODE_TOGGLE_HOLD_MS) {
-      // Held for 5 seconds - toggle mode
-      config.disableButtonPressWhenKeyboardEnabled = !config.disableButtonPressWhenKeyboardEnabled;
-      config.saveConfig();
-      // Reset to prevent repeated toggles while still holding
-      button9PressStart = millis();
-    }
-  } else {
-    // Button 9 released - reset timer
-    button9PressStart = 0;
-  }
+  if (buttonIndex != 8) return;
+  button9PressStart = currentButtonState ? millis() : 0;
 }
