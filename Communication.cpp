@@ -105,6 +105,19 @@ void Communication::sendAdmin() {
       pinMode(11, OUTPUT);
       digitalWrite(11, LOW);
       admin = 0;
+      break;
+    case SET_BLE_MAP:
+      if (config.bluetoothEnable) {
+        uint8_t bleMap[32];
+        for (uint8_t i = 0; i < 32; i++) {
+          uint32_t t1 = millis();
+          while (!Serial.available() && (millis() - t1 < 5000)) { delay(1); }
+          bleMap[i] = Serial.available() ? Serial.read() : 0;
+        }
+        spiController.sendBleConfigPacket(bleMap);
+      }
+      admin = 0;
+      break;
     }
     
   }

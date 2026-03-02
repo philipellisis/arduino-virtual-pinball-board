@@ -11,6 +11,7 @@ public:
     void init();
     void update();
     bool hasInputChanged();
+    void sendBleConfigPacket(const uint8_t* map);
     
 private:
     static const uint8_t SS_PIN = 21;

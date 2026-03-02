@@ -154,3 +154,29 @@ void SPIController::sendSPIPacket() {
     lastYAxis = yAxis;
     lastPlungerValue = plungerVal;
 }
+
+void SPIController::sendBleConfigPacket(const uint8_t* map) {
+    uint8_t txBuf[PACKET_SIZE] = {0};
+
+    // Bytes 0-31: BLE button slot map
+    for (uint8_t i = 0; i < 32; i++) {
+        txBuf[i] = map[i];
+    }
+
+    // Bytes 32-37: analog fields unused in config packet (already 0)
+    // Byte 38: mode = 2 (BLE config packet)
+    txBuf[38] = 2;
+
+    // Byte 39: XOR checksum of bytes 0-38
+    uint8_t checksum = 0;
+    for (uint8_t i = 0; i < PACKET_SIZE - 1; i++) {
+        checksum ^= txBuf[i];
+    }
+    txBuf[39] = checksum;
+
+    digitalWrite(SS_PIN, LOW);
+    for (uint8_t i = 0; i < PACKET_SIZE; i++) {
+        SPI.transfer(txBuf[i]);
+    }
+    digitalWrite(SS_PIN, HIGH);
+}
