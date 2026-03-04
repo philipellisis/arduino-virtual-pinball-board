@@ -80,11 +80,5 @@ void loop() {
     // so back-channel output commands are picked up even during idle play.
     spiController.update();
 
-    // Apply any DOF-compatible output command received from the ESP32 via MISO.
-    // applyOutputPacket() calls outputs.updateOutput() for each affected output,
-    // mirroring exactly what Communication::updateOutputs() does for serial DOF.
-    if (spiController.hasOutputPacket()) {
-      spiController.applyOutputPacket(outputs);
-    }
   }
 }
