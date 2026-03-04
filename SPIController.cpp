@@ -250,4 +250,10 @@ void SPIController::sendBleConfigPacket(const uint8_t* map) {
         SPI.transfer(txBuf[i]);
     }
     digitalWrite(SS_PIN, HIGH);
+
+    // Reset the heartbeat timer so update() does not immediately fire another
+    // SPI packet.  The regular heartbeat packet arriving right on top of the
+    // config packet is what caused the race condition where the ESP32's queue
+    // (depth 1, overwrite) dropped the config before processPacket() read it.
+    _lastHeartbeat = millis();
 }

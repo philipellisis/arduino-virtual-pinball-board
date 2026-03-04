@@ -115,6 +115,9 @@ void Communication::sendAdmin() {
           bleMap[i] = Serial.available() ? Serial.read() : 0;
         }
         spiController.sendBleConfigPacket(bleMap);
+        Serial.print(F("BLE_MAP_OK\r\n"));
+      } else {
+        Serial.print(F("BLE_MAP_ERR\r\n"));
       }
       admin = 0;
       break;
