@@ -73,16 +73,18 @@ void loop() {
     Gamepad1.write();
     config.updateUSB = false;
     config.buttonPressed = false;
-    // unsigned long t2 = micros();
-    // Serial.print(F("DEBUG,Time taken by the task: "));
-    // Serial.print(t2 - t1);
-    // Serial.println(F(" microseconds"));
-    if (config.bluetoothEnable) {
-      spiController.update();
-    }
-    
   }
-  
-  // Update SPI controller with current input states
-  
+
+  if (config.bluetoothEnable) {
+    // Always call update() — sends a packet when inputs change OR every 100 ms
+    // so back-channel output commands are picked up even during idle play.
+    spiController.update();
+
+    // Apply any DOF-compatible output command received from the ESP32 via MISO.
+    // applyOutputPacket() calls outputs.updateOutput() for each affected output,
+    // mirroring exactly what Communication::updateOutputs() does for serial DOF.
+    if (spiController.hasOutputPacket()) {
+      spiController.applyOutputPacket(outputs);
+    }
+  }
 }

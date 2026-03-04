@@ -25,8 +25,15 @@ void SPIController::init() {
 }
 
 void SPIController::update() {
-    // Only send update if inputs have changed
-    if (hasInputChanged()) {
+    bool inputChanged = hasInputChanged();
+
+    // Send a heartbeat packet even when inputs are idle so PinOne can receive
+    // any pending rumble commands from the ESP32 with bounded latency.
+    uint32_t now = millis();
+    bool heartbeat = (now - _lastHeartbeat >= 100);
+
+    if (inputChanged || heartbeat) {
+        if (heartbeat) _lastHeartbeat = now;
         sendSPIPacket();
     }
 }
@@ -139,20 +146,84 @@ void SPIController::sendSPIPacket() {
     }
     txBuf[39] = checksum;
 
-    // 6) Send packet via SPI
+    // 6) Send packet via SPI and capture the MISO response from the ESP32.
+    //    SPI.transfer() returns the byte shifted in from MISO simultaneously
+    //    with the byte shifted out on MOSI — zero additional overhead.
+    uint8_t rxBuf[PACKET_SIZE];
     digitalWrite(SS_PIN, LOW);
     for (uint8_t i = 0; i < PACKET_SIZE; i++) {
-        SPI.transfer(txBuf[i]);
+        rxBuf[i] = SPI.transfer(txBuf[i]);
     }
     digitalWrite(SS_PIN, HIGH);
 
-    // 7) Update last known states
+    // 7) Parse any back-channel output command carried in the MISO response
+    parseBackchannelPacket(rxBuf);
+
+    // 8) Update last known states
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
         lastButtonStates[i] = config.lastButtonState[i];
     }
     lastXAxis = xAxis;
     lastYAxis = yAxis;
     lastPlungerValue = plungerVal;
+}
+
+// ---------------------------------------------------------------------------
+//  SPI back-channel: output commands sent from the ESP32 via MISO
+// ---------------------------------------------------------------------------
+//
+//  Packet layout (40 bytes) — see SpiReceiver.h for full spec:
+//    Byte 0:      Type  — 0x4F='O' multi-bank, 0x53='S' single output, 0x00 idle
+//  For 0x4F:
+//    Byte 1:      Slot count (1–4)
+//    Bytes 2–33:  Up to 4 slots × 8 bytes each: [bank_index(0-8), v0–v6]
+//  For 0x53:
+//    Byte 1:      Output ID (0–62)
+//    Byte 2:      Value (0–255)
+
+void SPIController::parseBackchannelPacket(const uint8_t* rxBuf) {
+    if (rxBuf[0] == 0x00) return;  // idle
+
+    uint8_t cs = 0;
+    for (uint8_t i = 0; i < PACKET_SIZE - 1; i++) cs ^= rxBuf[i];
+    if (cs != rxBuf[PACKET_SIZE - 1]) return;  // bad checksum
+
+    _bcType = rxBuf[0];
+    _bcArg  = rxBuf[1];
+    if (_bcType == 0x4F) {
+        memcpy(_bcRaw, &rxBuf[2], 32);  // up to 4 slots × 8 bytes
+    } else if (_bcType == 0x53) {
+        _bcRaw[0] = rxBuf[2];           // single value
+    }
+    _bcPending = true;
+}
+
+bool SPIController::hasOutputPacket() const {
+    return _bcPending;
+}
+
+void SPIController::applyOutputPacket(Outputs& outputs) {
+    if (!_bcPending) return;
+    _bcPending = false;
+
+    if (_bcType == 0x53) {
+        // Single-output: _bcArg = output ID, _bcRaw[0] = value
+        outputs.updateOutput(_bcArg, _bcRaw[0]);
+
+    } else if (_bcType == 0x4F) {
+        // Multi-bank: _bcArg = slot count, _bcRaw = packed slot data.
+        // Each slot: [bank_index(0-8), v0–v6] — same as DOF serial bank updates
+        // (bankOffset stripped; Communication.cpp uses baseIndex = bank*7).
+        uint8_t count = _bcArg;
+        if (count > 4) count = 4;
+        for (uint8_t s = 0; s < count; s++) {
+            const uint8_t* slot    = &_bcRaw[s * 8];
+            uint8_t        baseOut = slot[0] * 7;
+            for (uint8_t i = 0; i < 7; i++) {
+                outputs.updateOutput(baseOut + i, slot[1 + i]);
+            }
+        }
+    }
 }
 
 void SPIController::sendBleConfigPacket(const uint8_t* map) {
