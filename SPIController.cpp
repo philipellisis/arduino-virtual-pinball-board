@@ -147,11 +147,13 @@ void SPIController::sendSPIPacket() {
     txBuf[39] = checksum;
 
     // 6) Send packet via SPI and capture the MISO response from the ESP32.
+    uint8_t rxBuf[PACKET_SIZE] = {0};
     digitalWrite(SS_PIN, LOW);
     for (uint8_t i = 0; i < PACKET_SIZE; i++) {
-        SPI.transfer(txBuf[i]);
+        rxBuf[i] = SPI.transfer(txBuf[i]);
     }
     digitalWrite(SS_PIN, HIGH);
+    parseBackchannelPacket(rxBuf);
 
     // 7) Update last known states
     for (uint8_t i = 0; i < NUM_BUTTONS; i++) {
@@ -160,6 +162,53 @@ void SPIController::sendSPIPacket() {
     lastXAxis = xAxis;
     lastYAxis = yAxis;
     lastPlungerValue = plungerVal;
+}
+
+void SPIController::parseBackchannelPacket(const uint8_t* rxBuf) {
+    // Validate XOR checksum of bytes 0-38
+    uint8_t cs = 0;
+    for (uint8_t i = 0; i < PACKET_SIZE - 1; i++) cs ^= rxBuf[i];
+    if (cs != rxBuf[PACKET_SIZE - 1]) return;
+
+    uint8_t type = rxBuf[0];
+    if (type == 0x00) return;  // idle — nothing to do
+
+    if (type == 0x53) {
+        // Single output: [0x53, outputId, value, ...]
+        _bcType    = 0xFF;  // reuse 0xFF as "single" sentinel in applyOutputPacket
+        _bcArg     = rxBuf[1];
+        _bcRaw[0]  = rxBuf[2];
+        _bcPending = true;
+    } else if (type == 0x4F) {
+        // Bank update: [0x4F, count, bankSlot0(8 bytes), ...]
+        // We only apply the first bank slot to keep things simple; any additional
+        // slots queued in subsequent SPI transactions will be processed then.
+        uint8_t count = rxBuf[1];
+        if (count > 0) {
+            uint8_t bankIdx = rxBuf[2];
+            _bcType    = bankIdx;
+            memcpy(_bcRaw, &rxBuf[3], 7);
+            _bcPending = true;
+        }
+    }
+}
+
+void SPIController::applyOutputPacket(Outputs& outputs) {
+    if (!_bcPending) return;
+    _bcPending = false;
+
+    if (_bcType == 0xFF) {
+        // Single output
+        uint8_t outputId = _bcArg;
+        uint8_t value    = _bcRaw[0];
+        outputs.updateOutput(outputId, value);
+    } else {
+        // Bank update — _bcType holds the bankIndex (0-8)
+        uint8_t base = _bcType * 7;
+        for (uint8_t i = 0; i < 7; i++) {
+            outputs.updateOutput(base + i, _bcRaw[i]);
+        }
+    }
 }
 
 void SPIController::sendBleConfigPacket(const uint8_t* map) {

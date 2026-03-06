@@ -80,5 +80,9 @@ void loop() {
     // so back-channel output commands are picked up even during idle play.
     spiController.update();
 
+    // Apply any DOF output packet forwarded from the ESP32 via the SPI back-channel.
+    if (spiController.hasOutputPacket()) {
+      spiController.applyOutputPacket(outputs);
+    }
   }
 }
