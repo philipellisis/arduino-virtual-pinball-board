@@ -54,6 +54,7 @@ class Config {
     void setPlunger();
     void setAccelerometer();
     bool lowLatencyMode = false;
+    unsigned char plungerRestingDeadZone = 50;
 
     unsigned char lightShowState = 1;
 
