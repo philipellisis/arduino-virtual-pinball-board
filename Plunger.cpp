@@ -176,6 +176,6 @@ void Plunger::updateGamepadZAxis(int8_t value, bool forceUpdate) {
 
 void Plunger::sendPlungerState() {
   Serial.print(F("P,"));
-  Serial.print(analogRead(23));
+  Serial.print(truePriorValue);
   Serial.print(F("\r\n"));
 }
