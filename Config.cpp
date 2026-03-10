@@ -80,6 +80,7 @@ void Config::init() {
     EEPROM.get(615, irBits);
     EEPROM.get(616, irButton);
     EEPROM.get(617, lowLatencyMode);
+    EEPROM.get(618, plungerRestingDeadZone);
 
 
   } else {
@@ -157,6 +158,7 @@ void Config::saveConfig() {
     EEPROM.write(615, irBits);
     EEPROM.write(616, irButton);
     EEPROM.write(617, lowLatencyMode);
+    EEPROM.write(618, plungerRestingDeadZone);
 
     EEPROM.write(1000, 101);
 }
@@ -228,6 +230,7 @@ void Config::updateConfigFromSerial() {
     irBits = blockRead();
     irButton = blockRead();
     lowLatencyMode = blockRead();
+    plungerRestingDeadZone = blockRead();
 
     if(blockRead() != 42) {
       done = 1;
@@ -308,6 +311,7 @@ void Config::sendConfig() {
     printComma(irBits);
     printComma(irButton);
     printComma(lowLatencyMode);
+    printComma(plungerRestingDeadZone);
 
     Serial.print(F("E\r\n"));
 }

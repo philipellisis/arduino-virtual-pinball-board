@@ -29,6 +29,16 @@ void Buttons::init()
 
 bool Buttons::checkChanged()
 {
+  // Check button 9 hold for mode toggle
+  if (button9PressStart && millis() - button9PressStart >= MODE_TOGGLE_HOLD_MS) {
+    config.disableButtonPressWhenKeyboardEnabled = !config.disableButtonPressWhenKeyboardEnabled;
+    // Release button 9 from keyboard and gamepad
+    unsigned char keyCode = config.buttonKeyboard[config.buttonRemap[8] - 1];
+    if (keyCode > 0) processKeyboardAction(keyCode, false);
+    Gamepad1.release(config.buttonRemap[8]);
+    lightShow.flashLights();
+    button9PressStart = millis();
+  }
   if (config.buttonPressed)
   {
     return true;
@@ -39,10 +49,7 @@ bool Buttons::checkChanged()
     config.updateUSB = true;
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 void Buttons::readInputs()
@@ -89,6 +96,8 @@ void Buttons::readInputs()
 
 bool Buttons::sendButtonPush(unsigned char i, bool currentButtonState)
 {
+  // Check for button 9 mode toggle (5 second hold)
+  checkModeToggle(i, currentButtonState);
 
   config.updateUSB = true;
 
@@ -182,12 +191,17 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
     return;
   }
 
-  if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] > 0)
+  if (config.disableButtonPressWhenKeyboardEnabled)
   {
-    processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1], currentButtonState == 1);
+    // Keyboard mode: send keyboard events only (if keycode assigned)
+    if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] > 0)
+    {
+      processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1], currentButtonState == 1);
+    }
   }
-  if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] == 0 || config.disableButtonPressWhenKeyboardEnabled == 0)
+  else
   {
+    // Button mode: send gamepad events only
     if (currentButtonState == 1)
     {
       Gamepad1.press(config.buttonRemap[buttonOffset]);
@@ -236,4 +250,9 @@ void Buttons::handleMediaKey(unsigned char keyCode, bool pressed) {
     if (pressed) SingleConsumer.press(MEDIA_VOLUME_UP);
     else SingleConsumer.release(MEDIA_VOLUME_UP);
   }
+}
+
+void Buttons::checkModeToggle(unsigned char buttonIndex, bool currentButtonState) {
+  if (buttonIndex != 8) return;
+  button9PressStart = currentButtonState ? millis() : 0;
 }

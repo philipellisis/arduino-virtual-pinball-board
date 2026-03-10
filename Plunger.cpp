@@ -55,7 +55,7 @@ void Plunger::plungerRead() {
   // this checks that the plunger is sitting stationary. If so, it will enable the accelerometer. It also checks if there is nothing connected. to ensure the accelerometer still works even if the plunger is disconnected
   uint32_t currentTime = millis();
 
-  if ((sensorValue < config.plungerMid + 50 && sensorValue > config.plungerMid - 50) || sensorValue > 990) {
+  if ((sensorValue < config.plungerMid + config.plungerRestingDeadZone && sensorValue > config.plungerMid - config.plungerRestingDeadZone) || sensorValue > 990) {
     if (currentTime - restingStartTime >= config.restingStateMax) {
       // Plunger is in the resting state when the timer exceeds restingStateMax
       config.plungerMoving = false;
@@ -176,6 +176,6 @@ void Plunger::updateGamepadZAxis(int8_t value, bool forceUpdate) {
 
 void Plunger::sendPlungerState() {
   Serial.print(F("P,"));
-  Serial.print(analogRead(23));
+  Serial.print(truePriorValue);
   Serial.print(F("\r\n"));
 }

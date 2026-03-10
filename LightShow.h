@@ -16,6 +16,7 @@ class LightShow {
     void setLightsHigh();
     void checkSetLights();
     void setLightsOff();
+    void flashLights();
     
   private:
     uint32_t timeInState;
