@@ -108,16 +108,15 @@ void Communication::sendAdmin() {
       break;
     case SET_BLE_MAP:
       if (config.bluetoothEnable) {
-        uint8_t bleMap[32];
-        for (uint8_t i = 0; i < 32; i++) {
+        uint8_t bleData[64];
+        for (uint8_t i = 0; i < 64; i++) {
           uint32_t t1 = millis();
           while (!Serial.available() && (millis() - t1 < 5000)) { delay(1); }
-          bleMap[i] = Serial.available() ? Serial.read() : 0;
+          bleData[i] = Serial.available() ? Serial.read() : 0;
         }
-        spiController.sendBleConfigPacket(bleMap);
-        Serial.print(F("BLE_MAP_OK\r\n"));
-      } else {
-        Serial.print(F("BLE_MAP_ERR\r\n"));
+        spiController.sendBleConfigPacket(bleData);
+        delay(50);
+        spiController.sendBleNamePacket(bleData + 32, 32);
       }
       admin = 0;
       break;

@@ -211,34 +211,27 @@ void SPIController::applyOutputPacket(Outputs& outputs) {
     }
 }
 
+// Shared helper: sends bytes 0-31 of data[] as an SPI config packet with the
+// given mode byte.  Used for both button map (mode=2) and device name (mode=3).
+static void sendConfigSPI(uint8_t ssPin, const uint8_t* data, uint8_t len, uint8_t mode) {
+    uint8_t txBuf[40] = {0};
+    uint8_t n = (len < 32) ? len : 32;
+    for (uint8_t i = 0; i < n; i++) txBuf[i] = data[i];
+    txBuf[38] = mode;
+    uint8_t cs = 0;
+    for (uint8_t i = 0; i < 39; i++) cs ^= txBuf[i];
+    txBuf[39] = cs;
+    digitalWrite(ssPin, LOW);
+    for (uint8_t i = 0; i < 40; i++) SPI.transfer(txBuf[i]);
+    digitalWrite(ssPin, HIGH);
+}
+
 void SPIController::sendBleConfigPacket(const uint8_t* map) {
-    uint8_t txBuf[PACKET_SIZE] = {0};
+    sendConfigSPI(SS_PIN, map, 32, 2);
+    _lastHeartbeat = millis();
+}
 
-    // Bytes 0-31: BLE button slot map
-    for (uint8_t i = 0; i < 32; i++) {
-        txBuf[i] = map[i];
-    }
-
-    // Bytes 32-37: analog fields unused in config packet (already 0)
-    // Byte 38: mode = 2 (BLE config packet)
-    txBuf[38] = 2;
-
-    // Byte 39: XOR checksum of bytes 0-38
-    uint8_t checksum = 0;
-    for (uint8_t i = 0; i < PACKET_SIZE - 1; i++) {
-        checksum ^= txBuf[i];
-    }
-    txBuf[39] = checksum;
-
-    digitalWrite(SS_PIN, LOW);
-    for (uint8_t i = 0; i < PACKET_SIZE; i++) {
-        SPI.transfer(txBuf[i]);
-    }
-    digitalWrite(SS_PIN, HIGH);
-
-    // Reset the heartbeat timer so update() does not immediately fire another
-    // SPI packet.  The regular heartbeat packet arriving right on top of the
-    // config packet is what caused the race condition where the ESP32's queue
-    // (depth 1, overwrite) dropped the config before processPacket() read it.
+void SPIController::sendBleNamePacket(const uint8_t* name, uint8_t len) {
+    sendConfigSPI(SS_PIN, name, len, 3);
     _lastHeartbeat = millis();
 }

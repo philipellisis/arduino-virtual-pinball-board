@@ -13,6 +13,7 @@ public:
     void update();
     bool hasInputChanged();
     void sendBleConfigPacket(const uint8_t* map);
+    void sendBleNamePacket(const uint8_t* name, uint8_t len);
 
     // Returns true if a DOF output packet was received from the ESP32 and
     // has not yet been applied.
