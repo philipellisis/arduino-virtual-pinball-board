@@ -191,17 +191,12 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
     return;
   }
 
-  if (config.disableButtonPressWhenKeyboardEnabled)
+  if (config.disableButtonPressWhenKeyboardEnabled && config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] > 0)
   {
-    // Keyboard mode: send keyboard events only (if keycode assigned)
-    if (config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] > 0)
-    {
-      processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1], currentButtonState == 1);
-    }
+    processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1], currentButtonState == 1);
   }
   else
   {
-    // Button mode: send gamepad events only
     if (currentButtonState == 1)
     {
       Gamepad1.press(config.buttonRemap[buttonOffset]);
