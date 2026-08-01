@@ -76,7 +76,9 @@ class Config {
     bool disableAccelOnPlungerMove = true;
     unsigned char  enablePlungerQuickRelease = true;
     bool disablePlungerWhenNotInUse = true;
-    bool disableButtonPressWhenKeyboardEnabled = true;
+    // 0 = gamepad only, 1 = keyboard only (falls back to gamepad if no keyboard mapping),
+    // 2 = keyboard AND gamepad simultaneously (holding button 9 will not exit this mode)
+    unsigned char disableButtonPressWhenKeyboardEnabled = 1;
     bool enablePlunger = true;
     bool bluetoothEnable = false;
 

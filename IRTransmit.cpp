@@ -38,13 +38,13 @@ void IRTransmit::sendCommand(uint8_t outputPin) {
       break;
     }
 
-    case IR_PROTOCOL_SONY: {
-      // config.irBits typically 12/15/20
-      sendSony(config.irCode, config.irBits, outputPin);
-      delay(45);
-      sendSony(config.irCode, config.irBits, outputPin);
-      break;
-    }
+    // case IR_PROTOCOL_SONY: {
+    //   // config.irBits typically 12/15/20
+    //   sendSony(config.irCode, config.irBits, outputPin);
+    //   delay(45);
+    //   sendSony(config.irCode, config.irBits, outputPin);
+    //   break;
+    // }
 
     default:
       break;
@@ -148,20 +148,20 @@ void IRTransmit::sendSamsung(uint32_t wordAAiiCCjj, uint8_t pin) {
 }
 
 // ===== Sony SIRC =====
-void IRTransmit::sendSony(uint32_t data, uint8_t bits, uint8_t pin) {
-  // Leader
-  mark(2400, pin);
-  space(600, pin);
+// void IRTransmit::sendSony(uint32_t data, uint8_t bits, uint8_t pin) {
+//   // Leader
+//   mark(2400, pin);
+//   space(600, pin);
 
-  // LSB-first
-  for (uint8_t i = 0; i < bits; i++) {
-    mark(600, pin);
-    space((data & 0x1) ? 1200 : 600, pin);
-    data >>= 1;
-  }
+//   // LSB-first
+//   for (uint8_t i = 0; i < bits; i++) {
+//     mark(600, pin);
+//     space((data & 0x1) ? 1200 : 600, pin);
+//     data >>= 1;
+//   }
 
-  space(0, pin);
-}
+//   space(0, pin);
+// }
 
 // ===== Carrier helpers (via bit-banging) =====
 void IRTransmit::mark(uint16_t usec, uint8_t pin) {

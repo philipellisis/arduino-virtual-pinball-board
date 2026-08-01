@@ -31,12 +31,15 @@ bool Buttons::checkChanged()
 {
   // Check button 9 hold for mode toggle
   if (button9PressStart && millis() - button9PressStart >= MODE_TOGGLE_HOLD_MS) {
-    config.disableButtonPressWhenKeyboardEnabled = !config.disableButtonPressWhenKeyboardEnabled;
-    // Release button 9 from keyboard and gamepad
-    unsigned char keyCode = config.buttonKeyboard[config.buttonRemap[8] - 1];
-    if (keyCode > 0) processKeyboardAction(keyCode, false);
-    Gamepad1.release(config.buttonRemap[8]);
-    lightShow.flashLights();
+    // Mode 2 (keyboard + gamepad) is sticky and can't be exited by holding button 9
+    if (config.disableButtonPressWhenKeyboardEnabled != 2) {
+      config.disableButtonPressWhenKeyboardEnabled = !config.disableButtonPressWhenKeyboardEnabled;
+      // Release button 9 from keyboard and gamepad
+      unsigned char keyCode = config.buttonKeyboard[config.buttonRemap[8] - 1];
+      if (keyCode > 0) processKeyboardAction(keyCode, false);
+      Gamepad1.release(config.buttonRemap[8]);
+      lightShow.flashLights();
+    }
     button9PressStart = millis();
   }
   if (config.buttonPressed)
@@ -191,11 +194,19 @@ void Buttons::sendActualButtonPress(unsigned char buttonOffset, bool currentButt
     return;
   }
 
-  if (config.disableButtonPressWhenKeyboardEnabled && config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1] > 0)
+  unsigned char keyCode = config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1];
+  bool hasKeyMapping = keyCode > 0;
+  unsigned char keyboardMode = config.disableButtonPressWhenKeyboardEnabled;
+
+  // Mode 1 or 2: send the keyboard key (if one is mapped)
+  if (hasKeyMapping && (keyboardMode == 1 || keyboardMode == 2))
   {
-    processKeyboardAction(config.buttonKeyboard[config.buttonRemap[buttonOffset] - 1], currentButtonState == 1);
+    processKeyboardAction(keyCode, currentButtonState == 1);
   }
-  else
+
+  // Mode 0 always sends gamepad, mode 2 always sends gamepad in addition to keyboard,
+  // and mode 1 falls back to gamepad when there's no keyboard mapping
+  if (keyboardMode == 0 || keyboardMode == 2 || !hasKeyMapping)
   {
     if (currentButtonState == 1)
     {
